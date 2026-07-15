@@ -1,0 +1,29 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: #faf7f0;
+}
+
+body {
+  font-family: 'Manrope', sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: #b98d3e;
+}
+
+a:hover {
+  color: #96712c;
+}
+
+::selection {
+  background: #e6d3aa;
+}
