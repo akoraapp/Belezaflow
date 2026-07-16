@@ -3,6 +3,7 @@ import { SCREEN_SCROLL, SCREEN_PAD_TOP, SCREEN_PAD_BOTTOM, CONTENT_PAD_X } from 
 import type { Locale } from '../data/content';
 
 export interface AgendaAppointment {
+  id: string;
   time: string;
   client: string;
   service: string;
@@ -42,7 +43,7 @@ export function AgendaScreen({ t, agendaAppointments, onOpenSetup }: AgendaScree
       </div>
       <div style={sx(`${CONTENT_PAD_X} ${SCREEN_PAD_BOTTOM} box-sizing:border-box; display:flex; flex-direction:column; gap:10px;`)}>
         {agendaAppointments.map((ap) => (
-          <div key={ap.time} style={sx('display:flex; gap:14px; align-items:stretch;')}>
+          <div key={ap.id} style={sx('display:flex; gap:14px; align-items:stretch;')}>
             <div style={sx('width:56px; flex-shrink:0; font-size:13px; color:#8A8074; padding-top:14px; font-weight:600;')}>{ap.time}</div>
             <div
               style={{

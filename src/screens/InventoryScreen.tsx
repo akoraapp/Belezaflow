@@ -197,8 +197,8 @@ export function InventoryScreen({
             <div style={sx('display:flex; flex-direction:column; gap:10px; margin-top:14px;')}>
               <input type="text" placeholder={inv.formNamePlaceholder} value={addFormName} onChange={onAddFormNameChange} style={inputStyle} />
               <div style={sx('display:flex; gap:10px;')}>
-                <input type="number" placeholder={inv.formQtyPlaceholder} value={addFormQty} onChange={onAddFormQtyChange} style={{ ...inputStyle, flex: 1 }} />
-                <input type="number" placeholder={inv.formValuePlaceholder} value={addFormValue} onChange={onAddFormValueChange} style={{ ...inputStyle, flex: 1 }} />
+                <input type="number" placeholder={inv.formQtyPlaceholder} value={addFormQty} onChange={onAddFormQtyChange} style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
+                <input type="number" placeholder={inv.formValuePlaceholder} value={addFormValue} onChange={onAddFormValueChange} style={{ ...inputStyle, flex: 1, minWidth: 0 }} />
               </div>
               <div style={sx('font-size:11px; color:#B0A78F;')}>{inv.formValueHint}</div>
               <div

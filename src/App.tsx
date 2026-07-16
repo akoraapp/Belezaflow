@@ -3,7 +3,11 @@ import { AppFrame } from './components/AppFrame';
 import { BottomNav } from './components/BottomNav';
 import { useNavigator } from './app/navigation';
 import { content, type Lang } from './data/content';
-import { OnboardingScreen } from './screens/OnboardingScreen';
+import { newFeatures } from './data/newFeatures';
+import { DEFAULT_WORKING_DAYS, TIME_SLOTS, slugify, todayWeekdayIndex } from './lib/scheduling';
+import type { FinanceEntry, LiveAppointment, LiveClient, ServiceItem } from './lib/types';
+import { LoginScreen } from './screens/LoginScreen';
+import { OnboardingScreen, type OnboardingResult } from './screens/OnboardingScreen';
 import { HomeScreen, type HojeQuickAction, type ReadyResponseWithCopy } from './screens/HomeScreen';
 import { AgendaScreen, type AgendaAppointment } from './screens/AgendaScreen';
 import { AgendaSetupScreen } from './screens/AgendaSetupScreen';
@@ -16,7 +20,7 @@ import { InventoryScreen } from './screens/InventoryScreen';
 import { ReportsScreen } from './screens/ReportsScreen';
 import { AiAssistantScreen } from './screens/AiAssistantScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
-import { PublicPageScreen, type PublicService } from './screens/PublicPageScreen';
+import { PublicPageScreen } from './screens/PublicPageScreen';
 
 const AGENDA_STATUS_STYLE: Record<string, { statusColor: string; badgeBg: string; badgeColor: string }> = {
   confirmed: { statusColor: '#B98D3E', badgeBg: '#FBF3E4', badgeColor: '#8A6A2E' },
@@ -24,6 +28,7 @@ const AGENDA_STATUS_STYLE: Record<string, { statusColor: string; badgeBg: string
   pending: { statusColor: '#201C17', badgeBg: '#ECE7DC', badgeColor: '#201C17' },
 };
 
+const AUTHED_KEY = 'bc.authed';
 const ONBOARDED_KEY = 'bc.onboarded';
 const LANG_KEY = 'bc.lang';
 
@@ -35,13 +40,28 @@ function fmtCurrency(lang: Lang, n: number): string {
   return lang === 'pt' ? `R$ ${n.toLocaleString('pt-BR')}` : `$${n.toLocaleString('en-US')}`;
 }
 
+let idSeq = 0;
+function nextId(prefix: string): string {
+  idSeq += 1;
+  return `${prefix}-${idSeq}`;
+}
+
 export default function App() {
+  const [authed, setAuthed] = useState(() => localStorage.getItem(AUTHED_KEY) === '1');
   const [onboarded, setOnboarded] = useState(() => localStorage.getItem(ONBOARDED_KEY) === '1');
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem(LANG_KEY) as Lang) || 'pt');
   const [inventoryProfession, setInventoryProfession] = useState('lash');
+  const [professionalName, setProfessionalName] = useState('');
+  const [publicName, setPublicName] = useState('');
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [appointments, setAppointments] = useState<LiveAppointment[]>([]);
+  const [bookedSlotTimes, setBookedSlotTimes] = useState<string[]>([]);
+  const [workingDays, setWorkingDays] = useState<number[]>(DEFAULT_WORKING_DAYS);
+  const [bookableSlots, setBookableSlots] = useState<string[]>(TIME_SLOTS);
+  const [financeEntries, setFinanceEntries] = useState<FinanceEntry[]>([]);
+  const [clients, setClients] = useState<LiveClient[]>([]);
   const [crmFilter, setCrmFilter] = useState('todos');
-  const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
-  const [publicSelectedService, setPublicSelectedService] = useState<number | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [attendance, setAttendance] = useState<Record<string, 'yes' | 'no'>>({});
   const [estoqueExpandedConsumption, setEstoqueExpandedConsumption] = useState<Record<number, boolean>>({ 0: true });
@@ -57,6 +77,8 @@ export default function App() {
 
   const nav = useNavigator();
   const t = content[lang];
+  const nf = newFeatures[lang];
+  const fmtPrice = (n: number) => fmtCurrency(lang, n);
 
   useEffect(() => {
     localStorage.setItem(LANG_KEY, lang);
@@ -66,7 +88,36 @@ export default function App() {
     setAttendance((a) => ({ ...a, [name]: status }));
   }
 
-  function finishOnboarding() {
+  function login() {
+    setAuthed(true);
+    localStorage.setItem(AUTHED_KEY, '1');
+  }
+
+  function finishOnboarding(result: OnboardingResult) {
+    setProfessionalName(result.name);
+    setPublicName(result.publicName);
+    setServices(result.services);
+    setAppointments(
+      t.agenda.appointments.map((ap) => ({
+        id: nextId('seed-appt'),
+        time: ap.time,
+        clientName: ap.client,
+        service: ap.service,
+        price: 0,
+        status: ap.status,
+      })),
+    );
+    setClients(
+      t.crm.clients.map((c) => ({
+        id: nextId('seed-client'),
+        initial: c.initial,
+        name: c.name,
+        tag: c.tag,
+        lastVisit: c.lastVisit,
+        value: c.value,
+        stage: c.stage,
+      })),
+    );
     setOnboarded(true);
     localStorage.setItem(ONBOARDED_KEY, '1');
   }
@@ -74,7 +125,7 @@ export default function App() {
   const toggleLang = () => setLang((l) => (l === 'pt' ? 'en' : 'pt'));
 
   // CRM
-  const filteredClients = crmFilter === 'todos' ? t.crm.clients : t.crm.clients.filter((c) => c.stage === crmFilter);
+  const filteredClients = crmFilter === 'todos' ? clients : clients.filter((c) => c.stage === crmFilter);
   const crmStages: CrmStage[] = t.crm.stages.map((s) => ({
     ...s,
     bg: s.key === crmFilter ? '#201C17' : '#FFFFFF',
@@ -112,10 +163,34 @@ export default function App() {
       markNo: () => markAttendance(c.name, 'no'),
     };
   });
-  const selectedClient = t.crm.clients.find((c) => c.name === selectedClientName) ?? t.crm.clients[0];
+  const selectedClient = clients.find((c) => c.id === selectedClientId) ?? clients[0] ?? null;
+
+  function updateClientStage(id: string, stage: string) {
+    setClients((list) => list.map((c) => (c.id === id ? { ...c, stage } : c)));
+  }
+  function updateClientBirthday(id: string, birthday: string) {
+    setClients((list) => list.map((c) => (c.id === id ? { ...c, birthday } : c)));
+  }
+  function addClient(data: { name: string; phone: string; service: string; birthday: string; origin: string }) {
+    const initial = data.name.trim().slice(0, 2).toUpperCase() || '—';
+    const tag = `${lang === 'pt' ? 'Contato via' : 'Contact via'} ${data.origin}`;
+    const newClient: LiveClient = {
+      id: nextId('client'),
+      initial,
+      name: data.name,
+      tag,
+      lastVisit: lang === 'pt' ? 'Novo contato' : 'New contact',
+      value: '—',
+      stage: 'leads',
+      phone: data.phone || undefined,
+      service: data.service || undefined,
+      birthday: data.birthday || undefined,
+    };
+    setClients((list) => [newClient, ...list]);
+  }
 
   // Hoje quick actions
-  const nextApptName = t.agenda.appointments[0]?.client ?? '';
+  const nextApptName = appointments[0]?.clientName ?? '';
   const nextApptAttended = attendance[nextApptName] === 'yes';
   const goToClientMachine = () => nav.openDetail('clientMachine');
   const hojeQuickActions: HojeQuickAction[] = [
@@ -133,8 +208,11 @@ export default function App() {
   ];
 
   // Agenda
-  const agendaAppointments: AgendaAppointment[] = t.agenda.appointments.map((ap) => ({
-    ...ap,
+  const agendaAppointments: AgendaAppointment[] = appointments.map((ap) => ({
+    id: ap.id,
+    time: ap.time,
+    client: ap.clientName,
+    service: ap.service,
     ...AGENDA_STATUS_STYLE[ap.status],
     statusLabel: t.agenda.statusLabels[ap.status],
   }));
@@ -231,26 +309,64 @@ export default function App() {
     return { ...p, statusBg: style.bg, statusColor: style.color, statusLabel: style.label };
   });
 
-  // Public page
-  const publicServices: PublicService[] = t.publicPage.services.map((s, i) => {
-    const isSelected = i === publicSelectedService;
-    return {
-      ...s,
-      borderColor: isSelected ? '#B98D3E' : '#EBE2CF',
-      bg: isSelected ? '#FBF3E4' : '#FFFFFF',
-      btnBg: isSelected ? '#201C17' : '#F6EFE1',
-      btnColor: isSelected ? '#F4E9D2' : '#8A6A2E',
-      btnBorder: isSelected ? '#201C17' : '#E3C989',
-      btnLabel: isSelected ? t.publicPage.selectedLabel : t.publicPage.selectLabel,
-      onClick: () => setPublicSelectedService(isSelected ? null : i),
-    };
-  });
-  const publicCtaLabel = publicSelectedService != null ? `${t.publicPage.cta} · ${t.publicPage.services[publicSelectedService].name}` : t.publicPage.cta;
+  // Finance ledger
+  function addFinanceEntry(entry: { tipo: 'receber' | 'pagar'; label: string; value: number; dueDate: string }) {
+    setFinanceEntries((list) => [{ id: nextId('fin'), ...entry }, ...list]);
+  }
+  function removeFinanceEntry(id: string) {
+    setFinanceEntries((list) => list.filter((e) => e.id !== id));
+  }
+
+  // Agenda Online (public booking)
+  function toggleWorkingDay(idx: number) {
+    setWorkingDays((days) => (days.includes(idx) ? days.filter((d) => d !== idx) : [...days, idx].sort()));
+  }
+  function toggleSlot(slot: string) {
+    setBookableSlots((slots) => (slots.includes(slot) ? slots.filter((s) => s !== slot) : [...slots, slot].sort()));
+  }
+  const isWorkingToday = workingDays.includes(todayWeekdayIndex());
+  const publicBookingAvailableSlots = bookableSlots.filter((slot) => !bookedSlotTimes.includes(slot));
+  const publicLink = `${nf.onboardingPublicName.linkPrefix}${slugify(publicName)}`;
+
+  function confirmBooking(data: { service: ServiceItem; time: string; name: string; phone: string }) {
+    setAppointments((list) => [
+      ...list,
+      { id: nextId('appt'), time: data.time, clientName: data.name, service: data.service.name, price: data.service.price, status: 'confirmed', origin: 'online' },
+    ]);
+    setBookedSlotTimes((list) => [...list, data.time]);
+    setClients((list) => {
+      const existing = list.find((c) => c.phone && c.phone === data.phone);
+      if (existing) {
+        return list.map((c) => (c.id === existing.id ? { ...c, stage: 'agendados', service: data.service.name } : c));
+      }
+      const initial = data.name.trim().slice(0, 2).toUpperCase() || '—';
+      const newClient: LiveClient = {
+        id: nextId('client'),
+        initial,
+        name: data.name,
+        tag: data.service.name,
+        lastVisit: lang === 'pt' ? 'Novo contato' : 'New contact',
+        value: '—',
+        stage: 'agendados',
+        phone: data.phone,
+        service: data.service.name,
+      };
+      return [newClient, ...list];
+    });
+  }
+
+  if (!authed) {
+    return (
+      <AppFrame>
+        <LoginScreen strings={nf.login} onLogin={login} />
+      </AppFrame>
+    );
+  }
 
   if (!onboarded) {
     return (
       <AppFrame>
-        <OnboardingScreen t={t} onLanguageSelect={setLang} onProfessionSelect={setInventoryProfession} onFinish={finishOnboarding} />
+        <OnboardingScreen t={t} lang={lang} strings={nf} onLanguageSelect={setLang} onProfessionSelect={setInventoryProfession} onFinish={finishOnboarding} />
       </AppFrame>
     );
   }
@@ -273,26 +389,51 @@ export default function App() {
 
       {nav.tab === 'agenda' && !nav.detail && <AgendaScreen t={t} agendaAppointments={agendaAppointments} onOpenSetup={() => nav.openDetail('agendaSetup')} />}
       {nav.tab === 'agenda' && nav.detail === 'agendaSetup' && (
-        <AgendaSetupScreen t={t} onBack={nav.goBack} onOpenPublicPage={() => setShowPublicPreview(true)} />
+        <AgendaSetupScreen
+          t={t}
+          strings={nf}
+          publicLink={publicLink}
+          workingDays={workingDays}
+          toggleWorkingDay={toggleWorkingDay}
+          bookableSlots={bookableSlots}
+          toggleSlot={toggleSlot}
+          onBack={nav.goBack}
+          onOpenPublicPage={() => setShowPublicPreview(true)}
+        />
       )}
 
       {nav.tab === 'crm' && !nav.detail && (
         <CrmListScreen
           t={t}
+          strings={nf.crmAddClient}
           crmStages={crmStages}
           crmClientsWithAttendance={crmClientsWithAttendance}
           attendanceCountLabel={attendanceCountLabel}
           conversionLabelValue={conversionLabelValue}
           attendanceLabels={{ yes: lang === 'pt' ? 'Compareceu' : 'Attended', no: lang === 'pt' ? 'Não compareceu' : 'No-show' }}
-          onOpenProfile={(name) => {
-            setSelectedClientName(name);
+          onOpenProfile={(id) => {
+            setSelectedClientId(id);
             nav.openDetail('crmProfile');
           }}
+          onAddClient={addClient}
         />
       )}
-      {nav.tab === 'crm' && nav.detail === 'crmProfile' && <CrmProfileScreen t={t} client={selectedClient} onBack={nav.goBack} />}
+      {nav.tab === 'crm' && nav.detail === 'crmProfile' && selectedClient && (
+        <CrmProfileScreen
+          t={t}
+          lang={lang}
+          strings={nf.crmProfileExtra}
+          client={selectedClient}
+          stageOptions={t.crm.stages.filter((s) => s.key !== 'todos')}
+          onBack={nav.goBack}
+          onChangeStage={(stage) => updateClientStage(selectedClient.id, stage)}
+          onChangeBirthday={(birthday) => updateClientBirthday(selectedClient.id, birthday)}
+        />
+      )}
 
-      {nav.tab === 'financeiro' && !nav.detail && <FinanceScreen t={t} />}
+      {nav.tab === 'financeiro' && !nav.detail && (
+        <FinanceScreen t={t} strings={nf.finance} entries={financeEntries} fmtPrice={fmtPrice} onAddEntry={addFinanceEntry} onRemoveEntry={removeFinanceEntry} />
+      )}
 
       {nav.tab === 'mais' && !nav.detail && <MoreMenuScreen t={t} lang={lang} onToggleLang={toggleLang} onOpen={nav.openDetail} />}
       {nav.tab === 'mais' && nav.detail === 'clientMachine' && (
@@ -329,7 +470,17 @@ export default function App() {
       <BottomNav active={nav.tab} t={t} onSelect={nav.goTab} />
 
       {showPublicPreview && (
-        <PublicPageScreen t={t} publicServices={publicServices} publicCtaLabel={publicCtaLabel} onClose={() => setShowPublicPreview(false)} />
+        <PublicPageScreen
+          t={t}
+          strings={nf.publicBooking}
+          publicName={publicName || professionalName}
+          services={services}
+          availableSlots={publicBookingAvailableSlots}
+          isWorkingToday={isWorkingToday}
+          fmtPrice={fmtPrice}
+          onConfirmBooking={confirmBooking}
+          onClose={() => setShowPublicPreview(false)}
+        />
       )}
     </AppFrame>
   );

@@ -1,27 +1,57 @@
+import { useState } from 'react';
 import { sx } from '../lib/sx';
 import type { Locale } from '../data/content';
+import type { NewFeatureStrings } from '../data/newFeatures';
+import type { ServiceItem } from '../lib/types';
 
-export interface PublicService {
+interface BookingData {
+  service: ServiceItem;
+  time: string;
   name: string;
-  price: string;
-  borderColor: string;
-  bg: string;
-  btnBg: string;
-  btnColor: string;
-  btnBorder: string;
-  btnLabel: string;
-  onClick: () => void;
+  phone: string;
 }
 
 interface PublicPageScreenProps {
   t: Locale;
-  publicServices: PublicService[];
-  publicCtaLabel: string;
+  strings: NewFeatureStrings['publicBooking'];
+  publicName: string;
+  services: ServiceItem[];
+  availableSlots: string[];
+  isWorkingToday: boolean;
+  fmtPrice: (n: number) => string;
+  onConfirmBooking: (data: BookingData) => void;
   onClose: () => void;
 }
 
-export function PublicPageScreen({ t, publicServices, publicCtaLabel, onClose }: PublicPageScreenProps) {
+export function PublicPageScreen({
+  t,
+  strings,
+  publicName,
+  services,
+  availableSlots,
+  isWorkingToday,
+  fmtPrice,
+  onConfirmBooking,
+  onClose,
+}: PublicPageScreenProps) {
   const p = t.publicPage;
+  const [serviceId, setServiceId] = useState<string | null>(null);
+  const [time, setTime] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [confirmed, setConfirmed] = useState(false);
+
+  const selectedService = services.find((s) => s.id === serviceId) ?? null;
+  const inputStyle = sx(
+    "height:46px; border-radius:12px; border:1px solid #EBE2CF; padding:0 14px; font-size:14px; font-family:'Manrope',sans-serif; box-sizing:border-box; width:100%;",
+  );
+
+  function confirm() {
+    if (!selectedService || !time || !name.trim() || !phone.trim()) return;
+    onConfirmBooking({ service: selectedService, time, name: name.trim(), phone: phone.trim() });
+    setConfirmed(true);
+  }
+
   return (
     <div style={sx('position:absolute; inset:0; z-index:80; background:#FAF7F0; overflow-y:auto; -webkit-overflow-scrolling:touch;')}>
       <div
@@ -58,7 +88,7 @@ export function PublicPageScreen({ t, publicServices, publicCtaLabel, onClose }:
             {p.photoLabel}
           </div>
         </div>
-        <div style={sx("font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; letter-spacing:0.3px;")}>{p.name}</div>
+        <div style={sx("font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; letter-spacing:0.3px;")}>{publicName || p.name}</div>
         <div
           style={sx(
             'display:inline-block; margin-top:8px; padding:5px 14px; border:1px solid #C9A24B; border-radius:999px; font-size:11px; color:#E3C989; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;',
@@ -84,39 +114,117 @@ export function PublicPageScreen({ t, publicServices, publicCtaLabel, onClose }:
         </div>
       </div>
 
-      <div style={sx('padding:22px 24px; border-bottom:1px solid #EBE2CF; background:#FFFFFF;')}>
-        <div style={sx('font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#B98D3E; margin-bottom:14px;')}>{p.servicesLabel}</div>
-        <div style={sx('display:flex; flex-direction:column; gap:10px;')}>
-          {publicServices.map((s) => (
+      <div style={sx('padding:22px 24px; background:#FFFFFF;')}>
+        {confirmed ? (
+          <div style={sx('text-align:center; padding:26px 0;')}>
+            <div style={sx('width:52px; height:52px; border-radius:50%; background:#FBF3E4; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;')}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A6A2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 6 9 17l-5-5"></path>
+              </svg>
+            </div>
+            <div style={sx("font-family:'Cormorant Garamond',serif; font-size:19px; color:#201C17;")}>{strings.confirmedTitle}</div>
+            <div style={sx('font-size:12px; color:#8A8074; margin-top:6px;')}>{strings.confirmedSubtitle}</div>
+          </div>
+        ) : (
+          <>
+            <div style={sx('font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#B98D3E; margin-bottom:14px;')}>{strings.step1}</div>
+            <div style={sx('display:flex; flex-direction:column; gap:10px; margin-bottom:20px;')}>
+              {services.map((svc) => {
+                const active = svc.id === serviceId;
+                return (
+                  <div
+                    key={svc.id}
+                    onClick={() => setServiceId(svc.id)}
+                    style={{
+                      ...sx('cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:14px;'),
+                      border: `1.5px solid ${active ? '#B98D3E' : '#EBE2CF'}`,
+                      background: active ? '#FBF3E4' : '#FFFFFF',
+                    }}
+                  >
+                    <div>
+                      <div style={sx("font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600; color:#26221D;")}>{svc.name}</div>
+                      <div style={sx('font-size:12px; color:#B98D3E; font-weight:700; margin-top:2px;')}>{fmtPrice(svc.price)}</div>
+                    </div>
+                    <div
+                      style={{
+                        ...sx('flex-shrink:0; padding:9px 16px; border-radius:999px; font-size:12px; font-weight:700;'),
+                        background: active ? '#201C17' : '#F6EFE1',
+                        color: active ? '#F4E9D2' : '#8A6A2E',
+                        border: `1px solid ${active ? '#201C17' : '#E3C989'}`,
+                      }}
+                    >
+                      {active ? p.selectedLabel : p.selectLabel}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={sx('font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#B98D3E; margin-bottom:14px;')}>{strings.step2}</div>
+            <div style={sx('display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;')}>
+              {!isWorkingToday && <span style={sx('font-size:12px; color:#B0A78F;')}>{strings.notWorkingDay}</span>}
+              {isWorkingToday && availableSlots.length === 0 && <span style={sx('font-size:12px; color:#B0A78F;')}>{strings.noSlots}</span>}
+              {isWorkingToday &&
+                availableSlots.map((slot) => {
+                  const active = slot === time;
+                  return (
+                    <div
+                      key={slot}
+                      onClick={() => setTime(slot)}
+                      data-testid={`booking-slot-${slot}`}
+                      style={{
+                        ...sx("cursor:pointer; padding:10px 16px; border-radius:12px; font-family:'Cormorant Garamond',serif; font-size:13.5px; font-weight:600;"),
+                        border: `1.5px solid ${active ? '#B98D3E' : '#EBE2CF'}`,
+                        background: active ? '#201C17' : '#FFFFFF',
+                        color: active ? '#F4E9D2' : '#26221D',
+                      }}
+                    >
+                      {slot}
+                    </div>
+                  );
+                })}
+            </div>
+
+            <div style={sx('font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#B98D3E; margin-bottom:14px;')}>{strings.step3}</div>
+            <div style={sx('display:flex; flex-direction:column; gap:10px; margin-bottom:20px;')}>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder={strings.namePlaceholder} style={inputStyle} />
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={strings.phonePlaceholder} style={inputStyle} />
+            </div>
+
+            {selectedService && (
+              <div style={sx('display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:14px; background:#FBF3E4; margin-bottom:16px;')}>
+                <div>
+                  <div style={sx('font-size:12.5px; font-weight:700; color:#201C17;')}>
+                    {selectedService.name}
+                    {time ? ` · ${time}` : ''}
+                  </div>
+                  <div style={sx('font-size:10.5px; color:#8A8074; margin-top:2px;')}>{selectedService.duration} min</div>
+                </div>
+                <div style={sx("font-family:'Cormorant Garamond',serif; font-size:16px; color:#8A6A2E; font-weight:600;")}>{fmtPrice(selectedService.price)}</div>
+              </div>
+            )}
+
             <div
-              key={s.name}
-              onClick={s.onClick}
+              onClick={confirm}
               style={{
-                ...sx('cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:14px; transition:all 0.15s ease;'),
-                border: `1.5px solid ${s.borderColor}`,
-                background: s.bg,
+                ...sx(
+                  'height:52px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; letter-spacing:0.3px;',
+                ),
+                cursor: selectedService && time && name.trim() && phone.trim() ? 'pointer' : 'default',
+                background:
+                  selectedService && time && name.trim() && phone.trim()
+                    ? 'linear-gradient(90deg,#201C17,#2B261F)'
+                    : '#EBE2CF',
+                color: selectedService && time && name.trim() && phone.trim() ? '#F4E9D2' : '#B0A78F',
               }}
             >
-              <div>
-                <div style={sx("font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600; color:#26221D;")}>{s.name}</div>
-                <div style={sx('font-size:12px; color:#B98D3E; font-weight:700; margin-top:2px;')}>{s.price}</div>
-              </div>
-              <div
-                style={{
-                  ...sx('flex-shrink:0; padding:9px 16px; border-radius:999px; font-size:12px; font-weight:700;'),
-                  background: s.btnBg,
-                  color: s.btnColor,
-                  border: `1px solid ${s.btnBorder}`,
-                }}
-              >
-                {s.btnLabel}
-              </div>
+              {strings.confirmCta}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </div>
 
-      <div style={sx('padding:22px 24px; background:#FFFFFF;')}>
+      <div style={sx('padding:22px 24px; background:#FFFFFF; border-top:1px solid #EBE2CF;')}>
         <div style={sx('font-size:11px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; color:#B98D3E; margin-bottom:14px;')}>{p.portfolioLabel}</div>
         <div style={sx('display:grid; grid-template-columns:repeat(3,1fr); gap:8px;')}>
           {p.portfolio.map((photo, i) => (
@@ -132,15 +240,8 @@ export function PublicPageScreen({ t, publicServices, publicCtaLabel, onClose }:
         </div>
       </div>
 
-      <div style={sx('padding:16px 24px calc(env(safe-area-inset-bottom, 0px) + 28px); background:#FAF7F0; border-top:1px solid #EBE2CF;')}>
-        <div
-          style={sx(
-            'height:52px; border-radius:999px; background:linear-gradient(90deg,#201C17,#2B261F); color:#F4E9D2; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; letter-spacing:0.3px; box-shadow:0 8px 20px -8px rgba(32,28,23,0.5);',
-          )}
-        >
-          {publicCtaLabel}
-        </div>
-        <div style={sx('text-align:center; font-size:10px; color:#B0A78F; margin-top:12px; letter-spacing:0.3px;')}>{p.poweredBy}</div>
+      <div style={sx('padding:16px 24px calc(env(safe-area-inset-bottom, 0px) + 28px); background:#FAF7F0; text-align:center;')}>
+        <div style={sx('font-size:10px; color:#B0A78F; letter-spacing:0.3px;')}>{p.poweredBy}</div>
       </div>
     </div>
   );
