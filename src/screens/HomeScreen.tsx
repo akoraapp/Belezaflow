@@ -20,6 +20,8 @@ export interface ReadyResponseWithCopy {
 
 interface HomeScreenProps {
   t: Locale;
+  greeting: string;
+  goalStatusLabel: string;
   goalPercentLabel: string;
   goalRemainingLabel: string;
   hojeQuickActions: HojeQuickAction[];
@@ -32,6 +34,8 @@ interface HomeScreenProps {
 
 export function HomeScreen({
   t,
+  greeting,
+  goalStatusLabel,
   goalPercentLabel,
   goalRemainingLabel,
   hojeQuickActions,
@@ -45,7 +49,7 @@ export function HomeScreen({
     <div style={sx(`${SCREEN_SCROLL}`)}>
       <div style={sx(`${SCREEN_PAD_TOP} ${CONTENT_PAD_X} padding-bottom:16px; box-sizing:border-box;`)}>
         <div style={sx('font-size:13px; color:#8A8074;')}>{t.today.date}</div>
-        <div style={sx("font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin-top:4px;")}>{t.today.greeting}</div>
+        <div style={sx("font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:600; margin-top:4px;")}>{greeting}</div>
       </div>
 
       <div style={sx(`${CONTENT_PAD_X} ${SCREEN_PAD_BOTTOM} box-sizing:border-box; display:flex; flex-direction:column; gap:16px;`)}>
@@ -54,7 +58,7 @@ export function HomeScreen({
             <div style={sx('font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#C9A24B; font-weight:700;')}>{t.today.goal.label}</div>
             <div style={sx("font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:600;")}>{goalPercentLabel}</div>
           </div>
-          <div style={sx("font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:600; margin-top:10px;")}>{t.today.goal.current}</div>
+          <div style={sx("font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:600; margin-top:10px;")}>{goalStatusLabel}</div>
           <div style={sx('height:8px; border-radius:999px; background:rgba(244,233,210,0.16); margin-top:14px; overflow:hidden;')}>
             <div style={{ ...sx('height:100%; border-radius:999px; background:#C9A24B;'), width: goalPercentLabel }} />
           </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { sx } from '../lib/sx';
 import { SCREEN_PAD_TOP, CONTENT_PAD_X } from '../components/AppFrame';
-import type { Lang, Locale, OnboardingStep } from '../data/content';
+import type { Lang, Locale } from '../data/content';
 import type { NewFeatureStrings } from '../data/newFeatures';
 import { PROFESSION_SERVICE_BUCKET, SUGGESTED_SERVICES } from '../data/suggestedServices';
 import { slugify } from '../lib/scheduling';
@@ -12,11 +12,11 @@ import type { ServiceItem } from '../lib/types';
 // professions fall back to the lash catalog as a reasonable default.
 const PROFESSION_INVENTORY_KEY = ['lash', 'nail', 'lash', 'esteticista', 'lash'];
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
 
 export interface OnboardingResult {
-  name: string;
   publicName: string;
+  monthlyGoal: number;
   services: ServiceItem[];
 }
 
@@ -70,34 +70,34 @@ function nextServiceId() {
   return `svc-${serviceIdSeq}`;
 }
 
+// Suggested service names are a useful starting point, but price and
+// duration are personal to each professional — those must start blank so
+// she fills in what she actually charges, not a made-up default.
+function blankSuggestedServices(lang: Lang, bucket: ReturnType<typeof bucketFor>): ServiceItem[] {
+  return SUGGESTED_SERVICES[lang][bucket].map((svc) => ({ id: nextServiceId(), name: svc.name, price: 0, duration: 0 }));
+}
+
+function bucketFor(professionIdx: number) {
+  return PROFESSION_SERVICE_BUCKET[professionIdx] ?? 'other';
+}
+
 export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfessionSelect, onFinish }: OnboardingScreenProps) {
   const [step, setStep] = useState(1);
   const o = t.onboarding;
   const s = strings;
 
-  const [langIdx, setLangIdx] = useState(() => o.s1.options.findIndex((opt) => opt.selected));
   const [professionIdx, setProfessionIdx] = useState(() => o.s4.options.findIndex((opt) => opt.selected));
   const [currencyIdx, setCurrencyIdx] = useState(() => o.s3.options.findIndex((opt) => opt.selected));
-  const [name, setName] = useState('');
   const [publicName, setPublicName] = useState('');
-  const [services, setServices] = useState<ServiceItem[]>(() => {
-    const bucket = PROFESSION_SERVICE_BUCKET[professionIdx] ?? 'other';
-    return SUGGESTED_SERVICES[lang][bucket].map((svc) => ({ id: nextServiceId(), ...svc }));
-  });
+  const [goalInput, setGoalInput] = useState('');
+  const [services, setServices] = useState<ServiceItem[]>(() => blankSuggestedServices(lang, bucketFor(professionIdx)));
   const [servicesInitialized, setServicesInitialized] = useState(false);
-
-  function selectLanguage(i: number, opt: OnboardingStep['options'][number]) {
-    setLangIdx(i);
-    const lang = detectLang(opt.label);
-    if (lang) onLanguageSelect(lang);
-  }
 
   function selectProfession(i: number) {
     setProfessionIdx(i);
     onProfessionSelect(PROFESSION_INVENTORY_KEY[i] ?? 'lash');
     if (!servicesInitialized) {
-      const bucket = PROFESSION_SERVICE_BUCKET[i] ?? 'other';
-      setServices(SUGGESTED_SERVICES[lang][bucket].map((svc) => ({ id: nextServiceId(), ...svc })));
+      setServices(blankSuggestedServices(lang, bucketFor(i)));
     }
   }
 
@@ -120,26 +120,20 @@ export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfess
 
   function addService() {
     setServicesInitialized(true);
-    setServices((prev) => [...prev, { id: nextServiceId(), name: '', price: 0, duration: 30 }]);
+    setServices((prev) => [...prev, { id: nextServiceId(), name: '', price: 0, duration: 0 }]);
   }
 
-  const canAdvance = [
-    true,
-    professionIdx >= 0,
-    true,
-    name.trim().length > 0,
-    publicName.trim().length > 0,
-    true,
-    services.length > 0,
-  ];
+  const canAdvance = [true, professionIdx >= 0, true, publicName.trim().length > 0, true, services.length > 0];
 
   function next() {
     if (step === TOTAL_STEPS) {
-      onFinish({ name: name.trim(), publicName: publicName.trim(), services });
+      onFinish({ publicName: publicName.trim(), monthlyGoal: parseFloat(goalInput) || 0, services });
     } else {
       setStep((v) => v + 1);
     }
   }
+
+  const currencySymbol = lang === 'pt' ? 'R$' : '$';
 
   return (
     <div style={sx('height:100%; display:flex; flex-direction:column; background:#FFFFFF;')}>
@@ -156,9 +150,13 @@ export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfess
           <>
             <StepHeading title={o.s1.title} subtitle={o.s1.subtitle} />
             <div style={sx('display:flex; flex-direction:column; gap:12px;')}>
-              {o.s1.options.map((opt, i) => (
-                <OptionRow key={opt.label} label={opt.label} selected={i === langIdx} onClick={() => selectLanguage(i, opt)} />
-              ))}
+              {o.s1.options.map((opt) => {
+                const optLang = detectLang(opt.label);
+                const selected = optLang !== null && optLang === lang;
+                return (
+                  <OptionRow key={opt.label} label={opt.label} selected={selected} onClick={() => optLang && onLanguageSelect(optLang)} />
+                );
+              })}
             </div>
           </>
         )}
@@ -187,18 +185,6 @@ export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfess
 
         {step === 4 && (
           <>
-            <StepHeading title={s.onboardingName.title} subtitle={s.onboardingName.subtitle} />
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={s.onboardingName.placeholder} style={inputStyle} />
-            {name.trim() && (
-              <div style={sx("font-family:'Cormorant Garamond',serif; font-size:20px; color:#8A6A2E; margin-top:18px;")}>
-                {s.onboardingName.greetingPreview} {name.trim()}.
-              </div>
-            )}
-          </>
-        )}
-
-        {step === 5 && (
-          <>
             <StepHeading title={s.onboardingPublicName.title} subtitle={s.onboardingPublicName.subtitle} />
             <input value={publicName} onChange={(e) => setPublicName(e.target.value)} placeholder={s.onboardingPublicName.placeholder} style={inputStyle} />
             {publicName.trim() && (
@@ -212,20 +198,26 @@ export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfess
           </>
         )}
 
-        {step === 6 && (
+        {step === 5 && (
           <>
             <StepHeading title={o.s5.title} subtitle={o.s5.subtitle} />
-            <div style={sx('text-align:center; padding:28px 0;')}>
-              <div style={sx("font-family:'Cormorant Garamond',serif; font-size:52px; font-weight:600; color:#201C17;")}>{o.s5.amount}</div>
-              <div style={sx('font-size:13px; color:#8A8074; margin-top:6px;')}>{o.s5.perMonth}</div>
+            <div style={sx('display:flex; align-items:center; gap:10px; justify-content:center; padding:28px 0 0;')}>
+              <span style={sx("font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:600; color:#201C17;")}>{currencySymbol}</span>
+              <input
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder="0"
+                inputMode="numeric"
+                style={sx(
+                  "border:none; border-bottom:2px solid #E3C989; outline:none; font-family:'Cormorant Garamond',serif; font-size:44px; font-weight:600; color:#201C17; width:220px; text-align:left; background:transparent;",
+                )}
+              />
             </div>
-            <div style={sx('height:6px; border-radius:999px; background:#F0E6D2; margin:8px 0 30px; overflow:hidden;')}>
-              <div style={sx('width:62%; height:100%; background:#B98D3E;')} />
-            </div>
+            <div style={sx('font-size:13px; color:#8A8074; margin-top:10px; text-align:center;')}>{o.s5.perMonth}</div>
           </>
         )}
 
-        {step === 7 && (
+        {step === 6 && (
           <>
             <StepHeading title={s.onboardingServices.title} subtitle={s.onboardingServices.subtitle} />
             <div style={sx('display:flex; flex-direction:column; gap:10px;')}>
@@ -256,7 +248,7 @@ export function OnboardingScreen({ t, lang, strings, onLanguageSelect, onProfess
                     <input
                       value={svc.price || ''}
                       onChange={(e) => updateService(svc.id, 'price', e.target.value)}
-                      placeholder={s.onboardingServices.pricePlaceholder}
+                      placeholder={`${s.onboardingServices.pricePlaceholder} (${currencySymbol})`}
                       inputMode="numeric"
                       style={sx(
                         "flex:1; min-width:0; width:100%; box-sizing:border-box; border:1px solid #EBE2CF; border-radius:8px; padding:6px 10px; font-family:'Manrope',sans-serif; font-weight:600; font-size:13px; outline:none;",

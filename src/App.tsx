@@ -32,10 +32,6 @@ const AUTHED_KEY = 'bc.authed';
 const ONBOARDED_KEY = 'bc.onboarded';
 const LANG_KEY = 'bc.lang';
 
-function parseNum(s: string): number {
-  return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
-}
-
 function fmtCurrency(lang: Lang, n: number): string {
   return lang === 'pt' ? `R$ ${n.toLocaleString('pt-BR')}` : `$${n.toLocaleString('en-US')}`;
 }
@@ -53,6 +49,7 @@ export default function App() {
   const [inventoryProfession, setInventoryProfession] = useState('lash');
   const [professionalName, setProfessionalName] = useState('');
   const [publicName, setPublicName] = useState('');
+  const [monthlyGoal, setMonthlyGoal] = useState(0);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [appointments, setAppointments] = useState<LiveAppointment[]>([]);
   const [bookedSlotTimes, setBookedSlotTimes] = useState<string[]>([]);
@@ -88,14 +85,15 @@ export default function App() {
     setAttendance((a) => ({ ...a, [name]: status }));
   }
 
-  function login() {
+  function login(name: string) {
+    setProfessionalName(name);
     setAuthed(true);
     localStorage.setItem(AUTHED_KEY, '1');
   }
 
   function finishOnboarding(result: OnboardingResult) {
-    setProfessionalName(result.name);
     setPublicName(result.publicName);
+    setMonthlyGoal(result.monthlyGoal);
     setServices(result.services);
     setAppointments(
       t.agenda.appointments.map((ap) => ({
@@ -208,21 +206,27 @@ export default function App() {
   ];
 
   // Agenda
-  const agendaAppointments: AgendaAppointment[] = appointments.map((ap) => ({
-    id: ap.id,
-    time: ap.time,
-    client: ap.clientName,
-    service: ap.service,
-    ...AGENDA_STATUS_STYLE[ap.status],
-    statusLabel: t.agenda.statusLabels[ap.status],
-  }));
+  const agendaAppointments: AgendaAppointment[] = [...appointments]
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .map((ap) => ({
+      id: ap.id,
+      time: ap.time,
+      client: ap.clientName,
+      service: ap.service,
+      ...AGENDA_STATUS_STYLE[ap.status],
+      statusLabel: t.agenda.statusLabels[ap.status],
+    }));
 
-  // Hoje: goal + ready responses
-  const goalNums = t.today.goal.current.match(/[\d.,]+/g) || ['0', '0'];
-  const goalCurrentNum = parseNum(goalNums[0]);
-  const goalTargetNum = parseNum(goalNums[1] || goalNums[0]);
+  // Hoje: greeting + goal (both live — no static demo defaults)
+  const greetingHour = new Date().getHours();
+  const greetingPrefix = greetingHour < 12 ? nf.greetings.morning : greetingHour < 18 ? nf.greetings.afternoon : nf.greetings.evening;
+  const greeting = `${greetingPrefix}, ${professionalName}`;
+
+  const goalCurrentNum = appointments.filter((ap) => ap.status === 'confirmed' || ap.status === 'done').reduce((sum, ap) => sum + ap.price, 0);
+  const goalTargetNum = monthlyGoal;
   const goalPct = goalTargetNum > 0 ? Math.min(100, Math.round((goalCurrentNum / goalTargetNum) * 100)) : 0;
   const goalPercentLabel = `${goalPct}%`;
+  const goalStatusLabel = lang === 'pt' ? `${fmtCurrency(lang, goalCurrentNum)} de ${fmtCurrency(lang, goalTargetNum)}` : `${fmtCurrency(lang, goalCurrentNum)} of ${fmtCurrency(lang, goalTargetNum)}`;
   const goalRemainingNum = Math.max(0, goalTargetNum - goalCurrentNum);
   const goalRemainingLabel =
     lang === 'pt' ? `Faltam ${fmtCurrency(lang, goalRemainingNum)} para bater a meta` : `${fmtCurrency(lang, goalRemainingNum)} left to hit your goal`;
@@ -355,6 +359,14 @@ export default function App() {
     });
   }
 
+  function addManualAppointment(data: { clientName: string; service: ServiceItem; time: string }) {
+    setAppointments((list) => [
+      ...list,
+      { id: nextId('appt'), time: data.time, clientName: data.clientName, service: data.service.name, price: data.service.price, status: 'confirmed' },
+    ]);
+    setBookedSlotTimes((list) => [...list, data.time]);
+  }
+
   if (!authed) {
     return (
       <AppFrame>
@@ -376,6 +388,8 @@ export default function App() {
       {nav.tab === 'hoje' && !nav.detail && (
         <HomeScreen
           t={t}
+          greeting={greeting}
+          goalStatusLabel={goalStatusLabel}
           goalPercentLabel={goalPercentLabel}
           goalRemainingLabel={goalRemainingLabel}
           hojeQuickActions={hojeQuickActions}
@@ -387,7 +401,18 @@ export default function App() {
         />
       )}
 
-      {nav.tab === 'agenda' && !nav.detail && <AgendaScreen t={t} agendaAppointments={agendaAppointments} onOpenSetup={() => nav.openDetail('agendaSetup')} />}
+      {nav.tab === 'agenda' && !nav.detail && (
+        <AgendaScreen
+          t={t}
+          strings={nf.agendaAddAppointment}
+          agendaAppointments={agendaAppointments}
+          services={services}
+          availableSlots={publicBookingAvailableSlots}
+          fmtPrice={fmtPrice}
+          onOpenSetup={() => nav.openDetail('agendaSetup')}
+          onAddAppointment={addManualAppointment}
+        />
+      )}
       {nav.tab === 'agenda' && nav.detail === 'agendaSetup' && (
         <AgendaSetupScreen
           t={t}

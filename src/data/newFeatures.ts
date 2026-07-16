@@ -1,20 +1,26 @@
 import type { Lang } from './content';
 
 // Extra UI strings for features added on top of the base content.ts locale:
-// login gate, expanded onboarding (name / public name / services), a real
-// finance ledger, a working CRM (add client, edit stage, message templates),
-// and a functional public booking flow. Kept separate from content.ts to
-// avoid churning that already-large file — same Record<Lang, ...> pattern.
+// login/signup gate, expanded onboarding (public name / goal / services), a
+// real finance ledger, a working CRM (add client, edit stage, message
+// templates), a functional public booking flow, and manual appointment
+// entry from the professional's own Agenda. Kept separate from content.ts
+// to avoid churning that already-large file — same Record<Lang, ...> pattern.
 export interface NewFeatureStrings {
   login: {
-    title: string;
-    subtitle: string;
+    signinTitle: string;
+    signinSubtitle: string;
+    signupTitle: string;
+    signupSubtitle: string;
+    namePlaceholder: string;
     emailPlaceholder: string;
     passwordPlaceholder: string;
-    submitCta: string;
-    hint: string;
+    signinCta: string;
+    signupCta: string;
+    toggleToSignup: string;
+    toggleToSignin: string;
   };
-  onboardingName: { title: string; subtitle: string; placeholder: string; greetingPreview: string };
+  greetings: { morning: string; afternoon: string; evening: string };
   onboardingPublicName: { title: string; subtitle: string; placeholder: string; linkPrefix: string };
   onboardingServices: {
     title: string;
@@ -74,24 +80,34 @@ export interface NewFeatureStrings {
     slotsLabel: string;
     hint: string;
   };
+  agendaAddAppointment: {
+    cta: string;
+    formTitle: string;
+    clientPlaceholder: string;
+    serviceLabel: string;
+    timeLabel: string;
+    noServices: string;
+    noSlots: string;
+    submitCta: string;
+  };
 }
 
 export const newFeatures: Record<Lang, NewFeatureStrings> = {
   pt: {
     login: {
-      title: 'Entrar',
-      subtitle: 'Acesse sua conta Beauty Consultants',
+      signinTitle: 'Entrar',
+      signinSubtitle: 'Acesse sua conta Beauty Consultants',
+      signupTitle: 'Criar conta',
+      signupSubtitle: 'Comece a usar o Beauty Consultants',
+      namePlaceholder: 'Seu nome',
       emailPlaceholder: 'E-mail',
       passwordPlaceholder: 'Senha',
-      submitCta: 'Entrar',
-      hint: 'Primeiro acesso? Basta preencher e entrar — a configuração inicial vem a seguir.',
+      signinCta: 'Entrar',
+      signupCta: 'Criar conta',
+      toggleToSignup: 'Não tem conta? Criar conta',
+      toggleToSignin: 'Já tem conta? Entrar',
     },
-    onboardingName: {
-      title: 'Qual é o seu nome?',
-      subtitle: 'Usado nas saudações dentro do app.',
-      placeholder: 'Seu nome',
-      greetingPreview: 'Bom dia,',
-    },
+    greetings: { morning: 'Bom dia', afternoon: 'Boa tarde', evening: 'Boa noite' },
     onboardingPublicName: {
       title: 'Como quer aparecer para suas clientes?',
       subtitle: 'Usado na sua página pública e no link de agendamento.',
@@ -100,7 +116,7 @@ export const newFeatures: Record<Lang, NewFeatureStrings> = {
     },
     onboardingServices: {
       title: 'Confirme seus serviços e valores',
-      subtitle: 'Já sugerimos com base na sua profissão. Edite como preferir.',
+      subtitle: 'Sugerimos os nomes com base na sua profissão — preencha o valor e a duração que você pratica.',
       namePlaceholder: 'Nome do serviço',
       pricePlaceholder: 'Valor',
       durationPlaceholder: 'Duração',
@@ -156,22 +172,32 @@ export const newFeatures: Record<Lang, NewFeatureStrings> = {
       slotsLabel: 'Horários abertos para agendamento',
       hint: 'Só os dias e horários marcados aqui ficam disponíveis na sua página pública.',
     },
+    agendaAddAppointment: {
+      cta: 'Registrar atendimento',
+      formTitle: 'Novo atendimento',
+      clientPlaceholder: 'Nome da cliente',
+      serviceLabel: 'Serviço',
+      timeLabel: 'Horário disponível hoje',
+      noServices: 'Cadastre um serviço em Configurações para poder registrar atendimentos.',
+      noSlots: 'Sem horários livres hoje.',
+      submitCta: 'Registrar',
+    },
   },
   en: {
     login: {
-      title: 'Sign in',
-      subtitle: 'Access your Beauty Consultants account',
+      signinTitle: 'Sign in',
+      signinSubtitle: 'Access your Beauty Consultants account',
+      signupTitle: 'Create account',
+      signupSubtitle: 'Start using Beauty Consultants',
+      namePlaceholder: 'Your name',
       emailPlaceholder: 'Email',
       passwordPlaceholder: 'Password',
-      submitCta: 'Sign in',
-      hint: 'First time here? Just fill in and continue — setup comes right after.',
+      signinCta: 'Sign in',
+      signupCta: 'Create account',
+      toggleToSignup: "Don't have an account? Create one",
+      toggleToSignin: 'Already have an account? Sign in',
     },
-    onboardingName: {
-      title: "What's your name?",
-      subtitle: 'Used for greetings inside the app.',
-      placeholder: 'Your name',
-      greetingPreview: 'Good morning,',
-    },
+    greetings: { morning: 'Good morning', afternoon: 'Good afternoon', evening: 'Good evening' },
     onboardingPublicName: {
       title: 'How should clients see you?',
       subtitle: 'Used on your public page and booking link.',
@@ -180,7 +206,7 @@ export const newFeatures: Record<Lang, NewFeatureStrings> = {
     },
     onboardingServices: {
       title: 'Confirm your services and prices',
-      subtitle: 'Already suggested based on your profession. Edit as you like.',
+      subtitle: "We suggested names based on your profession — fill in the price and duration you actually charge.",
       namePlaceholder: 'Service name',
       pricePlaceholder: 'Price',
       durationPlaceholder: 'Duration',
@@ -235,6 +261,16 @@ export const newFeatures: Record<Lang, NewFeatureStrings> = {
     agendaSetupSlots: {
       slotsLabel: 'Slots open for booking',
       hint: 'Only the days and times marked here show up as available on your public page.',
+    },
+    agendaAddAppointment: {
+      cta: 'Log appointment',
+      formTitle: 'New appointment',
+      clientPlaceholder: "Client's name",
+      serviceLabel: 'Service',
+      timeLabel: 'Open slot today',
+      noServices: 'Add a service in Settings before logging appointments.',
+      noSlots: 'No open slots today.',
+      submitCta: 'Log it',
     },
   },
 };
