@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { sx } from '../lib/sx';
+import { SCREEN_PAD_TOP, SCREEN_PAD_BOTTOM, CONTENT_PAD_X } from './AppFrame';
 import type { Lang, Locale } from '../data/content';
 
 interface ObjectiveDef {
@@ -99,9 +100,11 @@ interface ClientMachineFlowProps {
   t: Locale;
   lang: Lang;
   presetObjective: string | null;
+  exitLabel: string;
+  onExit: () => void;
 }
 
-export function ClientMachineFlow({ t, lang, presetObjective }: ClientMachineFlowProps) {
+export function ClientMachineFlow({ t, lang, presetObjective, exitLabel, onExit }: ClientMachineFlowProps) {
   const TOOL = t.clientMachine.tool;
   const [step, setStep] = useState<'home' | 'approach' | 'result'>('home');
   const [objectiveKey, setObjectiveKey] = useState<string | null>(null);
@@ -176,12 +179,18 @@ export function ClientMachineFlow({ t, lang, presetObjective }: ClientMachineFlo
     <div style={sx('height:100%; display:flex; flex-direction:column; min-height:0;')}>
       {step === 'home' && (
         <>
-          <div style={sx('padding:70px 24px 14px; box-sizing:border-box;')}>
+          <div style={sx(`${SCREEN_PAD_TOP} ${CONTENT_PAD_X} padding-bottom:14px; box-sizing:border-box;`)}>
+            <div onClick={onExit} style={sx('cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#8A8074; font-weight:600; margin-bottom:14px;')}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#8A8074" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7.5 2 3 6l4.5 4"></path>
+              </svg>
+              {exitLabel}
+            </div>
             <div style={sx("font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:600;")}>{TOOL.ui.title}</div>
             <div style={sx('font-size:13px; color:#8A8074; margin-top:4px;')}>{TOOL.ui.subtitle}</div>
           </div>
 
-          <div style={sx('flex:1; overflow:auto; padding:0 24px 24px; box-sizing:border-box; display:flex; flex-direction:column; gap:16px;')}>
+          <div style={sx(`flex:1; overflow:auto; ${CONTENT_PAD_X} ${SCREEN_PAD_BOTTOM} box-sizing:border-box; display:flex; flex-direction:column; gap:16px;`)}>
             <div style={sx('background:#201C17; border-radius:18px; padding:18px; color:#F4E9D2; border:1px solid #C9A24B;')}>
               <div style={sx('font-size:11px; letter-spacing:1px; text-transform:uppercase; font-weight:700; color:#C9A24B; margin-bottom:8px;')}>
                 {TOOL.ui.suggestionLabel}
@@ -247,14 +256,14 @@ export function ClientMachineFlow({ t, lang, presetObjective }: ClientMachineFlo
 
       {step === 'approach' && (
         <>
-          <div style={sx('padding:70px 24px 16px; box-sizing:border-box;')}>
+          <div style={sx(`${SCREEN_PAD_TOP} ${CONTENT_PAD_X} padding-bottom:16px; box-sizing:border-box;`)}>
             <div onClick={goBackHome} style={sx('cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#8A8074; font-weight:600; margin-bottom:14px;')}>
               ← {TOOL.ui.back}
             </div>
             <div style={sx("font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; line-height:1.3;")}>{TOOL.ui.approachLabel}</div>
             <div style={sx('font-size:12px; color:#8A8074; margin-top:4px;')}>{currentObjectiveLabel}</div>
           </div>
-          <div style={sx('flex:1; overflow:auto; padding:0 24px 24px; box-sizing:border-box; display:flex; flex-direction:column; gap:10px;')}>
+          <div style={sx(`flex:1; overflow:auto; ${CONTENT_PAD_X} ${SCREEN_PAD_BOTTOM} box-sizing:border-box; display:flex; flex-direction:column; gap:10px;`)}>
             {APPROACHES[lang].map((ap) => (
               <div
                 key={ap.key}
@@ -271,14 +280,14 @@ export function ClientMachineFlow({ t, lang, presetObjective }: ClientMachineFlo
 
       {step === 'result' && (
         <>
-          <div style={sx('padding:70px 24px 16px; box-sizing:border-box;')}>
+          <div style={sx(`${SCREEN_PAD_TOP} ${CONTENT_PAD_X} padding-bottom:16px; box-sizing:border-box;`)}>
             <div onClick={goBackHome} style={sx('cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#8A8074; font-weight:600; margin-bottom:14px;')}>
               ← {TOOL.ui.back}
             </div>
             <div style={sx("font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600;")}>{currentObjectiveLabel}</div>
             <div style={sx('font-size:12px; color:#8A8074; margin-top:4px;')}>{TOOL.ui.resultSubtitle}</div>
           </div>
-          <div style={sx('flex:1; overflow:auto; padding:0 24px 20px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;')}>
+          <div style={sx(`flex:1; overflow:auto; ${CONTENT_PAD_X} padding-bottom:20px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;`)}>
             <div style={sx('background:#FFFFFF; border:1px solid #EBE2CF; border-radius:16px; padding:16px;')}>
               <div style={sx('font-size:11px; text-transform:uppercase; letter-spacing:0.6px; font-weight:700; color:#B98D3E; margin-bottom:8px;')}>
                 {TOOL.ui.reelLabel}
@@ -324,7 +333,7 @@ export function ClientMachineFlow({ t, lang, presetObjective }: ClientMachineFlo
               </div>
             </div>
           </div>
-          <div style={sx('padding:0 24px 18px; box-sizing:border-box;')}>
+          <div style={sx(`${CONTENT_PAD_X} ${SCREEN_PAD_BOTTOM} box-sizing:border-box;`)}>
             <div
               onClick={createAnother}
               style={sx(

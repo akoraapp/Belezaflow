@@ -5,7 +5,7 @@
 html,
 body {
   margin: 0;
-  background: #faf7f0;
+  background: #ece4d3;
 }
 
 body {
@@ -14,6 +14,7 @@ body {
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 a {
@@ -26,4 +27,14 @@ a:hover {
 
 ::selection {
   background: #e6d3aa;
+}
+
+input::placeholder {
+  color: #b0a78f;
+  opacity: 1;
+}
+
+input:focus {
+  outline: none;
+  border-color: #b98d3e !important;
 }

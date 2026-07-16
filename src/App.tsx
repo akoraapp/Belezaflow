@@ -1,28 +1,31 @@
-import { useState, type ChangeEvent } from 'react';
-import { sx } from './lib/sx';
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { AppFrame } from './components/AppFrame';
+import { BottomNav } from './components/BottomNav';
+import { useNavigator } from './app/navigation';
 import { content, type Lang } from './data/content';
-import { Onboarding } from './sections/Onboarding';
-import { Today } from './sections/Today';
-import { ClientMachine } from './sections/ClientMachine';
-import { Crm } from './sections/Crm';
-import { AgendaSetup } from './sections/AgendaSetup';
-import { PublicPage } from './sections/PublicPage';
-import { Agenda } from './sections/Agenda';
-import { Financeiro } from './sections/Financeiro';
-import { Inventory } from './sections/Inventory';
-import { Relatorios } from './sections/Relatorios';
-import { Ia } from './sections/Ia';
-import { Config } from './sections/Config';
-import type { HojeQuickAction, ReadyResponseWithCopy } from './sections/Today';
-import type { CrmStage, CrmClientWithAttendance } from './sections/Crm';
-import type { PublicService } from './sections/PublicPage';
-import type { AgendaAppointment } from './sections/Agenda';
+import { OnboardingScreen } from './screens/OnboardingScreen';
+import { HomeScreen, type HojeQuickAction, type ReadyResponseWithCopy } from './screens/HomeScreen';
+import { AgendaScreen, type AgendaAppointment } from './screens/AgendaScreen';
+import { AgendaSetupScreen } from './screens/AgendaSetupScreen';
+import { CrmListScreen, type CrmStage, type CrmClientWithAttendance } from './screens/CrmListScreen';
+import { CrmProfileScreen } from './screens/CrmProfileScreen';
+import { FinanceScreen } from './screens/FinanceScreen';
+import { MoreMenuScreen } from './screens/MoreMenuScreen';
+import { ClientMachineScreen } from './screens/ClientMachineScreen';
+import { InventoryScreen } from './screens/InventoryScreen';
+import { ReportsScreen } from './screens/ReportsScreen';
+import { AiAssistantScreen } from './screens/AiAssistantScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
+import { PublicPageScreen, type PublicService } from './screens/PublicPageScreen';
 
 const AGENDA_STATUS_STYLE: Record<string, { statusColor: string; badgeBg: string; badgeColor: string }> = {
   confirmed: { statusColor: '#B98D3E', badgeBg: '#FBF3E4', badgeColor: '#8A6A2E' },
   done: { statusColor: '#C7BEAC', badgeBg: '#F2ECDF', badgeColor: '#8A8074' },
   pending: { statusColor: '#201C17', badgeBg: '#ECE7DC', badgeColor: '#201C17' },
 };
+
+const ONBOARDED_KEY = 'bc.onboarded';
+const LANG_KEY = 'bc.lang';
 
 function parseNum(s: string): number {
   return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
@@ -33,9 +36,13 @@ function fmtCurrency(lang: Lang, n: number): string {
 }
 
 export default function App() {
-  const [lang, setLang] = useState<Lang>('pt');
+  const [onboarded, setOnboarded] = useState(() => localStorage.getItem(ONBOARDED_KEY) === '1');
+  const [lang, setLang] = useState<Lang>(() => (localStorage.getItem(LANG_KEY) as Lang) || 'pt');
+  const [inventoryProfession, setInventoryProfession] = useState('lash');
   const [crmFilter, setCrmFilter] = useState('todos');
+  const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
   const [publicSelectedService, setPublicSelectedService] = useState<number | null>(null);
+  const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [attendance, setAttendance] = useState<Record<string, 'yes' | 'no'>>({});
   const [estoqueExpandedConsumption, setEstoqueExpandedConsumption] = useState<Record<number, boolean>>({ 0: true });
   const [readyResponsesOpen, setReadyResponsesOpen] = useState(false);
@@ -48,11 +55,23 @@ export default function App() {
   const [estoqueAddFormQty, setEstoqueAddFormQty] = useState('');
   const [estoqueAddFormValue, setEstoqueAddFormValue] = useState('');
 
+  const nav = useNavigator();
   const t = content[lang];
+
+  useEffect(() => {
+    localStorage.setItem(LANG_KEY, lang);
+  }, [lang]);
 
   function markAttendance(name: string, status: 'yes' | 'no') {
     setAttendance((a) => ({ ...a, [name]: status }));
   }
+
+  function finishOnboarding() {
+    setOnboarded(true);
+    localStorage.setItem(ONBOARDED_KEY, '1');
+  }
+
+  const toggleLang = () => setLang((l) => (l === 'pt' ? 'en' : 'pt'));
 
   // CRM
   const filteredClients = crmFilter === 'todos' ? t.crm.clients : t.crm.clients.filter((c) => c.stage === crmFilter);
@@ -93,20 +112,14 @@ export default function App() {
       markNo: () => markAttendance(c.name, 'no'),
     };
   });
+  const selectedClient = t.crm.clients.find((c) => c.name === selectedClientName) ?? t.crm.clients[0];
 
   // Hoje quick actions
   const nextApptName = t.agenda.appointments[0]?.client ?? '';
   const nextApptAttended = attendance[nextApptName] === 'yes';
-  const goToClientMachine = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const goToClientMachine = () => nav.openDetail('clientMachine');
   const hojeQuickActions: HojeQuickAction[] = [
-    {
-      key: 'content',
-      label: t.today.quickActions.createContent,
-      bg: '#201C17',
-      border: '#201C17',
-      color: '#F4E9D2',
-      onClick: goToClientMachine,
-    },
+    { key: 'content', label: t.today.quickActions.createContent, bg: '#201C17', border: '#201C17', color: '#F4E9D2', onClick: goToClientMachine },
     {
       key: 'attendance',
       label: nextApptAttended ? t.today.quickActions.registeredDone : t.today.quickActions.registerAttendance,
@@ -115,22 +128,8 @@ export default function App() {
       color: nextApptAttended ? '#8A6A2E' : '#26221D',
       onClick: () => markAttendance(nextApptName, 'yes'),
     },
-    {
-      key: 'finance',
-      label: t.today.quickActions.goFinance,
-      bg: '#FFFFFF',
-      border: '#EBE2CF',
-      color: '#26221D',
-      onClick: goToClientMachine,
-    },
-    {
-      key: 'client',
-      label: t.today.quickActions.newClient,
-      bg: '#FFFFFF',
-      border: '#EBE2CF',
-      color: '#26221D',
-      onClick: goToClientMachine,
-    },
+    { key: 'finance', label: t.today.quickActions.goFinance, bg: '#FFFFFF', border: '#EBE2CF', color: '#26221D', onClick: () => nav.goTab('financeiro') },
+    { key: 'client', label: t.today.quickActions.newClient, bg: '#FFFFFF', border: '#EBE2CF', color: '#26221D', onClick: () => nav.goTab('crm') },
   ];
 
   // Agenda
@@ -148,9 +147,7 @@ export default function App() {
   const goalPercentLabel = `${goalPct}%`;
   const goalRemainingNum = Math.max(0, goalTargetNum - goalCurrentNum);
   const goalRemainingLabel =
-    lang === 'pt'
-      ? `Faltam ${fmtCurrency(lang, goalRemainingNum)} para bater a meta`
-      : `${fmtCurrency(lang, goalRemainingNum)} left to hit your goal`;
+    lang === 'pt' ? `Faltam ${fmtCurrency(lang, goalRemainingNum)} para bater a meta` : `${fmtCurrency(lang, goalRemainingNum)} left to hit your goal`;
 
   const readyResponsesToggleLabel = readyResponsesOpen ? t.today.readyResponsesCloseLabel : t.today.readyResponsesOpenLabel;
   const readyResponsesWithCopy: ReadyResponseWithCopy[] = t.today.readyResponses.map((rr, i) => ({
@@ -172,12 +169,11 @@ export default function App() {
   const goToContentSuggestion = () => {
     setContentPresetObjectiveState('atrair');
     setContentPresetNonce((n) => n + 1);
-    const el = document.querySelector('[data-screen-label="Máquina de Clientes"]');
-    el?.scrollIntoView({ block: 'start' });
+    nav.openDetail('clientMachine');
   };
 
-  // Estoque Inteligente (fixed to the "lash" profession, as in the source prototype)
-  const invData = t.inventory.productsByProfession.lash;
+  // Estoque Inteligente
+  const invData = t.inventory.productsByProfession[inventoryProfession] ?? t.inventory.productsByProfession.lash;
   const extraProducts = estoqueExtraProducts.map((p) => ({
     name: p.name,
     category: '',
@@ -188,15 +184,10 @@ export default function App() {
     unit: lang === 'pt' ? 'un' : 'units',
     purchaseValue: p.value,
   }));
-  const allProductsRaw = invData.products.concat(extraProducts).map((p) => ({
-    ...p,
-    isLow: p.qty <= p.minQty,
-    isOut: p.qty <= 0,
-  }));
+  const allProductsRaw = invData.products.concat(extraProducts).map((p) => ({ ...p, isLow: p.qty <= p.minQty, isOut: p.qty <= 0 }));
   const inventoryTotalInvestedNum = allProductsRaw.reduce((sum, p) => sum + (p.purchaseValue || 0), 0);
   const inventoryTotalInvested = fmtCurrency(lang, inventoryTotalInvestedNum);
-  const inventoryProductCountLabel =
-    lang === 'pt' ? `${allProductsRaw.length} produtos cadastrados` : `${allProductsRaw.length} products registered`;
+  const inventoryProductCountLabel = lang === 'pt' ? `${allProductsRaw.length} produtos cadastrados` : `${allProductsRaw.length} products registered`;
 
   const toggleAddForm = () => setEstoqueAddFormOpen((v) => !v);
   const onAddFormNameChange = (e: ChangeEvent<HTMLInputElement>) => setEstoqueAddFormName(e.target.value);
@@ -254,113 +245,92 @@ export default function App() {
       onClick: () => setPublicSelectedService(isSelected ? null : i),
     };
   });
-  const publicCtaLabel =
-    publicSelectedService != null ? `${t.publicPage.cta} · ${t.publicPage.services[publicSelectedService].name}` : t.publicPage.cta;
+  const publicCtaLabel = publicSelectedService != null ? `${t.publicPage.cta} · ${t.publicPage.services[publicSelectedService].name}` : t.publicPage.cta;
 
-  const toggleLang = () => setLang((l) => (l === 'pt' ? 'en' : 'pt'));
-  const ptStyle = { color: lang === 'pt' ? '#201C17' : '#B7AE9C' };
-  const enStyle = { color: lang === 'en' ? '#201C17' : '#B7AE9C' };
+  if (!onboarded) {
+    return (
+      <AppFrame>
+        <OnboardingScreen t={t} onLanguageSelect={setLang} onProfessionSelect={setInventoryProfession} onFinish={finishOnboarding} />
+      </AppFrame>
+    );
+  }
 
   return (
-    <div style={sx("font-family:'Manrope',sans-serif; background:#FAF7F0; min-height:100vh; color:#26221D;")}>
-      {/* TOP BAR */}
-      <div
-        style={sx(
-          'position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:22px 48px; background:rgba(250,247,240,0.86); backdrop-filter:blur(10px); border-bottom:1px solid #EBE2CF;',
-        )}
-      >
-        <div style={sx('display:flex; align-items:center; gap:12px;')}>
-          <div style={sx('width:34px; height:34px; border-radius:50%; border:1.5px solid #B98D3E; display:flex; align-items:center; justify-content:center;')}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B98D3E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M6 6l2.2 2.2M15.8 15.8 18 18M18 6l-2.2 2.2M8.2 15.8 6 18"></path>
-            </svg>
-          </div>
-          <div style={sx("font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:600; letter-spacing:0.5px;")}>{t.brand.name}</div>
-        </div>
-        <div style={sx('display:flex; align-items:center; gap:22px;')}>
-          <div style={sx('font-size:13px; color:#8A8074; letter-spacing:0.3px;')}>{t.brand.tagline}</div>
-          <div
-            onClick={toggleLang}
-            style={sx(
-              'cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 16px; border:1px solid #D8C79E; border-radius:999px; font-size:13px; font-weight:600; letter-spacing:0.5px;',
-            )}
-          >
-            <span style={ptStyle}>PT</span>
-            <span style={sx('color:#D8C79E;')}>/</span>
-            <span style={enStyle}>EN</span>
-          </div>
-        </div>
-      </div>
+    <AppFrame>
+      {nav.tab === 'hoje' && !nav.detail && (
+        <HomeScreen
+          t={t}
+          goalPercentLabel={goalPercentLabel}
+          goalRemainingLabel={goalRemainingLabel}
+          hojeQuickActions={hojeQuickActions}
+          readyResponsesOpen={readyResponsesOpen}
+          readyResponsesToggleLabel={readyResponsesToggleLabel}
+          readyResponsesWithCopy={readyResponsesWithCopy}
+          toggleReadyResponses={toggleReadyResponses}
+          goToContentSuggestion={goToContentSuggestion}
+        />
+      )}
 
-      {/* HERO */}
-      <div style={sx('padding:72px 48px 56px; max-width:900px;')}>
-        <div style={sx('font-size:13px; letter-spacing:3px; text-transform:uppercase; color:#B98D3E; font-weight:700; margin-bottom:18px;')}>{t.hero.kicker}</div>
-        <div style={sx("font-family:'Cormorant Garamond',serif; font-size:56px; line-height:1.08; font-weight:600; color:#201C17; margin-bottom:22px;")}>
-          {t.hero.title}
-        </div>
-        <div style={sx('font-size:18px; line-height:1.6; color:#6B6459; max-width:640px;')}>{t.hero.subtitle}</div>
-      </div>
+      {nav.tab === 'agenda' && !nav.detail && <AgendaScreen t={t} agendaAppointments={agendaAppointments} onOpenSetup={() => nav.openDetail('agendaSetup')} />}
+      {nav.tab === 'agenda' && nav.detail === 'agendaSetup' && (
+        <AgendaSetupScreen t={t} onBack={nav.goBack} onOpenPublicPage={() => setShowPublicPreview(true)} />
+      )}
 
-      <Onboarding t={t} />
+      {nav.tab === 'crm' && !nav.detail && (
+        <CrmListScreen
+          t={t}
+          crmStages={crmStages}
+          crmClientsWithAttendance={crmClientsWithAttendance}
+          attendanceCountLabel={attendanceCountLabel}
+          conversionLabelValue={conversionLabelValue}
+          attendanceLabels={{ yes: lang === 'pt' ? 'Compareceu' : 'Attended', no: lang === 'pt' ? 'Não compareceu' : 'No-show' }}
+          onOpenProfile={(name) => {
+            setSelectedClientName(name);
+            nav.openDetail('crmProfile');
+          }}
+        />
+      )}
+      {nav.tab === 'crm' && nav.detail === 'crmProfile' && <CrmProfileScreen t={t} client={selectedClient} onBack={nav.goBack} />}
 
-      <Today
-        t={t}
-        goalPercentLabel={goalPercentLabel}
-        goalRemainingLabel={goalRemainingLabel}
-        hojeQuickActions={hojeQuickActions}
-        readyResponsesOpen={readyResponsesOpen}
-        readyResponsesToggleLabel={readyResponsesToggleLabel}
-        readyResponsesWithCopy={readyResponsesWithCopy}
-        toggleReadyResponses={toggleReadyResponses}
-        goToContentSuggestion={goToContentSuggestion}
-      />
+      {nav.tab === 'financeiro' && !nav.detail && <FinanceScreen t={t} />}
 
-      <ClientMachine t={t} lang={lang} contentPresetObjective={contentPresetObjective} />
+      {nav.tab === 'mais' && !nav.detail && <MoreMenuScreen t={t} lang={lang} onToggleLang={toggleLang} onOpen={nav.openDetail} />}
+      {nav.tab === 'mais' && nav.detail === 'clientMachine' && (
+        <ClientMachineScreen t={t} lang={lang} contentPresetObjective={contentPresetObjective} onExit={nav.goBack} />
+      )}
+      {nav.tab === 'mais' && nav.detail === 'inventory' && (
+        <InventoryScreen
+          t={t}
+          onBack={nav.goBack}
+          inventoryTotalInvested={inventoryTotalInvested}
+          inventoryProductCountLabel={inventoryProductCountLabel}
+          inventoryAlertsWithAction={inventoryAlertsWithAction}
+          inventoryHasLow={inventoryHasLow}
+          inventoryLowHeadline={inventoryLowHeadline}
+          inventoryLowProducts={inventoryLowProducts}
+          inventoryConsumptionList={inventoryConsumptionList}
+          inventoryAllProducts={inventoryAllProducts}
+          addFormOpen={estoqueAddFormOpen}
+          addFormToggleLabel={estoqueAddFormOpen ? t.inventory.collapseCta : t.inventory.expandCta}
+          addFormName={estoqueAddFormName}
+          addFormQty={estoqueAddFormQty}
+          addFormValue={estoqueAddFormValue}
+          toggleAddForm={toggleAddForm}
+          onAddFormNameChange={onAddFormNameChange}
+          onAddFormQtyChange={onAddFormQtyChange}
+          onAddFormValueChange={onAddFormValueChange}
+          onAddFormSubmit={onAddFormSubmit}
+        />
+      )}
+      {nav.tab === 'mais' && nav.detail === 'relatorios' && <ReportsScreen t={t} onBack={nav.goBack} />}
+      {nav.tab === 'mais' && nav.detail === 'ia' && <AiAssistantScreen t={t} onBack={nav.goBack} />}
+      {nav.tab === 'mais' && nav.detail === 'config' && <SettingsScreen t={t} lang={lang} onToggleLang={toggleLang} onBack={nav.goBack} />}
 
-      <Crm
-        t={t}
-        crmStages={crmStages}
-        crmClientsWithAttendance={crmClientsWithAttendance}
-        attendanceCountLabel={attendanceCountLabel}
-        conversionLabelValue={conversionLabelValue}
-        attendanceLabels={{ yes: lang === 'pt' ? 'Compareceu' : 'Attended', no: lang === 'pt' ? 'Não compareceu' : 'No-show' }}
-      />
+      <BottomNav active={nav.tab} t={t} onSelect={nav.goTab} />
 
-      <AgendaSetup t={t} />
-
-      <PublicPage t={t} publicServices={publicServices} publicCtaLabel={publicCtaLabel} />
-
-      <Agenda t={t} agendaAppointments={agendaAppointments} />
-
-      <Financeiro t={t} />
-
-      <Inventory
-        t={t}
-        inventoryTotalInvested={inventoryTotalInvested}
-        inventoryProductCountLabel={inventoryProductCountLabel}
-        inventoryAlertsWithAction={inventoryAlertsWithAction}
-        inventoryHasLow={inventoryHasLow}
-        inventoryLowHeadline={inventoryLowHeadline}
-        inventoryLowProducts={inventoryLowProducts}
-        inventoryConsumptionList={inventoryConsumptionList}
-        inventoryAllProducts={inventoryAllProducts}
-        addFormOpen={estoqueAddFormOpen}
-        addFormToggleLabel={estoqueAddFormOpen ? t.inventory.collapseCta : t.inventory.expandCta}
-        addFormName={estoqueAddFormName}
-        addFormQty={estoqueAddFormQty}
-        addFormValue={estoqueAddFormValue}
-        toggleAddForm={toggleAddForm}
-        onAddFormNameChange={onAddFormNameChange}
-        onAddFormQtyChange={onAddFormQtyChange}
-        onAddFormValueChange={onAddFormValueChange}
-        onAddFormSubmit={onAddFormSubmit}
-      />
-
-      <Relatorios t={t} />
-
-      <Ia t={t} />
-
-      <Config t={t} />
-    </div>
+      {showPublicPreview && (
+        <PublicPageScreen t={t} publicServices={publicServices} publicCtaLabel={publicCtaLabel} onClose={() => setShowPublicPreview(false)} />
+      )}
+    </AppFrame>
   );
 }
