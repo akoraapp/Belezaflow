@@ -135,6 +135,7 @@ export function PublicPageScreen({
                   <div
                     key={svc.id}
                     onClick={() => setServiceId(svc.id)}
+                    data-testid={`booking-service-${svc.id}`}
                     style={{
                       ...sx('cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-radius:14px;'),
                       border: `1.5px solid ${active ? '#B98D3E' : '#EBE2CF'}`,
