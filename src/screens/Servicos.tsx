@@ -1,0 +1,65 @@
+import { Plus, X } from 'lucide-react';
+import { T, CURRENCIES } from '../theme';
+import { BackHeader, MiniField } from '../components/primitives';
+import type { CurrencyCode, ServiceItem } from '../types';
+
+interface ServicosScreenProps {
+  services: ServiceItem[];
+  setServices: (updater: (prev: ServiceItem[]) => ServiceItem[]) => void;
+  currency: CurrencyCode;
+  onBack: () => void;
+}
+
+export function ServicosScreen({ services, setServices, currency, onBack }: ServicosScreenProps) {
+  const updateService = (id: string, field: 'name' | 'price' | 'duration', val: string | number) =>
+    setServices((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: val } : s)));
+  const removeService = (id: string) => setServices((prev) => prev.filter((s) => s.id !== id));
+  const addService = () => setServices((prev) => [...prev, { id: `s${Date.now()}`, name: 'Novo serviço', price: 0, duration: 0 }]);
+
+  return (
+    <div style={{ padding: '22px 20px 100px' }}>
+      <BackHeader title="Serviços e valores" onBack={onBack} />
+      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 16 }}>
+        Esses serviços e valores aparecem na sua Agenda, no Financeiro e na sua página pública de agendamento.
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {services.map((s) => (
+          <div key={s.id} style={{ border: `1px solid ${T.line}`, borderRadius: 14, padding: 12, background: T.surface }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <input
+                value={s.name}
+                onChange={(e) => updateService(s.id, 'name', e.target.value)}
+                style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontWeight: 700, fontSize: 14, color: T.ink, outline: 'none', width: '70%' }}
+              />
+              <X size={16} color={T.muted} style={{ cursor: 'pointer' }} onClick={() => removeService(s.id)} />
+            </div>
+            <div style={{ display: 'flex', gap: 14, marginTop: 8 }}>
+              <MiniField label={`Valor (${CURRENCIES[currency].symbol})`} value={s.price} onChange={(v) => updateService(s.id, 'price', v)} />
+              <MiniField label="Duração (min)" value={s.duration} onChange={(v) => updateService(s.id, 'duration', v)} />
+            </div>
+          </div>
+        ))}
+        <button
+          onClick={addService}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            justifyContent: 'center',
+            padding: 12,
+            border: `1.5px dashed ${T.gold}`,
+            borderRadius: 14,
+            background: 'transparent',
+            color: T.goldDeep,
+            fontFamily: 'Manrope',
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: 'pointer',
+          }}
+        >
+          <Plus size={15} /> Adicionar serviço
+        </button>
+      </div>
+    </div>
+  );
+}
