@@ -1,7 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Check, ChevronLeft, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, STATUS_COLOR } from '../theme';
+import { STATUS_LABEL } from '../i18n';
 import { fmtMoney } from '../lib/helpers';
+import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, ServiceItem } from '../types';
 
 export function GoalRing({ progress, size = 120, stroke = 10, center }: { progress: number; size?: number; stroke?: number; center?: string }) {
@@ -208,11 +210,11 @@ export function Row({ label, value, last }: { label: string; value: string; last
   );
 }
 
-export function StatBox({ label, value, accent }: { label: string; value: string; accent?: string }) {
+export function StatBox({ label, value, accent, testId }: { label: string; value: string; accent?: string; testId?: string }) {
   return (
-    <Card style={{ flex: 1, padding: 12 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted }}>{label}</div>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15, color: accent || T.ink, marginTop: 3 }}>{value}</div>
+    <Card testId={testId} style={{ flex: 1, padding: 14 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>{label}</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 22, fontWeight: 600, color: accent || T.ink, marginTop: 6 }}>{value}</div>
     </Card>
   );
 }
@@ -326,6 +328,7 @@ export function MiniField({ label, value, onChange }: { label: string; value: nu
 }
 
 export function AppointmentRow({ a, currency, testId }: { a: Appointment; currency: CurrencyCode; testId?: string }) {
+  const { lang } = useLang();
   return (
     <Card testId={testId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -346,7 +349,7 @@ export function AppointmentRow({ a, currency, testId }: { a: Appointment; curren
           {fmtMoney(a.price, currency)}
         </div>
         <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: STATUS_COLOR[a.status] || T.muted }}>
-          {a.status}
+          {STATUS_LABEL[lang][a.status] || a.status}
           {a.origin === 'online' ? ' · Online' : ''}
         </div>
       </div>

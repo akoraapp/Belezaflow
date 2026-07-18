@@ -19,6 +19,10 @@ export function todayIsBirthday(dateStr?: string) {
   return Number(m[1]) === now.getDate() && Number(m[2]) === now.getMonth() + 1;
 }
 
+export function format(template: string, vars: Record<string, string | number>) {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? ''));
+}
+
 export function fmtMoney(value: number, currency: CurrencyCode) {
   const c = CURRENCIES[currency] || CURRENCIES.BRL;
   try {
@@ -28,4 +32,8 @@ export function fmtMoney(value: number, currency: CurrencyCode) {
   } catch {
     return String(value || 0);
   }
+}
+
+export function fmtCurrency(value: number, currency: CurrencyCode) {
+  return `${CURRENCIES[currency].symbol} ${fmtMoney(value, currency)}`;
 }

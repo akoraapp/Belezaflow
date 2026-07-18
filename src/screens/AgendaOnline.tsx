@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react';
-import { T, ALL_SLOTS, PROFESSIONS } from '../theme';
+import { T, ALL_SLOTS } from '../theme';
+import { PROFESSION_LABEL } from '../i18n';
 import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, Chip, TextInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
+import { useLang } from '../lib/LangContext';
 import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
+
+const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 interface AgendaOnlineScreenProps {
   profile: Profile;
@@ -18,6 +22,7 @@ interface AgendaOnlineScreenProps {
 }
 
 export function AgendaOnlineScreen({ profile, services, appointments, currency, onUpdateProfile, addAppointment, addClient, onOpenServicos, embedded }: AgendaOnlineScreenProps) {
+  const { t, lang } = useLang();
   const [copied, setCopied] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
@@ -26,7 +31,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
   const [confirmed, setConfirmed] = useState(false);
 
   const slug = (profile.publicName || 'seunegocio').toLowerCase().replace(/[^a-z0-9]+/g, '');
-  const link = `beautyflow.app/agendar/${slug}`;
+  const link = `beautyflow.app/${slug}`;
 
   const { workingDays, chosenSlots, availableSlots } = getAvailability(profile, appointments);
 
@@ -34,8 +39,8 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
     const next = workingDays.includes(d) ? workingDays.filter((x) => x !== d) : [...workingDays, d];
     onUpdateProfile({ workingDays: next });
   };
-  const toggleSlot = (t: string) => {
-    const next = chosenSlots.includes(t) ? chosenSlots.filter((x) => x !== t) : [...chosenSlots, t].sort();
+  const toggleSlot = (tm: string) => {
+    const next = chosenSlots.includes(tm) ? chosenSlots.filter((x) => x !== tm) : [...chosenSlots, tm].sort();
     onUpdateProfile({ availableSlots: next });
   };
 
@@ -68,93 +73,90 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>Agenda Online</div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>Este link é único e pessoal — gerado a partir do seu nome público.</div>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>{t.agendaOnline.subtitle}</div>
         </>
       )}
 
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>Seu link público</div>
+        <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>{t.agendaOnline.publicLinkLabel}</div>
         <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12 }}>{link}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <IconButton
             icon={Copy}
-            label={copied ? 'Copiado!' : 'Copiar'}
+            label={copied ? t.agendaOnline.copiedLabel : t.agendaOnline.copyLabel}
             onClick={() => {
               setCopied(true);
               setTimeout(() => setCopied(false), 1500);
             }}
           />
-          <IconButton icon={Share2} label="Compartilhar" />
-          <IconButton icon={QrCode} label="QR Code" />
+          <IconButton icon={Share2} label={t.agendaOnline.shareLabel} />
+          <IconButton icon={QrCode} label={t.agendaOnline.qrLabel} />
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Informações do perfil público</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.publicInfoTitle}</div>
       <Card style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <FieldLabel>Instagram</FieldLabel>
-          <TextInput value={profile.instagram || ''} onChange={(v) => onUpdateProfile({ instagram: v })} placeholder="@seuinstagram" />
+          <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
+          <TextInput value={profile.instagram || ''} onChange={(v) => onUpdateProfile({ instagram: v })} placeholder={t.agendaOnline.instagramPlaceholder} />
         </div>
         <div>
-          <FieldLabel>Telefone / WhatsApp</FieldLabel>
-          <TextInput value={profile.whatsapp || ''} onChange={(v) => onUpdateProfile({ whatsapp: v })} placeholder="(11) 90000-0000" />
+          <FieldLabel>{t.agendaOnline.phoneLabel}</FieldLabel>
+          <TextInput value={profile.whatsapp || ''} onChange={(v) => onUpdateProfile({ whatsapp: v })} placeholder={t.agendaOnline.phonePlaceholder} />
         </div>
         <div>
-          <FieldLabel>Nome do local</FieldLabel>
-          <TextInput value={profile.endereco || ''} onChange={(v) => onUpdateProfile({ endereco: v })} placeholder="Rua Exemplo, 123 — São Paulo, SP" />
+          <FieldLabel>{t.agendaOnline.localNameLabel}</FieldLabel>
+          <TextInput value={profile.endereco || ''} onChange={(v) => onUpdateProfile({ endereco: v })} placeholder={t.agendaOnline.localPlaceholder} />
         </div>
         <div>
-          <FieldLabel>Link do Google Maps</FieldLabel>
-          <TextInput value={profile.mapsLink || ''} onChange={(v) => onUpdateProfile({ mapsLink: v })} placeholder="https://maps.app.goo.gl/..." />
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 4 }}>O nome aparece na página; o link é usado no botão "Como chegar".</div>
+          <FieldLabel>{t.agendaOnline.mapsLinkLabel}</FieldLabel>
+          <TextInput value={profile.mapsLink || ''} onChange={(v) => onUpdateProfile({ mapsLink: v })} placeholder={t.agendaOnline.mapsPlaceholder} />
+          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 4 }}>{t.agendaOnline.mapsHint}</div>
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Meus horários disponíveis</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.slotsTitle}</div>
+      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.agendaOnline.slotsSubtitle}</div>
       <Card style={{ marginBottom: 20 }}>
-        <FieldLabel>Dias de atendimento</FieldLabel>
+        <FieldLabel>{t.agendaOnline.workingDaysLabel}</FieldLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-          {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((d) => (
+          {WEEKDAYS.map((d) => (
             <Chip key={d} active={workingDays.includes(d)} onClick={() => toggleDay(d)}>
               {d}
             </Chip>
           ))}
         </div>
-        <FieldLabel>Horários que ficam abertos para agendamento</FieldLabel>
+        <FieldLabel>{t.agendaOnline.openSlotsLabel}</FieldLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {ALL_SLOTS.map((t) => (
-            <Chip key={t} active={chosenSlots.includes(t)} onClick={() => toggleSlot(t)}>
-              {t}
+          {ALL_SLOTS.map((tm) => (
+            <Chip key={tm} active={chosenSlots.includes(tm)} onClick={() => toggleSlot(tm)}>
+              {tm}
             </Chip>
           ))}
         </div>
-        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 10 }}>
-          Só os dias e horários marcados aqui aparecem para a cliente agendar — tanto na sua Agenda quanto nesta página pública.
-        </div>
+        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 10 }}>{t.agendaOnline.slotsHint}</div>
       </Card>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink }}>Serviços exibidos na página</div>
+        <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
         <button onClick={onOpenServicos} style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-          Editar serviços
+          {t.agendaOnline.editServicesCta}
         </button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-        {services.length === 0 && <EmptyHint text="Nenhum serviço cadastrado. Toque em “Editar serviços” para adicionar." />}
+        {services.length === 0 && <EmptyHint text={t.agendaOnline.noServicesShort} />}
         {services.map((s) => (
           <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 12, background: T.surfaceAlt }}>
             <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 600, color: T.ink }}>
               {s.name} · {s.duration}min
             </span>
-            <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 700, color: T.goldDeep }}>
-              {fmtMoney(s.price, currency)}
-            </span>
+            <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 700, color: T.goldDeep }}>{fmtMoney(s.price, currency)}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Pré-visualização — como a cliente agenda</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
       <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${T.line}`, boxShadow: '0 18px 40px -20px rgba(27,23,18,0.25)' }}>
         <div
           style={{
@@ -193,9 +195,9 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
           >
             {(profile.publicName || 'S').charAt(0)}
           </div>
-          <div style={{ position: 'relative', fontFamily: 'Fraunces', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || 'Studio Glow'}</div>
+          <div style={{ position: 'relative', fontFamily: 'Fraunces', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
           <div style={{ position: 'relative', fontFamily: 'Manrope', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
-            {PROFESSIONS.find((p) => p.id === profile.profession)?.label}
+            {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
           <div style={{ position: 'relative', width: 28, height: 1.5, background: T.gold, margin: '12px auto 14px', opacity: 0.7 }} />
           <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -261,11 +263,11 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                   textDecoration: 'none',
                 }}
               >
-                <MapPin size={12} /> Como chegar
+                <MapPin size={12} /> {t.agendaOnline.howToGet}
               </a>
             )}
             {!profile.instagram && !profile.whatsapp && !profile.endereco && (
-              <span style={{ fontFamily: 'Manrope', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Preencha suas informações acima para exibi-las aqui.</span>
+              <span style={{ fontFamily: 'Manrope', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{t.agendaOnline.fillInfoHint}</span>
             )}
           </div>
         </div>
@@ -276,26 +278,26 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Check size={24} color={T.goldDeep} />
               </div>
-              <div style={{ fontFamily: 'Fraunces', fontSize: 17, color: T.ink }}>Agendamento confirmado!</div>
-              <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: 3 }}>Já apareceu na sua Agenda e no Financeiro.</div>
+              <div style={{ fontFamily: 'Fraunces', fontSize: 17, color: T.ink }}>{t.agendaOnline.confirmedTitle}</div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: 3 }}>{t.agendaOnline.confirmedSubtitle}</div>
             </div>
           ) : (
             <>
-              <StepLabel n={1}>Escolha o serviço</StepLabel>
+              <StepLabel n={1}>{t.agendaOnline.step1}</StepLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                {services.length === 0 && <EmptyHint text="Nenhum serviço cadastrado ainda." />}
+                {services.length === 0 && <EmptyHint text={t.agendaOnline.noServicesYet} />}
                 {services.map((s) => (
                   <ServiceOption key={s.id} s={s} active={bookService?.id === s.id} currency={currency} onClick={() => setBookService(s)} />
                 ))}
               </div>
 
-              <StepLabel n={2}>Escolha o horário</StepLabel>
+              <StepLabel n={2}>{t.agendaOnline.step2}</StepLabel>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>Sem horários livres hoje.</span>}
-                {availableSlots.map((t) => (
+                {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agendaOnline.noSlotsFree}</span>}
+                {availableSlots.map((tm) => (
                   <button
-                    key={t}
-                    onClick={() => setBookTime(t)}
+                    key={tm}
+                    onClick={() => setBookTime(tm)}
                     style={{
                       padding: '10px 16px',
                       borderRadius: 12,
@@ -303,20 +305,20 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                       fontSize: 13.5,
                       fontWeight: 600,
                       cursor: 'pointer',
-                      border: `1.5px solid ${bookTime === t ? T.gold : T.line}`,
-                      background: bookTime === t ? `linear-gradient(135deg, #D9BA6D, #8A6D2F)` : T.surface,
-                      color: bookTime === t ? '#fff' : T.ink,
+                      border: `1.5px solid ${bookTime === tm ? T.gold : T.line}`,
+                      background: bookTime === tm ? `linear-gradient(135deg, #D9BA6D, #8A6D2F)` : T.surface,
+                      color: bookTime === tm ? '#fff' : T.ink,
                     }}
                   >
-                    {t}
+                    {tm}
                   </button>
                 ))}
               </div>
 
-              <StepLabel n={3}>Seus dados</StepLabel>
+              <StepLabel n={3}>{t.agendaOnline.step3}</StepLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
-                <TextInput value={bookName} onChange={setBookName} placeholder="Nome" />
-                <TextInput value={bookPhone} onChange={setBookPhone} placeholder="WhatsApp ou telefone para contato" />
+                <TextInput value={bookName} onChange={setBookName} placeholder={t.agendaOnline.namePlaceholder} />
+                <TextInput value={bookPhone} onChange={setBookPhone} placeholder={t.agendaOnline.phoneContactPlaceholder} />
               </div>
 
               {bookService && (
@@ -333,9 +335,9 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               )}
 
               <PrimaryButton full onClick={confirmBooking} disabled={!bookService || !bookTime || !bookName || !bookPhone}>
-                Confirmar agendamento
+                {t.agendaOnline.confirmApptCta}
               </PrimaryButton>
-              <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 10, color: T.muted, marginTop: 14, letterSpacing: 0.3 }}>Agendamento seguro · BeautyFlow AI</div>
+              <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 10, color: T.muted, marginTop: 14, letterSpacing: 0.3 }}>{t.agendaOnline.secureBookingFooter}</div>
             </>
           )}
         </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { T } from '../theme';
 import { AgendaScreen } from './Agenda';
 import { AgendaOnlineScreen } from './AgendaOnline';
+import { useLang } from '../lib/LangContext';
 import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
 
 interface AgendaTabProps {
@@ -18,17 +19,18 @@ interface AgendaTabProps {
 type SubTab = 'interna' | 'online';
 
 export function AgendaTab({ appointments, services, profile, currency, addAppointment, onUpdateProfile, addClient, onOpenServicos }: AgendaTabProps) {
+  const { t } = useLang();
   const [subTab, setSubTab] = useState<SubTab>('interna');
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 14 }}>Agenda</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 14 }}>{t.agenda.title}</div>
 
       <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4, marginBottom: 18 }}>
         {(
           [
-            { id: 'interna' as const, label: 'Agenda' },
-            { id: 'online' as const, label: 'Agenda Online' },
+            { id: 'interna' as const, label: t.agenda.subtabInterna },
+            { id: 'online' as const, label: t.agenda.subtabOnline },
           ]
         ).map((v) => (
           <button

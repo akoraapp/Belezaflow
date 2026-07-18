@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
+import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
 import { Card, Chip, TextInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
-import type { Client, ContactMethod } from '../types';
+import { useLang } from '../lib/LangContext';
+import type { Client, ContactMethod, ServiceItem } from '../types';
 
 interface ClientesScreenProps {
   clients: Client[];
+  services: ServiceItem[];
   contactMethod: ContactMethod;
   addClient: (c: Omit<Client, 'id'>) => void;
   updateClient: (id: string, patch: Partial<Client>) => void;
+  initialFilter?: string;
 }
 
-export function ClientesScreen({ clients, contactMethod, addClient, updateClient }: ClientesScreenProps) {
-  const [filter, setFilter] = useState('Todos');
+export function ClientesScreen({ clients, services, contactMethod, addClient, updateClient, initialFilter }: ClientesScreenProps) {
+  const { t, lang } = useLang();
+  const [filter, setFilter] = useState(initialFilter ?? 'Todos');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
@@ -49,7 +54,7 @@ export function ClientesScreen({ clients, contactMethod, addClient, updateClient
   return (
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>Clientes</div>
+        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="clientes-add-toggle"
@@ -69,29 +74,42 @@ export function ClientesScreen({ clients, contactMethod, addClient, updateClient
             boxShadow: '0 6px 16px -6px rgba(138,109,47,0.55)',
           }}
         >
-          <Plus size={15} /> Nova cliente
+          <Plus size={15} /> {t.clientes.newClientCta}
         </button>
       </div>
 
       {showAdd && (
         <Card style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>Nova cliente</div>
+          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.clientes.newClientFormTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <TextInput value={name} onChange={setName} placeholder="Nome" testId="clientes-name" />
-            <TextInput value={phone} onChange={setPhone} placeholder="Telefone" />
-            <TextInput value={service} onChange={setService} placeholder="Serviço de interesse" />
-            <TextInput value={birthday} onChange={setBirthday} placeholder="Aniversário — ex: 15/03" />
+            <TextInput value={name} onChange={setName} placeholder={t.clientes.namePlaceholder} testId="clientes-name" />
+            <TextInput value={phone} onChange={setPhone} placeholder={t.clientes.phonePlaceholder} />
+            <TextInput value={birthday} onChange={setBirthday} placeholder={t.clientes.birthdayPlaceholder} />
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>Origem:</div>
+
+          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.serviceLabel}</div>
+          {services.length === 0 ? (
+            <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 4 }}>{t.clientes.noServicesToSelect}</div>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+              {services.map((s) => (
+                <Chip key={s.id} active={service === s.name} onClick={() => setService(s.name)} testId={`clientes-service-${s.id}`}>
+                  {s.name}
+                </Chip>
+              ))}
+            </div>
+          )}
+
+          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.originLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             {ORIGENS.map((o) => (
               <Chip key={o} active={origem === o} onClick={() => setOrigem(o)}>
-                {o}
+                {ORIGEM_LABEL[lang][o]}
               </Chip>
             ))}
           </div>
           <PrimaryButton full onClick={submit} disabled={!name} testId="clientes-add-submit">
-            Adicionar cliente
+            {t.clientes.addClientCta}
           </PrimaryButton>
         </Card>
       )}
@@ -99,14 +117,14 @@ export function ClientesScreen({ clients, contactMethod, addClient, updateClient
       <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
         {['Todos', ...STATUS_LIST].map((s) => (
           <Chip key={s} active={filter === s} onClick={() => setFilter(s)}>
-            {s}
+            {s === 'Todos' ? t.clientes.filterAll : STATUS_LABEL[lang][s]}
           </Chip>
         ))}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {filtered.length === 0 && <EmptyHint text="Nenhuma cliente nesse filtro ainda." />}
+        {filtered.length === 0 && <EmptyHint text={t.clientes.noClientsInFilter} />}
         {filtered.map((c) => (
-          <Card key={c.id} onClick={() => setSelectedId(c.id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+          <Card key={c.id} onClick={() => setSelectedId(c.id)} testId={`cliente-row-${c.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div
                 style={{
@@ -127,12 +145,12 @@ export function ClientesScreen({ clients, contactMethod, addClient, updateClient
               <div>
                 <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{c.name}</div>
                 <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted }}>
-                  {c.origem} · {c.service}
+                  {ORIGEM_LABEL[lang][c.origem] || c.origem} · {c.service}
                 </div>
               </div>
             </div>
             <div style={{ fontFamily: 'Manrope', fontSize: 10.5, fontWeight: 700, color: STATUS_COLOR[c.status], padding: '3px 9px', borderRadius: 999, background: T.surfaceAlt }}>
-              {c.status}
+              {STATUS_LABEL[lang][c.status] || c.status}
             </div>
           </Card>
         ))}
@@ -154,15 +172,35 @@ function ClienteDetail({
   onChangeStatus: (status: string) => void;
   onChangeBirthday: (bday: string) => void;
 }) {
+  const { t, lang } = useLang();
   const [msgType, setMsgType] = useState<string | null>(null);
   const [bdayInput, setBdayInput] = useState(client.birthday === '—' ? '' : client.birthday || '');
-  const templates: Record<string, string> = {
-    'Primeiro contato': `Olá ${client.name}! 😊 Vi seu interesse em ${client.service}. Posso te ajudar a encontrar o melhor horário?`,
-    'Follow-up': `Oi ${client.name}, tudo bem? Ainda está pensando em agendar seu ${client.service}? Tenho horários abrindo essa semana!`,
-    'Quebra de objeção': `Entendo, ${client.name}! Se for sobre o valor, posso te mostrar as formas de pagamento que temos disponíveis 💛`,
-    Fechamento: `${client.name}, consigo te encaixar para o ${client.service} — vamos confirmar seu horário?`,
-    Reativação: `Saudades por aqui, ${client.name}! Que tal renovar seu ${client.service}? Tenho uma condição especial essa semana.`,
+
+  const templateBodies: Record<string, Record<string, string>> = {
+    pt: {
+      primeiroContato: `Olá ${client.name}! 😊 Vi seu interesse em ${client.service}. Posso te ajudar a encontrar o melhor horário?`,
+      followUp: `Oi ${client.name}, tudo bem? Ainda está pensando em agendar seu ${client.service}? Tenho horários abrindo essa semana!`,
+      quebraObjecao: `Entendo, ${client.name}! Se for sobre o valor, posso te mostrar as formas de pagamento que temos disponíveis 💛`,
+      fechamento: `${client.name}, consigo te encaixar para o ${client.service} — vamos confirmar seu horário?`,
+      reativacao: `Saudades por aqui, ${client.name}! Que tal renovar seu ${client.service}? Tenho uma condição especial essa semana.`,
+    },
+    en: {
+      primeiroContato: `Hi ${client.name}! 😊 I saw you're interested in ${client.service}. Can I help you find the best time?`,
+      followUp: `Hi ${client.name}, how are you? Still thinking about booking your ${client.service}? I have openings this week!`,
+      quebraObjecao: `I understand, ${client.name}! If it's about the price, I can show you the payment options we have 💛`,
+      fechamento: `${client.name}, I can fit you in for your ${client.service} — shall we confirm your time?`,
+      reativacao: `Missed you here, ${client.name}! How about renewing your ${client.service}? I have a special offer this week.`,
+    },
+    es: {
+      primeiroContato: `¡Hola ${client.name}! 😊 Vi tu interés en ${client.service}. ¿Te ayudo a encontrar el mejor horario?`,
+      followUp: `Hola ${client.name}, ¿todo bien? ¿Aún estás pensando en agendar tu ${client.service}? ¡Tengo horarios disponibles esta semana!`,
+      quebraObjecao: `Entiendo, ${client.name}! Si es por el precio, puedo mostrarte las formas de pago que tenemos disponibles 💛`,
+      fechamento: `${client.name}, puedo agendarte para tu ${client.service} — ¿confirmamos tu horario?`,
+      reativacao: `¡Te extrañamos por aquí, ${client.name}! ¿Qué tal renovar tu ${client.service}? Tengo una condición especial esta semana.`,
+    },
   };
+
+  const templateKeys = ['primeiroContato', 'followUp', 'quebraObjecao', 'fechamento', 'reativacao'] as const;
   const methodLabel = contactMethod === 'sms' ? 'SMS' : 'WhatsApp';
   const MethodIcon = contactMethod === 'sms' ? MessageSquare : MessageCircle;
 
@@ -184,7 +222,7 @@ function ClienteDetail({
           padding: 0,
         }}
       >
-        <ChevronLeft size={16} /> Clientes
+        <ChevronLeft size={16} /> {t.clientes.backToClientes}
       </button>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
         <div
@@ -211,15 +249,15 @@ function ClienteDetail({
       </div>
 
       <Card style={{ marginBottom: 14 }}>
-        <Row label="Origem" value={client.origem} />
-        <Row label="Serviço de interesse" value={client.service} />
+        <Row label={t.clientes.originRowLabel} value={ORIGEM_LABEL[lang][client.origem] || client.origem} />
+        <Row label={t.clientes.serviceRowLabel} value={client.service} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
-          <span style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>Aniversário</span>
+          <span style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
           <input
             value={bdayInput}
             onChange={(e) => setBdayInput(e.target.value)}
             onBlur={() => onChangeBirthday(bdayInput || '—')}
-            placeholder="dd/mm"
+            placeholder={t.clientes.birthdayInputPlaceholder}
             style={{
               border: 'none',
               borderBottom: `1px solid ${T.line}`,
@@ -236,29 +274,29 @@ function ClienteDetail({
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Status da cliente</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.clientStatusTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
         {STATUS_LIST.map((s) => (
           <Chip key={s} active={client.status === s} onClick={() => onChangeStatus(s)}>
-            {s}
+            {STATUS_LABEL[lang][s]}
           </Chip>
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Gerar Mensagem IA</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.centralRespostasTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-        {Object.keys(templates).map((t) => (
-          <Chip key={t} active={msgType === t} onClick={() => setMsgType(t)}>
-            {t}
+        {templateKeys.map((k) => (
+          <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>
+            {t.clientes.msgTemplateLabels[k]}
           </Chip>
         ))}
       </div>
       {msgType && (
         <Card style={{ marginBottom: 14 }}>
-          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templates[msgType]}</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templateBodies[lang][msgType]}</div>
           <div style={{ marginTop: 12 }}>
             <PrimaryButton full icon={MethodIcon}>
-              Enviar via {methodLabel}
+              {t.clientes.sendViaPrefix} {methodLabel}
             </PrimaryButton>
           </div>
         </Card>

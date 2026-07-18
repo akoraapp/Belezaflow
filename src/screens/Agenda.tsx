@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { T } from '../theme';
 import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton } from '../components/primitives';
+import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, Profile, ServiceItem } from '../types';
 
 interface AgendaScreenProps {
@@ -15,6 +16,7 @@ interface AgendaScreenProps {
 }
 
 export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded }: AgendaScreenProps) {
+  const { t } = useLang();
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
   const [clientName, setClientName] = useState('');
@@ -44,13 +46,13 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>Agenda</div>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
         </div>
       )}
       <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 16 }}>
         {isWorkingToday
-          ? `${today.length} agendamento${today.length !== 1 ? 's' : ''} hoje · ${availableSlots.length} horário${availableSlots.length !== 1 ? 's' : ''} livre${availableSlots.length !== 1 ? 's' : ''}`
-          : 'Você marcou hoje como dia sem atendimento em Agenda Online.'}
+          ? `${today.length} ${t.agenda.apptsCountSuffix} · ${availableSlots.length} ${t.agenda.slotsCountSuffix}`
+          : t.agenda.notWorkingDayShort}
       </div>
 
       <div
@@ -74,17 +76,17 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         }}
       >
         <Plus size={17} />
-        Registrar atendimento
+        {t.agenda.addApptCta}
       </div>
 
       {showAdd && (
         <Card style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>Novo agendamento</div>
-          <TextInput value={clientName} onChange={setClientName} placeholder="Nome da cliente" testId="agenda-client-name" />
+          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.agenda.newApptFormTitle}</div>
+          <TextInput value={clientName} onChange={setClientName} placeholder={t.agenda.clientNamePlaceholder} testId="agenda-client-name" />
           <div style={{ height: 8 }} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>Selecione o serviço na lista cadastrada:</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.selectServiceLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-            {services.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>Nenhum serviço cadastrado ainda.</span>}
+            {services.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agenda.noServicesRegistered}</span>}
             {services.map((s) => (
               <Chip key={s.id} active={selService?.id === s.id} onClick={() => setSelService(s)}>
                 {s.name}
@@ -93,27 +95,27 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
           </div>
           {selService && (
             <div style={{ marginBottom: 12, fontFamily: 'Manrope', fontSize: 12, color: T.goldDeep }}>
-              Valor preenchido automaticamente: {fmtMoney(selService.price, currency)} · {selService.duration} min
+              {t.agenda.autoFilledValuePrefix} {fmtMoney(selService.price, currency)} · {selService.duration} min
             </div>
           )}
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>Horários disponíveis hoje:</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.availableTodayLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-            {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>Nenhum horário livre hoje.</span>}
-            {availableSlots.map((t) => (
-              <Chip key={t} active={time === t} onClick={() => setTime(t)}>
-                {t}
+            {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agenda.noSlotsToday}</span>}
+            {availableSlots.map((tm) => (
+              <Chip key={tm} active={time === tm} onClick={() => setTime(tm)}>
+                {tm}
               </Chip>
             ))}
           </div>
           <PrimaryButton full onClick={submit} disabled={!selService || !clientName || !time} testId="agenda-add-submit">
-            Confirmar
+            {t.agenda.confirmCta}
           </PrimaryButton>
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Hoje</div>
+      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.todayLabel}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {today.length === 0 && <EmptyHint text="Nenhum agendamento hoje." />}
+        {today.length === 0 && <EmptyHint text={t.agenda.noApptsToday} />}
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
           .map((a) => (
@@ -124,11 +126,11 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       {availableSlots.length > 0 && (
         <>
           <div style={{ height: 18 }} />
-          <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>Horários livres hoje</div>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.freeSlotsToday}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {availableSlots.map((t) => (
-              <div key={t} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>
-                {t}
+            {availableSlots.map((tm) => (
+              <div key={tm} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>
+                {tm}
               </div>
             ))}
           </div>

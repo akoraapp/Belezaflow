@@ -1,5 +1,6 @@
-import { Bot, Calendar, Grid3x3, Home, Megaphone, Users, type LucideIcon } from 'lucide-react';
+import { BarChart3, Calendar, Grid3x3, Home, Megaphone, Users, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
+import type { Dict } from '../i18n';
 
 export interface TabDef {
   id: string;
@@ -7,25 +8,30 @@ export interface TabDef {
   icon: LucideIcon;
 }
 
-export const TABS: TabDef[] = [
-  { id: 'hoje', label: 'Hoje', icon: Home },
-  { id: 'maquina', label: 'Conteúdo', icon: Megaphone },
-  { id: 'agenda', label: 'Agenda', icon: Calendar },
-  { id: 'clientes', label: 'Clientes', icon: Users },
-  { id: 'ia', label: 'IA', icon: Bot },
-];
+export function getTabs(t: Dict): TabDef[] {
+  return [
+    { id: 'hoje', label: t.nav.tabHoje, icon: Home },
+    { id: 'maquina', label: t.nav.tabConteudo, icon: Megaphone },
+    { id: 'agenda', label: t.nav.tabAgenda, icon: Calendar },
+    { id: 'clientes', label: t.nav.tabClientes, icon: Users },
+    { id: 'ia', label: t.nav.tabDiagnostico, icon: BarChart3 },
+  ];
+}
 
 export function BottomNav({
   active,
   onSelect,
   onMore,
   moreActive,
+  t,
 }: {
   active: string;
   onSelect: (id: string) => void;
   onMore: () => void;
   moreActive: boolean;
+  t: Dict;
 }) {
+  const tabs = getTabs(t);
   return (
     <div
       style={{
@@ -41,17 +47,17 @@ export function BottomNav({
         zIndex: 20,
       }}
     >
-      {TABS.map((t) => {
-        const isActive = active === t.id && !moreActive;
+      {tabs.map((tb) => {
+        const isActive = active === tb.id && !moreActive;
         return (
           <button
-            key={t.id}
-            onClick={() => onSelect(t.id)}
-            data-testid={`tab-${t.id}`}
+            key={tb.id}
+            onClick={() => onSelect(tb.id)}
+            data-testid={`tab-${tb.id}`}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}
           >
-            <t.icon size={19} color={isActive ? T.goldDeep : T.muted} strokeWidth={isActive ? 2.4 : 1.9} />
-            <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? T.goldDeep : T.muted }}>{t.label}</span>
+            <tb.icon size={19} color={isActive ? T.goldDeep : T.muted} strokeWidth={isActive ? 2.4 : 1.9} />
+            <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? T.goldDeep : T.muted }}>{tb.label}</span>
           </button>
         );
       })}
@@ -61,7 +67,7 @@ export function BottomNav({
         style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}
       >
         <Grid3x3 size={19} color={moreActive ? T.goldDeep : T.muted} strokeWidth={moreActive ? 2.4 : 1.9} />
-        <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: moreActive ? 700 : 500, color: moreActive ? T.goldDeep : T.muted }}>Mais</span>
+        <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: moreActive ? 700 : 500, color: moreActive ? T.goldDeep : T.muted }}>{t.nav.tabMais}</span>
       </button>
     </div>
   );

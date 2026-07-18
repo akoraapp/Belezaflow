@@ -34,77 +34,76 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyMeta> = {
 
 export interface Profession {
   id: string;
-  label: string;
   icon: LucideIcon;
 }
 
 export const PROFESSIONS: Profession[] = [
-  { id: 'lash', label: 'Lash Designer', icon: Eye },
-  { id: 'nail', label: 'Nail Designer', icon: Hand },
-  { id: 'brow', label: 'Designer de Sobrancelhas', icon: PenTool },
-  { id: 'aesthetician', label: 'Esteticista', icon: Droplet },
-  { id: 'hair', label: 'Cabeleireira', icon: Scissors },
-  { id: 'wax', label: 'Depiladora', icon: Flame },
-  { id: 'makeup', label: 'Maquiadora', icon: Palette },
-  { id: 'clinic', label: 'Clínica', icon: Stethoscope },
-  { id: 'salon', label: 'Salão de Beleza', icon: Store },
-  { id: 'other', label: 'Outro', icon: MoreHorizontal },
+  { id: 'lash', icon: Eye },
+  { id: 'nail', icon: Hand },
+  { id: 'brow', icon: PenTool },
+  { id: 'aesthetician', icon: Droplet },
+  { id: 'hair', icon: Scissors },
+  { id: 'wax', icon: Flame },
+  { id: 'makeup', icon: Palette },
+  { id: 'clinic', icon: Stethoscope },
+  { id: 'salon', icon: Store },
+  { id: 'other', icon: MoreHorizontal },
 ];
 
 interface SuggestedService {
-  name: string;
+  key: string;
   price: number;
   duration: number;
 }
 
 export const SUGGESTED_SERVICES: Record<string, SuggestedService[]> = {
   lash: [
-    { name: 'Clássica', price: 90, duration: 90 },
-    { name: 'Híbrida', price: 120, duration: 100 },
-    { name: 'Volume Russo', price: 160, duration: 120 },
-    { name: 'Mega Volume', price: 190, duration: 140 },
-    { name: 'Fox Eyes', price: 170, duration: 120 },
-    { name: 'Manutenção', price: 70, duration: 60 },
-    { name: 'Remoção', price: 30, duration: 30 },
+    { key: 'classica', price: 90, duration: 90 },
+    { key: 'hibrida', price: 120, duration: 100 },
+    { key: 'volumeRusso', price: 160, duration: 120 },
+    { key: 'megaVolume', price: 190, duration: 140 },
+    { key: 'foxEyes', price: 170, duration: 120 },
+    { key: 'manutencao', price: 70, duration: 60 },
+    { key: 'remocao', price: 30, duration: 30 },
   ],
   nail: [
-    { name: 'Esmaltação em Gel', price: 60, duration: 60 },
-    { name: 'Alongamento em Fibra', price: 130, duration: 120 },
-    { name: 'Blindagem', price: 70, duration: 70 },
-    { name: 'Manutenção', price: 55, duration: 60 },
+    { key: 'esmaltacaoGel', price: 60, duration: 60 },
+    { key: 'alongamentoFibra', price: 130, duration: 120 },
+    { key: 'blindagem', price: 70, duration: 70 },
+    { key: 'manutencaoUnhas', price: 55, duration: 60 },
   ],
   brow: [
-    { name: 'Design com Henna', price: 45, duration: 40 },
-    { name: 'Micropigmentação', price: 350, duration: 150 },
-    { name: 'Laminação', price: 90, duration: 60 },
+    { key: 'designHenna', price: 45, duration: 40 },
+    { key: 'micropigmentacao', price: 350, duration: 150 },
+    { key: 'laminacao', price: 90, duration: 60 },
   ],
   aesthetician: [
-    { name: 'Limpeza de Pele', price: 110, duration: 60 },
-    { name: 'Peeling', price: 150, duration: 50 },
-    { name: 'Massagem Modeladora', price: 130, duration: 60 },
+    { key: 'limpezaPele', price: 110, duration: 60 },
+    { key: 'peeling', price: 150, duration: 50 },
+    { key: 'massagemModeladora', price: 130, duration: 60 },
   ],
   hair: [
-    { name: 'Corte', price: 80, duration: 50 },
-    { name: 'Coloração', price: 220, duration: 150 },
-    { name: 'Escova', price: 70, duration: 45 },
+    { key: 'corte', price: 80, duration: 50 },
+    { key: 'coloracao', price: 220, duration: 150 },
+    { key: 'escova', price: 70, duration: 45 },
   ],
   wax: [
-    { name: 'Depilação Perna Completa', price: 60, duration: 40 },
-    { name: 'Depilação Buço', price: 15, duration: 10 },
+    { key: 'depilacaoPerna', price: 60, duration: 40 },
+    { key: 'depilacaoBuco', price: 15, duration: 10 },
   ],
   makeup: [
-    { name: 'Maquiagem Social', price: 150, duration: 60 },
-    { name: 'Maquiagem para Noiva', price: 400, duration: 120 },
+    { key: 'maquiagemSocial', price: 150, duration: 60 },
+    { key: 'maquiagemNoiva', price: 400, duration: 120 },
   ],
   clinic: [
-    { name: 'Consulta', price: 200, duration: 40 },
-    { name: 'Procedimento Estético', price: 500, duration: 90 },
+    { key: 'consulta', price: 200, duration: 40 },
+    { key: 'procedimentoEstetico', price: 500, duration: 90 },
   ],
   salon: [
-    { name: 'Corte', price: 80, duration: 50 },
-    { name: 'Manicure', price: 50, duration: 50 },
+    { key: 'corteSalao', price: 80, duration: 50 },
+    { key: 'manicure', price: 50, duration: 50 },
   ],
-  other: [{ name: 'Serviço Padrão', price: 100, duration: 60 }],
+  other: [{ key: 'servicoPadrao', price: 100, duration: 60 }],
 };
 
 export const ORIGENS = ['Instagram', 'WhatsApp', 'Google', 'TikTok', 'Facebook', 'Indicação'];
@@ -113,8 +112,10 @@ export const STATUS_COLOR: Record<string, string> = {
   'Novo Lead': T.gold,
   Conversando: '#B08D3F',
   Agendado: T.success,
+  Confirmado: T.success,
   Cliente: T.ink,
   Perdido: T.danger,
+  Cancelado: T.danger,
 };
 
 export const ALL_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];

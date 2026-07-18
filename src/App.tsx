@@ -1,23 +1,35 @@
 import { useState } from 'react';
 import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
-import { T, FONT_IMPORT } from './theme';
-import { TABS, BottomNav } from './components/BottomNav';
-import { MORE_ITEMS, MoreSheet } from './components/MoreSheet';
+import { T, FONT_IMPORT, ALL_SLOTS } from './theme';
+import { getTabs, BottomNav } from './components/BottomNav';
+import { getMoreItems, MoreSheet } from './components/MoreSheet';
+import { LangProvider, useLang } from './lib/LangContext';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { HojeScreen } from './screens/Hoje';
 import { AgendaTab } from './screens/AgendaTab';
 import { ClientesScreen } from './screens/Clientes';
 import { FinanceiroScreen } from './screens/Financeiro';
-import { IAScreen } from './screens/IA';
+import { DiagnosticoScreen } from './screens/Diagnostico';
 import { MaquinaScreen } from './screens/Maquina';
 import { ServicosScreen } from './screens/Servicos';
+import { EstoqueScreen } from './screens/Estoque';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
-import { ALL_SLOTS } from './theme';
-import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult, Profile, ServiceItem } from './types';
+import { getAvailability } from './lib/helpers';
+import { productStatus } from './screens/Estoque';
+import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult, Product, Profile, ServiceItem } from './types';
 
 export default function App() {
+  return (
+    <LangProvider initialLang="pt">
+      <AppShell />
+    </LangProvider>
+  );
+}
+
+function AppShell() {
+  const { t } = useLang();
   const [authedName, setAuthedName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -27,7 +39,10 @@ export default function App() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [financeEntries, setFinanceEntries] = useState<FinanceEntry[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [clientesFilter, setClientesFilter] = useState('Todos');
+  const [clientesNonce, setClientesNonce] = useState(0);
 
   const handleOnboardingComplete = (data: OnboardingResult) => {
     setProfile({
@@ -55,6 +70,13 @@ export default function App() {
   const addClient = (c: Omit<Client, 'id'>) => setClients((prev) => [{ id: `c${Date.now()}`, ...c }, ...prev]);
   const updateClient = (id: string, patch: Partial<Client>) => setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
   const setServicesUpdater = (updater: (prev: ServiceItem[]) => ServiceItem[]) => setServices(updater);
+  const addProduct = (p: Omit<Product, 'id'>) => setProducts((prev) => [{ id: `p${Date.now()}`, ...p }, ...prev]);
+  const updateProduct = (id: string, patch: Partial<Product>) => setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+  const removeProduct = (id: string) => setProducts((prev) => prev.filter((p) => p.id !== id));
+
+  const sendReminders = () => {
+    setAppointments((prev) => prev.map((a) => (a.day === 'hoje' && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)));
+  };
 
   const openMore = (id: string) => {
     setMoreScreen(id);
@@ -64,7 +86,15 @@ export default function App() {
     setActiveTab(id);
     setMoreScreen(null);
   };
-  const goTo = (id: string) => (TABS.some((t) => t.id === id) ? selectTab(id) : openMore(id));
+  const tabs = getTabs(t);
+  const moreItems = getMoreItems(t);
+  const goTo = (id: string) => (tabs.some((tb) => tb.id === id) ? selectTab(id) : openMore(id));
+
+  const openClientesWithFilter = (filterValue: string) => {
+    setClientesFilter(filterValue);
+    setClientesNonce((n) => n + 1);
+    selectTab('clientes');
+  };
 
   const currency: CurrencyCode = profile?.currency || 'BRL';
 
@@ -114,19 +144,35 @@ export default function App() {
     );
   }
 
+  const { availableSlots } = getAvailability(profile, appointments);
+  const lowStockCount = products.filter((p) => productStatus(p) !== 'ok').length;
+
   const screenContent = (
     <>
       {moreScreen === 'financeiro' && (
         <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
       )}
+      {moreScreen === 'estoque' && <EstoqueScreen products={products} addProduct={addProduct} updateProduct={updateProduct} removeProduct={removeProduct} />}
       {moreScreen === 'notificacoes' && <NotificacoesScreen />}
       {moreScreen === 'config' && <ConfigScreen profile={profile} services={services} onUpdateProfile={updateProfile} onOpenServicos={() => setMoreScreen('servicos')} />}
       {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
 
       {!moreScreen && activeTab === 'hoje' && (
-        <HojeScreen profile={profile} appointments={appointments} clients={clients} services={services} currency={currency} onOpenMaquina={() => selectTab('maquina')} />
+        <HojeScreen
+          profile={profile}
+          appointments={appointments}
+          clients={clients}
+          services={services}
+          products={products}
+          currency={currency}
+          onOpenAgenda={() => selectTab('agenda')}
+          onOpenClientesLost={() => openClientesWithFilter('Perdido')}
+          onOpenEstoque={() => openMore('estoque')}
+          onOpenClientesLeads={() => openClientesWithFilter('Novo Lead')}
+          onSendReminders={sendReminders}
+        />
       )}
-      {!moreScreen && activeTab === 'maquina' && <MaquinaScreen />}
+      {!moreScreen && activeTab === 'maquina' && <MaquinaScreen freeSlotsToday={availableSlots.length} lostClientsCount={clients.filter((c) => c.status === 'Perdido').length} />}
       {!moreScreen && activeTab === 'agenda' && (
         <AgendaTab
           appointments={appointments}
@@ -139,8 +185,28 @@ export default function App() {
           onOpenServicos={() => setMoreScreen('servicos')}
         />
       )}
-      {!moreScreen && activeTab === 'clientes' && <ClientesScreen clients={clients} contactMethod={profile.contactMethod} addClient={addClient} updateClient={updateClient} />}
-      {!moreScreen && activeTab === 'ia' && <IAScreen profile={profile} clients={clients} appointments={appointments} currency={currency} />}
+      {!moreScreen && activeTab === 'clientes' && (
+        <ClientesScreen
+          key={clientesNonce}
+          clients={clients}
+          services={services}
+          contactMethod={profile.contactMethod}
+          addClient={addClient}
+          updateClient={updateClient}
+          initialFilter={clientesFilter}
+        />
+      )}
+      {!moreScreen && activeTab === 'ia' && (
+        <DiagnosticoScreen
+          profile={profile}
+          clients={clients}
+          appointments={appointments}
+          products={products}
+          currency={currency}
+          onOpenConteudo={() => selectTab('maquina')}
+          onOpenClientes={() => selectTab('clientes')}
+        />
+      )}
     </>
   );
 
@@ -148,8 +214,8 @@ export default function App() {
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
       <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4 }}>
         {[
-          { id: 'mobile' as const, label: 'Celular', icon: Home },
-          { id: 'desktop' as const, label: 'Computador', icon: Grid3x3 },
+          { id: 'mobile' as const, label: t.nav.viewToggleMobile, icon: Home },
+          { id: 'desktop' as const, label: t.nav.viewToggleDesktop, icon: Grid3x3 },
         ].map((v) => (
           <button
             key={v.id}
@@ -177,7 +243,7 @@ export default function App() {
   );
 
   if (viewMode === 'desktop') {
-    const navItems = [...TABS, ...MORE_ITEMS];
+    const navItems = [...tabs, ...moreItems];
     return (
       <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, padding: '24px 0', fontFamily: 'Manrope' }}>
         <style>{FONT_IMPORT}</style>
@@ -200,9 +266,12 @@ export default function App() {
             <div style={{ fontFamily: 'Fraunces', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
               BeautyFlow <span style={{ color: T.goldDeep }}>AI</span>
             </div>
-            <div style={{ padding: '0 10px 14px', fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>Olá, {profile.name} 👋</div>
+            <div style={{ padding: '0 10px 14px', fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
+              {t.nav.greetingLoggedAs}, {profile.name} 👋
+            </div>
             {navItems.map((item) => {
               const isActive = moreScreen ? moreScreen === item.id : activeTab === item.id;
+              const badge = item.id === 'estoque' && lowStockCount > 0 ? lowStockCount : null;
               return (
                 <button
                   key={item.id}
@@ -227,6 +296,21 @@ export default function App() {
                 >
                   <item.icon size={16} />
                   {item.label}
+                  {badge && (
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        color: '#fff',
+                        background: T.danger,
+                        borderRadius: 999,
+                        padding: '1px 6px',
+                      }}
+                    >
+                      {badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -283,8 +367,8 @@ export default function App() {
           </button>
         )}
 
-        <BottomNav active={activeTab} onSelect={selectTab} onMore={() => setShowMore(true)} moreActive={!!moreScreen} />
-        {showMore && <MoreSheet onSelect={openMore} onClose={() => setShowMore(false)} />}
+        <BottomNav active={activeTab} onSelect={selectTab} onMore={() => setShowMore(true)} moreActive={!!moreScreen} t={t} />
+        {showMore && <MoreSheet onSelect={openMore} onClose={() => setShowMore(false)} t={t} />}
       </div>
     </div>
   );

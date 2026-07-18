@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, Plus, X } from 'lucide-react';
 import { T, CURRENCIES, PROFESSIONS, SUGGESTED_SERVICES } from '../theme';
+import { PROFESSION_LABEL, SUGGESTED_SERVICE_LABEL, LANG_OPTIONS } from '../i18n';
 import { PrimaryButton, TextInput, MiniField, GoalRing } from '../components/primitives';
-import type { CurrencyCode, Language, OnboardingResult, ServiceItem } from '../types';
+import { useLang } from '../lib/LangContext';
+import type { CurrencyCode, Lang, OnboardingResult, ServiceItem } from '../types';
 
 function StepBlock({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
@@ -37,11 +39,9 @@ function SelectRow({ active, onClick, label, compact, testId }: { active: boolea
   );
 }
 
-const LANGUAGES: Language[] = ['Português', 'English', 'Español'];
-
 export function Onboarding({ initialName, onComplete }: { initialName: string; onComplete: (data: OnboardingResult) => void }) {
+  const { lang, setLang, t } = useLang();
   const [step, setStep] = useState(0);
-  const [language, setLanguage] = useState<Language>('Português');
   const [currency, setCurrency] = useState<CurrencyCode>('BRL');
   const [publicName, setPublicName] = useState('');
   const [profession, setProfession] = useState<string | null>(null);
@@ -51,8 +51,9 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
   useEffect(() => {
     if (profession) {
       const base = SUGGESTED_SERVICES[profession] || SUGGESTED_SERVICES.other;
-      setServices(base.map((s, i) => ({ id: `s${i}`, name: s.name, price: 0, duration: 0 })));
+      setServices(base.map((s, i) => ({ id: `s${i}`, name: SUGGESTED_SERVICE_LABEL[lang][s.key] || s.key, price: 0, duration: 0 })));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profession]);
 
   const totalSteps = 6;
@@ -61,11 +62,11 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
   const updateService = (id: string, field: 'name' | 'price' | 'duration', val: string | number) =>
     setServices((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: val } : s)));
   const removeService = (id: string) => setServices((prev) => prev.filter((s) => s.id !== id));
-  const addService = () => setServices((prev) => [...prev, { id: `s${Date.now()}`, name: 'Novo serviço', price: 0, duration: 0 }]);
+  const addService = () => setServices((prev) => [...prev, { id: `s${Date.now()}`, name: t.onboarding.newServiceDefaultName, price: 0, duration: 0 }]);
 
   const next = () => {
     if (step === totalSteps - 1) {
-      onComplete({ language, currency, name: initialName, publicName, profession: profession!, goal: Number(goal), services });
+      onComplete({ language: lang, currency, name: initialName, publicName, profession: profession!, goal: Number(goal), services });
     } else setStep((s) => s + 1);
   };
 
@@ -81,17 +82,17 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '28px 22px' }}>
         {step === 0 && (
-          <StepBlock title="Escolha o idioma" subtitle="Isso irá alterar todos os textos do aplicativo.">
+          <StepBlock title={t.onboarding.stepIdiomaTitle} subtitle={t.onboarding.stepIdiomaSubtitle}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {LANGUAGES.map((l) => (
-                <SelectRow key={l} active={language === l} onClick={() => setLanguage(l)} label={l} testId={`onboarding-lang-${l}`} />
+              {LANG_OPTIONS.map((opt) => (
+                <SelectRow key={opt.code} active={lang === opt.code} onClick={() => setLang(opt.code as Lang)} label={opt.label} testId={`onboarding-lang-${opt.code}`} />
               ))}
             </div>
           </StepBlock>
         )}
 
         {step === 1 && (
-          <StepBlock title="Escolha a moeda" subtitle="Idioma e moeda funcionam de forma independente.">
+          <StepBlock title={t.onboarding.stepMoedaTitle} subtitle={t.onboarding.stepMoedaSubtitle}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {(Object.keys(CURRENCIES) as CurrencyCode[]).map((c) => (
                 <SelectRow key={c} active={currency === c} onClick={() => setCurrency(c)} label={`${c}  ${CURRENCIES[c].symbol}`} compact />
@@ -101,18 +102,19 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         )}
 
         {step === 2 && (
-          <StepBlock title="Como deseja aparecer para seus clientes?" subtitle="Usado na página pública, no link da agenda e nos compartilhamentos.">
-            <TextInput value={publicName} onChange={setPublicName} placeholder="Studio Glow" testId="onboarding-public-name" />
+          <StepBlock title={t.onboarding.stepPublicNameTitle} subtitle={t.onboarding.stepPublicNameSubtitle}>
+            <TextInput value={publicName} onChange={setPublicName} placeholder={t.onboarding.publicNamePlaceholder} testId="onboarding-public-name" />
             {publicName && (
               <div style={{ marginTop: 18, padding: 12, background: T.goldSoft, borderRadius: 12, fontFamily: 'Manrope', fontSize: 13, color: T.goldDeep }}>
-                beautyflow.app/agendar/{publicName.toLowerCase().replace(/\s+/g, '')}
+                {t.onboarding.publicLinkPrefix}
+                {publicName.toLowerCase().replace(/\s+/g, '')}
               </div>
             )}
           </StepBlock>
         )}
 
         {step === 3 && (
-          <StepBlock title="Qual sua profissão?" subtitle="Vamos sugerir serviços prontos para você.">
+          <StepBlock title={t.onboarding.stepProfessionTitle} subtitle={t.onboarding.stepProfessionSubtitle}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {PROFESSIONS.map((p) => (
                 <div
@@ -142,7 +144,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                   >
                     <p.icon size={17} color={T.goldDeep} strokeWidth={1.6} />
                   </div>
-                  <div style={{ fontFamily: 'Manrope', fontSize: 12, fontWeight: 600, color: T.ink }}>{p.label}</div>
+                  <div style={{ fontFamily: 'Manrope', fontSize: 12, fontWeight: 600, color: T.ink }}>{PROFESSION_LABEL[lang][p.id]}</div>
                 </div>
               ))}
             </div>
@@ -150,21 +152,21 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         )}
 
         {step === 4 && (
-          <StepBlock title="Qual sua meta mensal?" subtitle="Essa meta será utilizada em todo o sistema.">
+          <StepBlock title={t.onboarding.stepGoalTitle} subtitle={t.onboarding.stepGoalSubtitle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontFamily: 'Fraunces', fontSize: 22, color: T.ink }}>{CURRENCIES[currency].symbol}</span>
               <TextInput value={goal} onChange={setGoal} placeholder="0" numeric testId="onboarding-goal" />
             </div>
             {goal && Number(goal) > 0 && (
               <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-                <GoalRing progress={0} size={130} center="a caminho" />
+                <GoalRing progress={0} size={130} center={t.onboarding.goalRingCenter} />
               </div>
             )}
           </StepBlock>
         )}
 
         {step === 5 && (
-          <StepBlock title="Confirme seus serviços e valores" subtitle="Sugerimos os nomes com base na sua profissão — ajuste o valor e a duração que você pratica.">
+          <StepBlock title={t.onboarding.stepServicesTitle} subtitle={t.onboarding.stepServicesSubtitle}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {services.map((s) => (
                 <div key={s.id} style={{ border: `1px solid ${T.line}`, borderRadius: 14, padding: 12, background: T.surface }}>
@@ -177,8 +179,8 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                     <X size={16} color={T.muted} style={{ cursor: 'pointer' }} onClick={() => removeService(s.id)} />
                   </div>
                   <div style={{ display: 'flex', gap: 14, marginTop: 8 }}>
-                    <MiniField label={`Valor (${CURRENCIES[currency].symbol})`} value={s.price} onChange={(v) => updateService(s.id, 'price', v)} />
-                    <MiniField label="Duração (min)" value={s.duration} onChange={(v) => updateService(s.id, 'duration', v)} />
+                    <MiniField label={`${t.onboarding.valorLabel} (${CURRENCIES[currency].symbol})`} value={s.price} onChange={(v) => updateService(s.id, 'price', v)} />
+                    <MiniField label={t.onboarding.duracaoLabel} value={s.duration} onChange={(v) => updateService(s.id, 'duration', v)} />
                   </div>
                 </div>
               ))}
@@ -200,7 +202,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                   cursor: 'pointer',
                 }}
               >
-                <Plus size={15} /> Adicionar serviço
+                <Plus size={15} /> {t.onboarding.addServiceCta}
               </button>
             </div>
           </StepBlock>
@@ -218,7 +220,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         )}
         <div style={{ flex: 1 }}>
           <PrimaryButton full onClick={next} disabled={!canNext[step]} testId="onboarding-next">
-            {step === totalSteps - 1 ? 'Concluir configuração' : 'Continuar'}
+            {step === totalSteps - 1 ? t.onboarding.finishCta : t.onboarding.continueCta}
           </PrimaryButton>
         </div>
       </div>

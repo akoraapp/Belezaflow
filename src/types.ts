@@ -6,11 +6,18 @@ export interface ServiceItem {
 }
 
 export type CurrencyCode = 'BRL' | 'USD' | 'EUR' | 'MXN' | 'COP' | 'GBP';
-export type Language = 'Português' | 'English' | 'Español';
+export type Lang = 'pt' | 'en' | 'es';
 export type ContactMethod = 'whatsapp' | 'sms';
 
+export interface Product {
+  id: string;
+  name: string;
+  qty: number;
+  minQty: number;
+}
+
 export interface Profile {
-  language: Language;
+  language: Lang;
   currency: CurrencyCode;
   name: string;
   publicName: string;
@@ -26,7 +33,7 @@ export interface Profile {
 }
 
 export interface OnboardingResult {
-  language: Language;
+  language: Lang;
   currency: CurrencyCode;
   name: string;
   publicName: string;
