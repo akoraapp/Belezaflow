@@ -11,9 +11,10 @@ interface AgendaScreenProps {
   profile: Profile;
   currency: CurrencyCode;
   addAppointment: (a: Appointment) => void;
+  embedded?: boolean;
 }
 
-export function AgendaScreen({ appointments, services, profile, currency, addAppointment }: AgendaScreenProps) {
+export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded }: AgendaScreenProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
   const [clientName, setClientName] = useState('');
@@ -40,10 +41,12 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
   };
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>Agenda</div>
-      </div>
+    <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
+      {!embedded && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>Agenda</div>
+        </div>
+      )}
       <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 16 }}>
         {isWorkingToday
           ? `${today.length} agendamento${today.length !== 1 ? 's' : ''} hoje · ${availableSlots.length} horário${availableSlots.length !== 1 ? 's' : ''} livre${availableSlots.length !== 1 ? 's' : ''}`

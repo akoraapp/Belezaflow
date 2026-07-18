@@ -6,13 +6,12 @@ import { MORE_ITEMS, MoreSheet } from './components/MoreSheet';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { HojeScreen } from './screens/Hoje';
-import { AgendaScreen } from './screens/Agenda';
+import { AgendaTab } from './screens/AgendaTab';
 import { ClientesScreen } from './screens/Clientes';
 import { FinanceiroScreen } from './screens/Financeiro';
 import { IAScreen } from './screens/IA';
 import { MaquinaScreen } from './screens/Maquina';
 import { ServicosScreen } from './screens/Servicos';
-import { AgendaOnlineScreen } from './screens/AgendaOnline';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
 import { ALL_SLOTS } from './theme';
@@ -120,18 +119,6 @@ export default function App() {
       {moreScreen === 'financeiro' && (
         <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
       )}
-      {moreScreen === 'online' && (
-        <AgendaOnlineScreen
-          profile={profile}
-          services={services}
-          appointments={appointments}
-          currency={currency}
-          onUpdateProfile={updateProfile}
-          addAppointment={addAppointment}
-          addClient={addClient}
-          onOpenServicos={() => setMoreScreen('servicos')}
-        />
-      )}
       {moreScreen === 'notificacoes' && <NotificacoesScreen />}
       {moreScreen === 'config' && <ConfigScreen profile={profile} services={services} onUpdateProfile={updateProfile} onOpenServicos={() => setMoreScreen('servicos')} />}
       {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
@@ -140,7 +127,18 @@ export default function App() {
         <HojeScreen profile={profile} appointments={appointments} clients={clients} services={services} currency={currency} onOpenMaquina={() => selectTab('maquina')} />
       )}
       {!moreScreen && activeTab === 'maquina' && <MaquinaScreen />}
-      {!moreScreen && activeTab === 'agenda' && <AgendaScreen appointments={appointments} services={services} profile={profile} currency={currency} addAppointment={addAppointment} />}
+      {!moreScreen && activeTab === 'agenda' && (
+        <AgendaTab
+          appointments={appointments}
+          services={services}
+          profile={profile}
+          currency={currency}
+          addAppointment={addAppointment}
+          onUpdateProfile={updateProfile}
+          addClient={addClient}
+          onOpenServicos={() => setMoreScreen('servicos')}
+        />
+      )}
       {!moreScreen && activeTab === 'clientes' && <ClientesScreen clients={clients} contactMethod={profile.contactMethod} addClient={addClient} updateClient={updateClient} />}
       {!moreScreen && activeTab === 'ia' && <IAScreen profile={profile} clients={clients} appointments={appointments} currency={currency} />}
     </>

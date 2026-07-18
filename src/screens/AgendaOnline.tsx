@@ -14,9 +14,10 @@ interface AgendaOnlineScreenProps {
   addAppointment: (a: Appointment) => void;
   addClient: (c: Omit<Client, 'id'>) => void;
   onOpenServicos: () => void;
+  embedded?: boolean;
 }
 
-export function AgendaOnlineScreen({ profile, services, appointments, currency, onUpdateProfile, addAppointment, addClient, onOpenServicos }: AgendaOnlineScreenProps) {
+export function AgendaOnlineScreen({ profile, services, appointments, currency, onUpdateProfile, addAppointment, addClient, onOpenServicos, embedded }: AgendaOnlineScreenProps) {
   const [copied, setCopied] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
@@ -64,9 +65,13 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
   };
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>Agenda Online</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>Este link é único e pessoal — gerado a partir do seu nome público.</div>
+    <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
+      {!embedded && (
+        <>
+          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>Agenda Online</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>Este link é único e pessoal — gerado a partir do seu nome público.</div>
+        </>
+      )}
 
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>Seu link público</div>

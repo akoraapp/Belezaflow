@@ -1,4 +1,4 @@
-import { Bell, Globe, Settings, Wallet, type LucideIcon } from 'lucide-react';
+import { Bell, Settings, Wallet, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
 
 export interface MoreItem {
@@ -10,7 +10,6 @@ export interface MoreItem {
 
 export const MORE_ITEMS: MoreItem[] = [
   { id: 'financeiro', label: 'Financeiro', icon: Wallet, sub: 'Faturamento e contas' },
-  { id: 'online', label: 'Agenda Online', icon: Globe, sub: 'Link público' },
   { id: 'notificacoes', label: 'Notificações', icon: Bell, sub: 'Central de avisos' },
   { id: 'config', label: 'Configurações', icon: Settings, sub: 'Preferências' },
 ];
