@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AlertCircle, Bot } from 'lucide-react';
+import { AlertCircle, Bot, Calendar, Megaphone, UserPlus, Wallet, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
 import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, GoalRing, EmptyHint, AppointmentRow } from '../components/primitives';
@@ -12,9 +12,13 @@ interface HojeScreenProps {
   appointments: Appointment[];
   currency: CurrencyCode;
   alerts: AlertItem[];
+  onOpenConteudo: () => void;
+  onOpenAgenda: () => void;
+  onOpenFinanceiro: () => void;
+  onOpenClientes: () => void;
 }
 
-export function HojeScreen({ profile, appointments, currency, alerts }: HojeScreenProps) {
+export function HojeScreen({ profile, appointments, currency, alerts, onOpenConteudo, onOpenAgenda, onOpenFinanceiro, onOpenClientes }: HojeScreenProps) {
   const { t } = useLang();
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
   const monthRevenue = useMemo(() => appointments.filter((a) => a.status !== 'Cancelado').reduce((sum, a) => sum + a.price, 0), [appointments]);
@@ -43,6 +47,14 @@ export function HojeScreen({ profile, appointments, currency, alerts }: HojeScre
         </div>
         <GoalRing progress={progress} size={88} stroke={8} center={t.onboarding.goalRingCenter} />
       </Card>
+
+      <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 10 }}>{t.hoje.quickActionsTitle}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+        <QuickActionButton icon={Megaphone} label={t.hoje.quickConteudo} onClick={onOpenConteudo} primary testId="quick-conteudo" />
+        <QuickActionButton icon={Calendar} label={t.hoje.quickAtendimento} onClick={onOpenAgenda} testId="quick-atendimento" />
+        <QuickActionButton icon={Wallet} label={t.hoje.quickFinanceiro} onClick={onOpenFinanceiro} testId="quick-financeiro" />
+        <QuickActionButton icon={UserPlus} label={t.hoje.quickCliente} onClick={onOpenClientes} testId="quick-cliente" />
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <Bot size={15} color={T.goldDeep} />
@@ -115,5 +127,42 @@ function AlertRow({ icon: Icon, title, ctaLabel, onCta }: { icon: typeof AlertCi
         </div>
       )}
     </Card>
+  );
+}
+
+function QuickActionButton({ icon: Icon, label, onClick, primary, testId }: { icon: LucideIcon; label: string; onClick: () => void; primary?: boolean; testId?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 10,
+        padding: '14px 14px',
+        borderRadius: 16,
+        cursor: 'pointer',
+        textAlign: 'left',
+        border: primary ? 'none' : `1px solid ${T.line}`,
+        background: primary ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : '#fff',
+        boxShadow: primary ? '0 6px 16px -6px rgba(138,109,47,0.55)' : 'none',
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 9,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: primary ? 'rgba(255,255,255,0.2)' : T.goldSoft,
+        }}
+      >
+        <Icon size={15} color={primary ? '#fff' : T.goldDeep} />
+      </div>
+      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, color: primary ? '#fff' : T.ink, lineHeight: 1.3 }}>{label}</div>
+    </button>
   );
 }

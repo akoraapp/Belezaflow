@@ -236,7 +236,18 @@ function AppShell() {
       )}
       {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
 
-      {!moreScreen && activeTab === 'hoje' && <HojeScreen profile={profile} appointments={appointments} currency={currency} alerts={alerts} />}
+      {!moreScreen && activeTab === 'hoje' && (
+        <HojeScreen
+          profile={profile}
+          appointments={appointments}
+          currency={currency}
+          alerts={alerts}
+          onOpenConteudo={() => openMore('maquina')}
+          onOpenAgenda={() => selectTab('agenda')}
+          onOpenFinanceiro={() => selectTab('financeiro')}
+          onOpenClientes={() => selectTab('clientes')}
+        />
+      )}
       {!moreScreen && activeTab === 'agenda' && (
         <AgendaTab
           appointments={appointments}
