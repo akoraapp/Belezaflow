@@ -1,5 +1,5 @@
 import { ALL_SLOTS, CURRENCIES, WEEKDAY_LABELS } from '../theme';
-import type { Appointment, CurrencyCode, Profile } from '../types';
+import type { Appointment, CurrencyCode, Lang, Profile } from '../types';
 
 export function getAvailability(profile: Profile | null, appointments: Appointment[]) {
   const today = (appointments || []).filter((a) => a.day === 'hoje');
@@ -36,4 +36,20 @@ export function fmtMoney(value: number, currency: CurrencyCode) {
 
 export function fmtCurrency(value: number, currency: CurrencyCode) {
   return `${CURRENCIES[currency].symbol} ${fmtMoney(value, currency)}`;
+}
+
+const RELATIVE_TIME_WORDS: Record<Lang, { now: string; minAgo: (n: number) => string; hAgo: (n: number) => string; dAgo: (n: number) => string }> = {
+  pt: { now: 'agora', minAgo: (n) => `há ${n} min`, hAgo: (n) => `há ${n} h`, dAgo: (n) => `há ${n} d` },
+  en: { now: 'now', minAgo: (n) => `${n} min ago`, hAgo: (n) => `${n} h ago`, dAgo: (n) => `${n} d ago` },
+  es: { now: 'ahora', minAgo: (n) => `hace ${n} min`, hAgo: (n) => `hace ${n} h`, dAgo: (n) => `hace ${n} d` },
+};
+
+export function relativeTimeLabel(timestampMs: number, lang: Lang) {
+  const words = RELATIVE_TIME_WORDS[lang] || RELATIVE_TIME_WORDS.pt;
+  const minutes = Math.max(0, Math.floor((Date.now() - timestampMs) / 60000));
+  if (minutes < 1) return words.now;
+  if (minutes < 60) return words.minAgo(minutes);
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return words.hAgo(hours);
+  return words.dAgo(Math.floor(hours / 24));
 }

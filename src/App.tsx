@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
 import { T, FONT_IMPORT, ALL_SLOTS } from './theme';
 import { getTabs, BottomNav } from './components/BottomNav';
@@ -17,6 +17,8 @@ import { EstoqueScreen } from './screens/Estoque';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
 import { getAvailability } from './lib/helpers';
+import { buildAlerts } from './lib/alerts';
+import { getNotificationPermission, requestNotificationPermission, fireNotification, type NotifPermission } from './lib/notifications';
 import { productStatus } from './screens/Estoque';
 import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult, Product, Profile, ServiceItem } from './types';
 
@@ -43,6 +45,9 @@ function AppShell() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [clientesFilter, setClientesFilter] = useState('Todos');
   const [clientesNonce, setClientesNonce] = useState(0);
+  const [notifPermission, setNotifPermission] = useState<NotifPermission>(() => getNotificationPermission());
+  const [alertTimestamps, setAlertTimestamps] = useState<Record<string, number>>({});
+  const seenAlertKeysRef = useRef<Set<string>>(new Set());
 
   const handleOnboardingComplete = (data: OnboardingResult) => {
     setProfile({
@@ -97,6 +102,57 @@ function AppShell() {
   };
 
   const currency: CurrencyCode = profile?.currency || 'BRL';
+
+  const alerts = profile
+    ? buildAlerts({
+        profile,
+        appointments,
+        clients,
+        services,
+        products,
+        currency,
+        t,
+        callbacks: {
+          onOpenAgenda: () => selectTab('agenda'),
+          onOpenClientesLost: () => openClientesWithFilter('Perdido'),
+          onOpenEstoque: () => openMore('estoque'),
+          onOpenClientesLeads: () => openClientesWithFilter('Novo Lead'),
+          onSendReminders: sendReminders,
+        },
+      })
+    : [];
+  const alertKeysJoined = alerts.map((a) => a.key).join('|');
+
+  useEffect(() => {
+    const currentKeys = alerts.map((a) => a.key);
+    const currentKeySet = new Set(currentKeys);
+    // Keys that vanished (condition resolved) are dropped from the seen-set so the
+    // same alert notifies again if the condition becomes true a second time.
+    Array.from(seenAlertKeysRef.current).forEach((k) => {
+      if (!currentKeySet.has(k)) seenAlertKeysRef.current.delete(k);
+    });
+    const newlyAppeared = alerts.filter((a) => !seenAlertKeysRef.current.has(a.key));
+    newlyAppeared.forEach((a) => seenAlertKeysRef.current.add(a.key));
+
+    if (newlyAppeared.length > 0) {
+      setAlertTimestamps((prev) => {
+        const next = { ...prev };
+        newlyAppeared.forEach((a) => {
+          next[a.key] = Date.now();
+        });
+        return next;
+      });
+      if (notifPermission === 'granted') {
+        newlyAppeared.forEach((a) => fireNotification('BeautyFlow AI', a.title));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertKeysJoined, notifPermission]);
+
+  const requestNotifPermission = async () => {
+    const result = await requestNotificationPermission();
+    setNotifPermission(result);
+  };
 
   if (!authedName) {
     return (
@@ -153,25 +209,22 @@ function AppShell() {
         <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
       )}
       {moreScreen === 'estoque' && <EstoqueScreen products={products} addProduct={addProduct} updateProduct={updateProduct} removeProduct={removeProduct} />}
-      {moreScreen === 'notificacoes' && <NotificacoesScreen />}
-      {moreScreen === 'config' && <ConfigScreen profile={profile} services={services} onUpdateProfile={updateProfile} onOpenServicos={() => setMoreScreen('servicos')} />}
-      {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
-
-      {!moreScreen && activeTab === 'hoje' && (
-        <HojeScreen
+      {moreScreen === 'notificacoes' && (
+        <NotificacoesScreen alerts={alerts} timestamps={alertTimestamps} permission={notifPermission} onRequestPermission={requestNotifPermission} />
+      )}
+      {moreScreen === 'config' && (
+        <ConfigScreen
           profile={profile}
-          appointments={appointments}
-          clients={clients}
           services={services}
-          products={products}
-          currency={currency}
-          onOpenAgenda={() => selectTab('agenda')}
-          onOpenClientesLost={() => openClientesWithFilter('Perdido')}
-          onOpenEstoque={() => openMore('estoque')}
-          onOpenClientesLeads={() => openClientesWithFilter('Novo Lead')}
-          onSendReminders={sendReminders}
+          onUpdateProfile={updateProfile}
+          onOpenServicos={() => setMoreScreen('servicos')}
+          notifPermission={notifPermission}
+          onRequestNotifPermission={requestNotifPermission}
         />
       )}
+      {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
+
+      {!moreScreen && activeTab === 'hoje' && <HojeScreen profile={profile} appointments={appointments} currency={currency} alerts={alerts} />}
       {!moreScreen && activeTab === 'maquina' && <MaquinaScreen freeSlotsToday={availableSlots.length} lostClientsCount={clients.filter((c) => c.status === 'Perdido').length} />}
       {!moreScreen && activeTab === 'agenda' && (
         <AgendaTab
@@ -271,7 +324,7 @@ function AppShell() {
             </div>
             {navItems.map((item) => {
               const isActive = moreScreen ? moreScreen === item.id : activeTab === item.id;
-              const badge = item.id === 'estoque' && lowStockCount > 0 ? lowStockCount : null;
+              const badge = item.id === 'estoque' ? (lowStockCount > 0 ? lowStockCount : null) : item.id === 'notificacoes' ? (alerts.length > 0 ? alerts.length : null) : null;
               return (
                 <button
                   key={item.id}

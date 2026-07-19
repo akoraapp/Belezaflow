@@ -1,39 +1,20 @@
 import { useMemo } from 'react';
-import { AlertCircle, Bot, Cake, Calendar, MessageCircle, Package, Target, Users } from 'lucide-react';
+import { AlertCircle, Bot } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
-import { getAvailability, fmtMoney, todayIsBirthday, format } from '../lib/helpers';
-import { productStatus } from './Estoque';
+import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, GoalRing, EmptyHint, AppointmentRow } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, Client, CurrencyCode, Product, Profile, ServiceItem } from '../types';
+import type { AlertItem } from '../lib/alerts';
+import type { Appointment, CurrencyCode, Profile } from '../types';
 
 interface HojeScreenProps {
   profile: Profile;
   appointments: Appointment[];
-  clients: Client[];
-  services: ServiceItem[];
-  products: Product[];
   currency: CurrencyCode;
-  onOpenAgenda: () => void;
-  onOpenClientesLost: () => void;
-  onOpenEstoque: () => void;
-  onOpenClientesLeads: () => void;
-  onSendReminders: () => void;
+  alerts: AlertItem[];
 }
 
-export function HojeScreen({
-  profile,
-  appointments,
-  clients,
-  services,
-  products,
-  currency,
-  onOpenAgenda,
-  onOpenClientesLost,
-  onOpenEstoque,
-  onOpenClientesLeads,
-  onSendReminders,
-}: HojeScreenProps) {
+export function HojeScreen({ profile, appointments, currency, alerts }: HojeScreenProps) {
   const { t } = useLang();
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
   const monthRevenue = useMemo(() => appointments.filter((a) => a.status !== 'Cancelado').reduce((sum, a) => sum + a.price, 0), [appointments]);
@@ -41,19 +22,7 @@ export function HojeScreen({
   const hour = new Date().getHours();
   const greet = hour < 12 ? t.hoje.greetMorning : hour < 18 ? t.hoje.greetAfternoon : t.hoje.greetEvening;
 
-  const lostClients = clients.filter((c) => c.status === 'Perdido');
-  const ticketBase =
-    appointments.length > 0 ? appointments.reduce((s, a) => s + a.price, 0) / appointments.length : services.length > 0 ? services.reduce((s, x) => s + x.price, 0) / services.length : 0;
-  const recoveryPotential = Math.round(lostClients.length * ticketBase);
-
-  const pendingConfirmation = today.filter((a) => a.status === 'Agendado').length;
-  const lowStockCount = products.filter((p) => productStatus(p) !== 'ok').length;
-  const leads = clients.filter((c) => c.status === 'Novo Lead').length;
-  const birthdayClients = clients.filter((c) => todayIsBirthday(c.birthday));
-
-  const showGaps = isWorkingToday && availableSlots.length > 0;
   const showFull = isWorkingToday && availableSlots.length === 0 && today.length > 0;
-  const anyAlert = showGaps || recoveryPotential > 0 || pendingConfirmation > 0 || lowStockCount > 0 || birthdayClients.length > 0 || leads > 0;
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
@@ -93,30 +62,11 @@ export function HojeScreen({
           </Card>
         )}
 
-        {showGaps && (
-          <AlertRow icon={Calendar} title={format(t.hoje.alertGapsMessage, { n: availableSlots.length })} ctaLabel={t.hoje.alertGapsCta} onCta={onOpenAgenda} />
-        )}
+        {alerts.map((a) => (
+          <AlertRow key={a.key} icon={a.icon} title={a.title} ctaLabel={a.ctaLabel} onCta={a.onCta} />
+        ))}
 
-        {recoveryPotential > 0 && (
-          <AlertRow
-            icon={Target}
-            title={format(t.hoje.alertRecoveryMessage, { value: `${CURRENCIES[currency].symbol}${fmtMoney(recoveryPotential, currency)}` })}
-            ctaLabel={t.hoje.alertRecoveryCta}
-            onCta={onOpenClientesLost}
-          />
-        )}
-
-        {pendingConfirmation > 0 && (
-          <AlertRow icon={MessageCircle} title={format(t.hoje.alertConfirmMessage, { n: pendingConfirmation })} ctaLabel={t.hoje.alertConfirmCta} onCta={onSendReminders} />
-        )}
-
-        {lowStockCount > 0 && <AlertRow icon={Package} title={format(t.hoje.alertStockMessage, { n: lowStockCount })} ctaLabel={t.hoje.alertStockCta} onCta={onOpenEstoque} />}
-
-        {birthdayClients.length > 0 && <AlertRow icon={Cake} title={format(t.hoje.alertBirthdayMessage, { names: birthdayClients.map((c) => c.name).join(', ') })} />}
-
-        {leads > 0 && <AlertRow icon={Users} title={format(t.hoje.alertLeadsMessage, { n: leads })} ctaLabel={t.hoje.alertLeadsCta} onCta={onOpenClientesLeads} />}
-
-        {!anyAlert && isWorkingToday && !showFull && (
+        {alerts.length === 0 && isWorkingToday && !showFull && (
           <Card>
             <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted, lineHeight: 1.5 }}>{t.hoje.noAlerts}</div>
           </Card>

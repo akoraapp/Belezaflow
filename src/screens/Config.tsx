@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
-import { Card, Chip } from '../components/primitives';
+import { Card, Chip, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
+import type { NotifPermission } from '../lib/notifications';
 import type { CurrencyCode, Lang, Profile, ServiceItem } from '../types';
 
 interface ConfigScreenProps {
@@ -11,11 +12,22 @@ interface ConfigScreenProps {
   services: ServiceItem[];
   onUpdateProfile: (patch: Partial<Profile>) => void;
   onOpenServicos: () => void;
+  notifPermission: NotifPermission;
+  onRequestNotifPermission: () => void;
 }
 
-export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos }: ConfigScreenProps) {
+export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
   const { t, lang, setLang } = useLang();
-  const [openRow, setOpenRow] = useState<'idioma' | 'moeda' | null>(null);
+  const [openRow, setOpenRow] = useState<'idioma' | 'moeda' | 'notificacoes' | null>(null);
+
+  const notifStatusLabel =
+    notifPermission === 'granted'
+      ? t.config.notifStatusGranted
+      : notifPermission === 'denied'
+        ? t.config.notifStatusDenied
+        : notifPermission === 'unsupported'
+          ? t.config.notifStatusUnsupported
+          : t.config.notifStatusDefault;
 
   const staticItems: string[] = [
     t.config.itemDadosProfissional,
@@ -24,7 +36,6 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
     t.config.itemTempoAtendimentos,
     t.config.itemRegrasCancelamento,
     t.config.itemRegrasReagendamento,
-    t.config.itemPrefNotificacoes,
     t.config.itemMetaFinanceira,
   ];
 
@@ -121,6 +132,28 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
                 {profile.currency === c && <Check size={13} color={T.goldDeep} />}
               </div>
             ))}
+          </div>
+        )}
+
+        <div
+          onClick={() => setOpenRow((r) => (r === 'notificacoes' ? null : 'notificacoes'))}
+          data-testid="config-notif-row"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
+        >
+          <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemPrefNotificacoes}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontFamily: 'Manrope', fontSize: 11.5, fontWeight: 700, color: notifPermission === 'granted' ? T.success : T.muted }}>{notifStatusLabel}</span>
+            <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'notificacoes' ? 'rotate(180deg)' : 'none' }} />
+          </div>
+        </div>
+        {openRow === 'notificacoes' && (
+          <div style={{ padding: '10px 16px 16px', borderBottom: `1px solid ${T.line}` }}>
+            {notifPermission === 'denied' && <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.danger, marginBottom: 10, lineHeight: 1.5 }}>{t.config.notifDeniedHint}</div>}
+            {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
+              <PrimaryButton full onClick={onRequestNotifPermission} testId="config-notif-enable">
+                {t.config.notifEnableCta}
+              </PrimaryButton>
+            )}
           </div>
         )}
 
