@@ -1,4 +1,4 @@
-import { BarChart3, Calendar, Grid3x3, Home, Megaphone, Users, type LucideIcon } from 'lucide-react';
+import { Calendar, Grid3x3, Home, Users, Wallet, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
 import type { Dict } from '../i18n';
 
@@ -11,10 +11,9 @@ export interface TabDef {
 export function getTabs(t: Dict): TabDef[] {
   return [
     { id: 'hoje', label: t.nav.tabHoje, icon: Home },
-    { id: 'maquina', label: t.nav.tabConteudo, icon: Megaphone },
     { id: 'agenda', label: t.nav.tabAgenda, icon: Calendar },
     { id: 'clientes', label: t.nav.tabClientes, icon: Users },
-    { id: 'ia', label: t.nav.tabDiagnostico, icon: BarChart3 },
+    { id: 'financeiro', label: t.nav.tabFinanceiro, icon: Wallet },
   ];
 }
 

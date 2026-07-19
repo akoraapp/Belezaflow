@@ -30,6 +30,9 @@ export interface Profile {
   contactMethod: ContactMethod;
   workingDays: string[];
   availableSlots: string[];
+  bufferMinutes: number;
+  cancellationNoticeHours: number;
+  rescheduleNoticeHours: number;
 }
 
 export interface OnboardingResult {

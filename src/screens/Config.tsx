@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
-import { Card, Chip, PrimaryButton } from '../components/primitives';
+import { Card, Chip, PrimaryButton, TextInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
 import type { NotifPermission } from '../lib/notifications';
@@ -16,9 +16,11 @@ interface ConfigScreenProps {
   onRequestNotifPermission: () => void;
 }
 
+type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | null;
+
 export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
   const { t, lang, setLang } = useLang();
-  const [openRow, setOpenRow] = useState<'idioma' | 'moeda' | 'notificacoes' | null>(null);
+  const [openRow, setOpenRow] = useState<OpenRow>(null);
 
   const notifStatusLabel =
     notifPermission === 'granted'
@@ -29,15 +31,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
           ? t.config.notifStatusUnsupported
           : t.config.notifStatusDefault;
 
-  const staticItems: string[] = [
-    t.config.itemDadosProfissional,
-    t.config.itemFoto,
-    t.config.itemLogo,
-    t.config.itemTempoAtendimentos,
-    t.config.itemRegrasCancelamento,
-    t.config.itemRegrasReagendamento,
-    t.config.itemMetaFinanceira,
-  ];
+  const toggle = (row: OpenRow) => setOpenRow((r) => (r === row ? null : row));
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
@@ -71,10 +65,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
 
       <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.config.generalTitle}</div>
       <Card style={{ padding: 0 }}>
-        <div
-          onClick={() => setOpenRow((r) => (r === 'idioma' ? null : 'idioma'))}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
-        >
+        <div onClick={() => toggle('idioma')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}>
           <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemIdioma}</span>
           <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'idioma' ? 'rotate(180deg)' : 'none' }} />
         </div>
@@ -102,10 +93,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
           </div>
         )}
 
-        <div
-          onClick={() => setOpenRow((r) => (r === 'moeda' ? null : 'moeda'))}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
-        >
+        <div onClick={() => toggle('moeda')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}>
           <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemMoeda}</span>
           <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'moeda' ? 'rotate(180deg)' : 'none' }} />
         </div>
@@ -136,9 +124,70 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
         )}
 
         <div
-          onClick={() => setOpenRow((r) => (r === 'notificacoes' ? null : 'notificacoes'))}
-          data-testid="config-notif-row"
+          onClick={() => toggle('dados')}
+          data-testid="config-dados-row"
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
+        >
+          <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemDadosProfissional}</span>
+          <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'dados' ? 'rotate(180deg)' : 'none' }} />
+        </div>
+        {openRow === 'dados' && (
+          <div style={{ padding: '10px 16px 16px', borderBottom: `1px solid ${T.line}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.dadosProfissionalNomeLabel}</div>
+              <TextInput value={profile.name} onChange={(v) => onUpdateProfile({ name: v })} testId="config-dados-nome" />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.dadosProfissionalContatoLabel}</div>
+              <TextInput value={profile.whatsapp} onChange={(v) => onUpdateProfile({ whatsapp: v })} testId="config-dados-contato" />
+            </div>
+          </div>
+        )}
+
+        <div
+          onClick={() => toggle('politicas')}
+          data-testid="config-politicas-row"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
+        >
+          <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemPoliticasAgendamento}</span>
+          <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'politicas' ? 'rotate(180deg)' : 'none' }} />
+        </div>
+        {openRow === 'politicas' && (
+          <div style={{ padding: '10px 16px 16px', borderBottom: `1px solid ${T.line}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.politicasBufferLabel}</div>
+              <TextInput
+                value={String(profile.bufferMinutes)}
+                onChange={(v) => onUpdateProfile({ bufferMinutes: Number(v) || 0 })}
+                numeric
+                testId="config-politicas-buffer"
+              />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.politicasCancelamentoLabel}</div>
+              <TextInput
+                value={String(profile.cancellationNoticeHours)}
+                onChange={(v) => onUpdateProfile({ cancellationNoticeHours: Number(v) || 0 })}
+                numeric
+                testId="config-politicas-cancelamento"
+              />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.politicasReagendamentoLabel}</div>
+              <TextInput
+                value={String(profile.rescheduleNoticeHours)}
+                onChange={(v) => onUpdateProfile({ rescheduleNoticeHours: Number(v) || 0 })}
+                numeric
+                testId="config-politicas-reagendamento"
+              />
+            </div>
+          </div>
+        )}
+
+        <div
+          onClick={() => toggle('notificacoes')}
+          data-testid="config-notif-row"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }}
         >
           <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemPrefNotificacoes}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -147,7 +196,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
           </div>
         </div>
         {openRow === 'notificacoes' && (
-          <div style={{ padding: '10px 16px 16px', borderBottom: `1px solid ${T.line}` }}>
+          <div style={{ padding: '10px 16px 16px' }}>
             {notifPermission === 'denied' && <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.danger, marginBottom: 10, lineHeight: 1.5 }}>{t.config.notifDeniedHint}</div>}
             {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
               <PrimaryButton full onClick={onRequestNotifPermission} testId="config-notif-enable">
@@ -156,16 +205,6 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
             )}
           </div>
         )}
-
-        {staticItems.map((it, i) => (
-          <div
-            key={it}
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: i < staticItems.length - 1 ? `1px solid ${T.line}` : 'none', cursor: 'pointer' }}
-          >
-            <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{it}</span>
-            <ChevronRight size={15} color={T.muted} />
-          </div>
-        ))}
       </Card>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Bell, Package, Settings, Wallet, type LucideIcon } from 'lucide-react';
+import { BarChart3, Bell, Megaphone, Package, Settings, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
 import type { Dict } from '../i18n';
 
@@ -11,7 +11,8 @@ export interface MoreItem {
 
 export function getMoreItems(t: Dict): MoreItem[] {
   return [
-    { id: 'financeiro', label: t.nav.moreFinanceiroLabel, icon: Wallet, sub: t.nav.moreFinanceiroSub },
+    { id: 'maquina', label: t.nav.tabConteudo, icon: Megaphone, sub: t.nav.moreConteudoSub },
+    { id: 'ia', label: t.nav.tabDiagnostico, icon: BarChart3, sub: t.nav.moreDiagnosticoSub },
     { id: 'estoque', label: t.nav.moreEstoqueLabel, icon: Package, sub: t.nav.moreEstoqueSub },
     { id: 'notificacoes', label: t.nav.moreNotificacoesLabel, icon: Bell, sub: t.nav.moreNotificacoesSub },
     { id: 'config', label: t.nav.moreConfigLabel, icon: Settings, sub: t.nav.moreConfigSub },

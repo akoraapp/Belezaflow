@@ -64,6 +64,9 @@ function AppShell() {
       contactMethod: 'whatsapp',
       workingDays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
       availableSlots: [...ALL_SLOTS],
+      bufferMinutes: 0,
+      cancellationNoticeHours: 24,
+      rescheduleNoticeHours: 24,
     });
     setServices(data.services);
   };
@@ -205,8 +208,17 @@ function AppShell() {
 
   const screenContent = (
     <>
-      {moreScreen === 'financeiro' && (
-        <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
+      {moreScreen === 'maquina' && <MaquinaScreen freeSlotsToday={availableSlots.length} lostClientsCount={clients.filter((c) => c.status === 'Perdido').length} />}
+      {moreScreen === 'ia' && (
+        <DiagnosticoScreen
+          profile={profile}
+          clients={clients}
+          appointments={appointments}
+          products={products}
+          currency={currency}
+          onOpenConteudo={() => openMore('maquina')}
+          onOpenClientes={() => selectTab('clientes')}
+        />
       )}
       {moreScreen === 'estoque' && <EstoqueScreen products={products} addProduct={addProduct} updateProduct={updateProduct} removeProduct={removeProduct} />}
       {moreScreen === 'notificacoes' && (
@@ -225,7 +237,6 @@ function AppShell() {
       {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
 
       {!moreScreen && activeTab === 'hoje' && <HojeScreen profile={profile} appointments={appointments} currency={currency} alerts={alerts} />}
-      {!moreScreen && activeTab === 'maquina' && <MaquinaScreen freeSlotsToday={availableSlots.length} lostClientsCount={clients.filter((c) => c.status === 'Perdido').length} />}
       {!moreScreen && activeTab === 'agenda' && (
         <AgendaTab
           appointments={appointments}
@@ -249,16 +260,8 @@ function AppShell() {
           initialFilter={clientesFilter}
         />
       )}
-      {!moreScreen && activeTab === 'ia' && (
-        <DiagnosticoScreen
-          profile={profile}
-          clients={clients}
-          appointments={appointments}
-          products={products}
-          currency={currency}
-          onOpenConteudo={() => selectTab('maquina')}
-          onOpenClientes={() => selectTab('clientes')}
-        />
+      {!moreScreen && activeTab === 'financeiro' && (
+        <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
       )}
     </>
   );
