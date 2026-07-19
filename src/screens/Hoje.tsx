@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AlertCircle, Bot, Calendar, Megaphone, UserPlus, Wallet, type LucideIcon } from 'lucide-react';
+import { AlertCircle, Bot } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
 import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, GoalRing, EmptyHint, AppointmentRow } from '../components/primitives';
@@ -50,10 +50,10 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
 
       <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 10 }}>{t.hoje.quickActionsTitle}</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-        <QuickActionButton icon={Megaphone} label={t.hoje.quickConteudo} onClick={onOpenConteudo} primary testId="quick-conteudo" />
-        <QuickActionButton icon={Calendar} label={t.hoje.quickAtendimento} onClick={onOpenAgenda} testId="quick-atendimento" />
-        <QuickActionButton icon={Wallet} label={t.hoje.quickFinanceiro} onClick={onOpenFinanceiro} testId="quick-financeiro" />
-        <QuickActionButton icon={UserPlus} label={t.hoje.quickCliente} onClick={onOpenClientes} testId="quick-cliente" />
+        <QuickActionButton label={t.hoje.quickConteudo} onClick={onOpenConteudo} primary testId="quick-conteudo" />
+        <QuickActionButton label={t.hoje.quickAtendimento} onClick={onOpenAgenda} testId="quick-atendimento" />
+        <QuickActionButton label={t.hoje.quickFinanceiro} onClick={onOpenFinanceiro} testId="quick-financeiro" />
+        <QuickActionButton label={t.hoje.quickCliente} onClick={onOpenClientes} testId="quick-cliente" />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -100,7 +100,7 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
 
 function AlertRow({ icon: Icon, title, ctaLabel, onCta }: { icon: typeof AlertCircle; title: string; ctaLabel?: string; onCta?: () => void }) {
   return (
-    <Card style={{ borderColor: T.gold, background: T.goldSoft }}>
+    <Card style={{ background: '#fff', border: `1.5px solid ${T.gold}` }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <Icon size={18} color={T.goldDeep} style={{ marginTop: 2, flexShrink: 0 }} />
         <div style={{ fontFamily: 'Manrope', fontWeight: 600, fontSize: 13.5, color: T.ink, lineHeight: 1.45 }}>{title}</div>
@@ -110,12 +110,15 @@ function AlertRow({ icon: Icon, title, ctaLabel, onCta }: { icon: typeof AlertCi
           <button
             onClick={onCta}
             style={{
-              width: '100%',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               height: 40,
-              borderRadius: 12,
+              padding: '0 18px',
+              borderRadius: 999,
               border: 'none',
-              background: T.ink,
-              color: '#fff',
+              background: T.goldSoft,
+              color: T.goldDeep,
               fontFamily: 'Manrope',
               fontWeight: 700,
               fontSize: 12.5,
@@ -130,39 +133,24 @@ function AlertRow({ icon: Icon, title, ctaLabel, onCta }: { icon: typeof AlertCi
   );
 }
 
-function QuickActionButton({ icon: Icon, label, onClick, primary, testId }: { icon: LucideIcon; label: string; onClick: () => void; primary?: boolean; testId?: string }) {
+function QuickActionButton({ label, onClick, primary, testId }: { label: string; onClick: () => void; primary?: boolean; testId?: string }) {
   return (
     <button
       onClick={onClick}
       data-testid={testId}
       style={{
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        gap: 10,
-        padding: '14px 14px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px 14px',
         borderRadius: 16,
         cursor: 'pointer',
-        textAlign: 'left',
+        textAlign: 'center',
         border: primary ? 'none' : `1px solid ${T.line}`,
-        background: primary ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : '#fff',
-        boxShadow: primary ? '0 6px 16px -6px rgba(138,109,47,0.55)' : 'none',
+        background: primary ? T.ink : '#fff',
       }}
     >
-      <div
-        style={{
-          width: 30,
-          height: 30,
-          borderRadius: 9,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: primary ? 'rgba(255,255,255,0.2)' : T.goldSoft,
-        }}
-      >
-        <Icon size={15} color={primary ? '#fff' : T.goldDeep} />
-      </div>
-      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, color: primary ? '#fff' : T.ink, lineHeight: 1.3 }}>{label}</div>
+      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: primary ? '#fff' : T.ink, lineHeight: 1.3 }}>{label}</div>
     </button>
   );
 }
