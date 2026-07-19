@@ -3,7 +3,7 @@ import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react
 import { T, ALL_SLOTS } from '../theme';
 import { PROFESSION_LABEL } from '../i18n';
 import { getAvailability, fmtMoney } from '../lib/helpers';
-import { Card, Chip, TextInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
 
@@ -103,7 +103,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
         <div>
           <FieldLabel>{t.agendaOnline.phoneLabel}</FieldLabel>
-          <TextInput value={profile.whatsapp || ''} onChange={(v) => onUpdateProfile({ whatsapp: v })} placeholder={t.agendaOnline.phonePlaceholder} />
+          <PhoneInput value={profile.whatsapp || ''} onChange={(v) => onUpdateProfile({ whatsapp: v })} placeholder={t.agendaOnline.phonePlaceholder} testId="agendaonline-whatsapp" />
         </div>
         <div>
           <FieldLabel>{t.agendaOnline.localNameLabel}</FieldLabel>
@@ -318,7 +318,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               <StepLabel n={3}>{t.agendaOnline.step3}</StepLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
                 <TextInput value={bookName} onChange={setBookName} placeholder={t.agendaOnline.namePlaceholder} />
-                <TextInput value={bookPhone} onChange={setBookPhone} placeholder={t.agendaOnline.phoneContactPlaceholder} />
+                <PhoneInput value={bookPhone} onChange={setBookPhone} placeholder={t.agendaOnline.phoneContactPlaceholder} testId="agendaonline-book-phone" />
               </div>
 
               {bookService && (

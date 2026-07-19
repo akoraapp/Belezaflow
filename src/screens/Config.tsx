@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
-import { Card, Chip, PrimaryButton, TextInput } from '../components/primitives';
+import { Card, Chip, PrimaryButton, TextInput, PhoneInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
 import type { NotifPermission } from '../lib/notifications';
@@ -139,7 +139,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
             </div>
             <div>
               <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.4 }}>{t.config.dadosProfissionalContatoLabel}</div>
-              <TextInput value={profile.whatsapp} onChange={(v) => onUpdateProfile({ whatsapp: v })} testId="config-dados-contato" />
+              <PhoneInput value={profile.whatsapp} onChange={(v) => onUpdateProfile({ whatsapp: v })} testId="config-dados-contato" />
             </div>
           </div>
         )}

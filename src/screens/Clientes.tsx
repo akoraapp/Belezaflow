@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
-import { Card, Chip, TextInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Client, ContactMethod, ServiceItem } from '../types';
 
@@ -83,7 +83,7 @@ export function ClientesScreen({ clients, services, contactMethod, addClient, up
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.clientes.newClientFormTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={name} onChange={setName} placeholder={t.clientes.namePlaceholder} testId="clientes-name" />
-            <TextInput value={phone} onChange={setPhone} placeholder={t.clientes.phonePlaceholder} />
+            <PhoneInput value={phone} onChange={setPhone} placeholder={t.clientes.phonePlaceholder} testId="clientes-phone" />
             <TextInput value={birthday} onChange={setBirthday} placeholder={t.clientes.birthdayPlaceholder} />
           </div>
 

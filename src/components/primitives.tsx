@@ -175,6 +175,83 @@ export function TextInput({
   );
 }
 
+interface PhoneCountry {
+  iso: string;
+  dial: string;
+  flag: string;
+}
+
+export const PHONE_COUNTRIES: PhoneCountry[] = [
+  { iso: 'BR', dial: '+55', flag: '🇧🇷' },
+  { iso: 'PT', dial: '+351', flag: '🇵🇹' },
+  { iso: 'US', dial: '+1', flag: '🇺🇸' },
+  { iso: 'MX', dial: '+52', flag: '🇲🇽' },
+  { iso: 'CO', dial: '+57', flag: '🇨🇴' },
+  { iso: 'AR', dial: '+54', flag: '🇦🇷' },
+  { iso: 'CL', dial: '+56', flag: '🇨🇱' },
+  { iso: 'ES', dial: '+34', flag: '🇪🇸' },
+  { iso: 'GB', dial: '+44', flag: '🇬🇧' },
+];
+
+function splitPhone(value: string): { dial: string; rest: string } {
+  const found = PHONE_COUNTRIES.find((c) => value === c.dial || value.startsWith(`${c.dial} `));
+  if (found) return { dial: found.dial, rest: value.slice(found.dial.length).trimStart() };
+  return { dial: PHONE_COUNTRIES[0].dial, rest: value };
+}
+
+export function PhoneInput({ value, onChange, placeholder, testId }: { value: string; onChange: (v: string) => void; placeholder?: string; testId?: string }) {
+  const { dial, rest } = splitPhone(value);
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <select
+        value={dial}
+        onChange={(e) => onChange(`${e.target.value} ${rest}`.trim())}
+        data-testid={testId ? `${testId}-country` : undefined}
+        style={{
+          width: 96,
+          flexShrink: 0,
+          padding: '13px 6px',
+          borderRadius: 12,
+          border: `1.5px solid ${T.line}`,
+          fontFamily: 'Manrope',
+          fontSize: 13,
+          fontWeight: 600,
+          color: T.ink,
+          outline: 'none',
+          background: '#fff',
+        }}
+      >
+        {PHONE_COUNTRIES.map((c) => (
+          <option key={c.iso} value={c.dial}>
+            {c.flag} {c.dial}
+          </option>
+        ))}
+      </select>
+      <input
+        type="tel"
+        value={rest}
+        data-testid={testId}
+        onChange={(e) => onChange(`${dial} ${e.target.value.replace(/[^0-9 ()-]/g, '')}`.trim())}
+        placeholder={placeholder}
+        style={{
+          flex: 1,
+          minWidth: 0,
+          padding: '13px 14px',
+          borderRadius: 12,
+          border: `1.5px solid ${T.line}`,
+          fontFamily: 'Manrope',
+          fontSize: 14,
+          fontWeight: 600,
+          color: T.ink,
+          outline: 'none',
+          boxSizing: 'border-box',
+          background: '#fff',
+        }}
+      />
+    </div>
+  );
+}
+
 export function FieldLabel({ children }: { children: ReactNode }) {
   return <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>{children}</div>;
 }
