@@ -9,7 +9,7 @@ import type { CurrencyCode, Lang, OnboardingResult, ServiceItem } from '../types
 function StepBlock({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 23, fontWeight: 600, color: T.ink, lineHeight: 1.25 }}>{title}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 23, fontWeight: 600, color: T.ink, lineHeight: 1.25 }}>{title}</div>
       {subtitle && <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted, marginTop: 6, marginBottom: 22 }}>{subtitle}</div>}
       {!subtitle && <div style={{ marginBottom: 22 }} />}
       {children}
@@ -154,7 +154,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         {step === 4 && (
           <StepBlock title={t.onboarding.stepGoalTitle} subtitle={t.onboarding.stepGoalSubtitle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: 'Fraunces', fontSize: 22, color: T.ink }}>{CURRENCIES[currency].symbol}</span>
+              <span style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, color: T.ink }}>{CURRENCIES[currency].symbol}</span>
               <TextInput value={goal} onChange={setGoal} placeholder="0" numeric testId="onboarding-goal" />
             </div>
             {goal && Number(goal) > 0 && (

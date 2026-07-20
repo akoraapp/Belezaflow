@@ -31,21 +31,21 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
   return (
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted }}>{greet},</div>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 26, fontWeight: 600, color: T.ink, marginBottom: 20 }} data-testid="hoje-greeting">
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 26, fontWeight: 600, color: T.ink, marginBottom: 20 }} data-testid="hoje-greeting">
         {profile.name}.
       </div>
 
-      <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, background: T.ink, border: 'none' }}>
         <div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 4 }}>{t.hoje.revenueLabel}</div>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 20, color: T.ink }}>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>{t.hoje.revenueLabel}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, color: '#fff' }}>
             {CURRENCIES[currency].symbol} {fmtMoney(monthRevenue, currency)}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.goldOnDark }}>
             {CURRENCIES[currency].symbol} {fmtMoney(profile.goal, currency)} {t.hoje.ofGoalSuffix}
           </div>
         </div>
-        <GoalRing progress={progress} size={88} stroke={8} center={t.onboarding.goalRingCenter} />
+        <GoalRing progress={progress} size={88} stroke={8} center={t.onboarding.goalRingCenter} dark />
       </Card>
 
       <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 10 }}>{t.hoje.quickActionsTitle}</div>
@@ -85,7 +85,7 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         )}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.hoje.appointmentsToday}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.hoje.appointmentsToday}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {today.length === 0 && <EmptyHint text={t.hoje.noAppointmentsToday} />}
         {[...today]

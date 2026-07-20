@@ -86,7 +86,7 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <Megaphone size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.maquina.title}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.maquina.title}</div>
       </div>
       <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
 

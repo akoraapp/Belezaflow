@@ -18,7 +18,7 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
 
       {permission === 'default' && (
         <Card style={{ marginBottom: 16, borderColor: T.gold, background: T.goldSoft }}>

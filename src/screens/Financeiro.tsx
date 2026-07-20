@@ -31,7 +31,7 @@ function GoalGauge({ pct }: { pct: number }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Fraunces',
+          fontFamily: 'Cormorant Garamond',
           fontWeight: 700,
           fontSize: 15,
           color: textOnFill ? '#1B1712' : '#F4E9D2',
@@ -114,7 +114,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.financeiro.title}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.financeiro.title}</div>
 
       <div style={{ background: T.ink, borderRadius: 20, padding: 18, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
         <GoalGauge pct={goalPct} />
@@ -141,7 +141,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="finance-add-toggle"
@@ -208,7 +208,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.financeiro.historicoTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.financeiro.historicoTitle}</div>
       <Card style={{ marginBottom: 14 }}>
         <BarChart data={history} currency={currency} />
       </Card>

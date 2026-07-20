@@ -6,7 +6,7 @@ import { fmtMoney } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, ServiceItem } from '../types';
 
-export function GoalRing({ progress, size = 120, stroke = 10, center }: { progress: number; size?: number; stroke?: number; center?: string }) {
+export function GoalRing({ progress, size = 120, stroke = 10, center, dark }: { progress: number; size?: number; stroke?: number; center?: string; dark?: boolean }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, progress));
@@ -18,7 +18,7 @@ export function GoalRing({ progress, size = 120, stroke = 10, center }: { progre
           <stop offset="100%" stopColor="#8A6D2F" />
         </linearGradient>
       </defs>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={T.goldSoft} strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={dark ? 'rgba(255,255,255,0.15)' : T.goldSoft} strokeWidth={stroke} />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -31,10 +31,10 @@ export function GoalRing({ progress, size = 120, stroke = 10, center }: { progre
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dasharray 0.6s ease' }}
       />
-      <text x="50%" y="47%" textAnchor="middle" fontFamily="Fraunces" fontSize={size * 0.19} fill={T.ink} fontWeight="600">
+      <text x="50%" y="47%" textAnchor="middle" fontFamily="Cormorant Garamond" fontSize={size * 0.19} fill={dark ? '#fff' : T.ink} fontWeight="600">
         {Math.round(pct * 100)}%
       </text>
-      <text x="50%" y="63%" textAnchor="middle" fontFamily="Manrope" fontSize={size * 0.075} fill={T.muted}>
+      <text x="50%" y="63%" textAnchor="middle" fontFamily="Manrope" fontSize={size * 0.075} fill={dark ? T.goldOnDark : T.muted}>
         {center || 'da meta'}
       </text>
     </svg>
@@ -92,7 +92,7 @@ export function PrimaryButton({
         justifyContent: 'center',
         gap: 8,
         padding: '14px 22px',
-        borderRadius: 14,
+        borderRadius: 999,
         border: 'none',
         background: disabled ? T.line : `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
         color: disabled ? T.muted : '#fff',
@@ -130,7 +130,7 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
       {right}
     </div>
   );
@@ -160,8 +160,8 @@ export function TextInput({
       placeholder={placeholder}
       style={{
         width: '100%',
-        padding: '13px 14px',
-        borderRadius: 12,
+        padding: '13px 16px',
+        borderRadius: 16,
         border: `1.5px solid ${T.line}`,
         fontFamily: 'Manrope',
         fontSize: 14,
@@ -213,7 +213,7 @@ export function PhoneInput({ value, onChange, placeholder, testId }: { value: st
           width: 96,
           flexShrink: 0,
           padding: '13px 6px',
-          borderRadius: 12,
+          borderRadius: 16,
           border: `1.5px solid ${T.line}`,
           fontFamily: 'Manrope',
           fontSize: 13,
@@ -238,8 +238,8 @@ export function PhoneInput({ value, onChange, placeholder, testId }: { value: st
         style={{
           flex: 1,
           minWidth: 0,
-          padding: '13px 14px',
-          borderRadius: 12,
+          padding: '13px 16px',
+          borderRadius: 16,
           border: `1.5px solid ${T.line}`,
           fontFamily: 'Manrope',
           fontSize: 14,
@@ -267,7 +267,7 @@ export function BackHeader({ title, onBack }: { title: string; onBack: () => voi
       >
         <ChevronLeft size={16} color={T.ink} />
       </button>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 21, fontWeight: 600, color: T.ink }}>{title}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 21, fontWeight: 600, color: T.ink }}>{title}</div>
     </div>
   );
 }
@@ -293,7 +293,7 @@ export function StatBox({ label, value, accent, testId }: { label: string; value
   return (
     <Card testId={testId} style={{ flex: 1, padding: 14 }}>
       <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>{label}</div>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 22, fontWeight: 600, color: accent || T.ink, marginTop: 6 }}>{value}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, fontWeight: 600, color: accent || T.ink, marginTop: 6 }}>{value}</div>
     </Card>
   );
 }
@@ -340,11 +340,11 @@ export function ServiceOption({ s, active, currency, onClick }: { s: ServiceItem
       }}
     >
       <div>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 14.5, color: T.ink }}>{s.name}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 14.5, color: T.ink }}>{s.name}</div>
         <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginTop: 1 }}>{s.duration} min</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 15, color: T.goldDeep, fontWeight: 600 }}>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.goldDeep, fontWeight: 600 }}>
           {CURRENCIES[currency].symbol}
           {fmtMoney(s.price, currency)}
         </div>
@@ -412,7 +412,7 @@ export function AppointmentRow({ a, currency, testId }: { a: Appointment; curren
     <Card testId={testId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ textAlign: 'center', minWidth: 40 }}>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 15, color: T.ink }}>{a.time}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{a.time}</div>
         </div>
         <div>
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>

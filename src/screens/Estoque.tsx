@@ -43,7 +43,7 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
   return (
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.estoque.title}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.estoque.title}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="estoque-add-toggle"

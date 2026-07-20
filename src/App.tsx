@@ -330,7 +330,7 @@ function AppShell() {
           }}
         >
           <div style={{ width: 230, background: T.surface, borderRight: `1px solid ${T.line}`, padding: '26px 16px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontFamily: 'Fraunces', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
+            <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
               BeautyFlow <span style={{ color: T.goldDeep }}>AI</span>
             </div>
             <div style={{ padding: '0 10px 14px', fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>

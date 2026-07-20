@@ -2,21 +2,23 @@ import { Eye, Hand, PenTool, Droplet, Scissors, Flame, Palette, Stethoscope, Sto
 import type { CurrencyCode } from './types';
 
 export const T = {
-  bg: '#FFFFFF',
-  surface: '#FCFAF5',
-  surfaceAlt: '#F6F1E7',
-  ink: '#1B1712',
-  gold: '#B8933E',
-  goldLight: '#EADFC1',
+  bg: '#FAF7F0',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F6EFE1',
+  ink: '#201C17',
+  gold: '#B98D3E',
+  goldLight: '#E3C989',
+  goldOnDark: '#C9A24B',
   goldDeep: '#8A6D2F',
-  goldSoft: '#F3EACB',
-  muted: '#8C8579',
-  line: '#EDE6D8',
-  danger: '#AD4A3C',
-  success: '#5B7A54',
+  goldSoft: '#F0E6D2',
+  muted: '#8A8074',
+  mutedDeep: '#6B6459',
+  line: '#EBE2CF',
+  danger: '#8A4A3E',
+  success: '#4E7A49',
 };
 
-export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..700&family=Manrope:wght@400;500;600;700;800&display=swap');`;
+export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Manrope:wght@400;500;600;700;800&display=swap');`;
 
 interface CurrencyMeta {
   symbol: string;

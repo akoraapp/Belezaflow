@@ -27,7 +27,7 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
   return (
     <Card style={{ flex: '1 1 45%', padding: 14 }}>
       <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 19, color: accent || T.ink, marginTop: 4 }}>{value}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: accent || T.ink, marginTop: 4 }}>{value}</div>
     </Card>
   );
 }
@@ -59,7 +59,7 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <BarChart3 size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
       </div>
       <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.diagnostico.subtitle}</div>
 
@@ -73,7 +73,7 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
         <Metric label={t.diagnostico.metricLowStock} value={`${lowStock}`} accent={lowStock > 0 ? T.danger : undefined} />
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.diagnostico.insightsTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.diagnostico.insightsTitle}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {insights.length === 0 && <EmptyHint text={t.diagnostico.noInsights} />}
         {insights.map((ins, i) => (

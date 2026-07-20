@@ -46,7 +46,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
         </div>
       )}
       <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 16 }}>
@@ -113,7 +113,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.todayLabel}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.todayLabel}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {today.length === 0 && <EmptyHint text={t.agenda.noApptsToday} />}
         {[...today]
@@ -126,7 +126,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       {availableSlots.length > 0 && (
         <>
           <div style={{ height: 18 }} />
-          <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.freeSlotsToday}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.freeSlotsToday}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {availableSlots.map((tm) => (
               <div key={tm} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>

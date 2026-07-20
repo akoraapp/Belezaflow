@@ -54,7 +54,7 @@ export function ClientesScreen({ clients, services, contactMethod, addClient, up
   return (
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="clientes-add-toggle"
@@ -135,7 +135,7 @@ export function ClientesScreen({ clients, services, contactMethod, addClient, up
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: 'Fraunces',
+                  fontFamily: 'Cormorant Garamond',
                   color: T.goldDeep,
                   fontWeight: 700,
                 }}
@@ -234,7 +234,7 @@ function ClienteDetail({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'Fraunces',
+            fontFamily: 'Cormorant Garamond',
             fontSize: 22,
             color: T.goldDeep,
             fontWeight: 700,
@@ -243,7 +243,7 @@ function ClienteDetail({
           {client.name.charAt(0)}
         </div>
         <div>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 19, color: T.ink }}>{client.name}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: T.ink }}>{client.name}</div>
           <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{client.phone}</div>
         </div>
       </div>
@@ -274,7 +274,7 @@ function ClienteDetail({
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.clientStatusTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.clientStatusTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
         {STATUS_LIST.map((s) => (
           <Chip key={s} active={client.status === s} onClick={() => onChangeStatus(s)}>
@@ -283,7 +283,7 @@ function ClienteDetail({
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.centralRespostasTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.centralRespostasTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {templateKeys.map((k) => (
           <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>

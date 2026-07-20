@@ -73,7 +73,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
           <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>{t.agendaOnline.subtitle}</div>
         </>
       )}
@@ -95,7 +95,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.publicInfoTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.publicInfoTitle}</div>
       <Card style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
@@ -116,7 +116,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.slotsTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.slotsTitle}</div>
       <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.agendaOnline.slotsSubtitle}</div>
       <Card style={{ marginBottom: 20 }}>
         <FieldLabel>{t.agendaOnline.workingDaysLabel}</FieldLabel>
@@ -139,7 +139,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
       </Card>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
         <button onClick={onOpenServicos} style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
           {t.agendaOnline.editServicesCta}
         </button>
@@ -156,7 +156,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Fraunces', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
       <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${T.line}`, boxShadow: '0 18px 40px -20px rgba(27,23,18,0.25)' }}>
         <div
           style={{
@@ -186,7 +186,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: 'Fraunces',
+              fontFamily: 'Cormorant Garamond',
               fontSize: 27,
               color: '#fff',
               fontWeight: 600,
@@ -195,7 +195,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
           >
             {(profile.publicName || 'S').charAt(0)}
           </div>
-          <div style={{ position: 'relative', fontFamily: 'Fraunces', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
+          <div style={{ position: 'relative', fontFamily: 'Cormorant Garamond', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
           <div style={{ position: 'relative', fontFamily: 'Manrope', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
             {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
@@ -278,7 +278,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Check size={24} color={T.goldDeep} />
               </div>
-              <div style={{ fontFamily: 'Fraunces', fontSize: 17, color: T.ink }}>{t.agendaOnline.confirmedTitle}</div>
+              <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 17, color: T.ink }}>{t.agendaOnline.confirmedTitle}</div>
               <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: 3 }}>{t.agendaOnline.confirmedSubtitle}</div>
             </div>
           ) : (
@@ -301,7 +301,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                     style={{
                       padding: '10px 16px',
                       borderRadius: 12,
-                      fontFamily: 'Fraunces',
+                      fontFamily: 'Cormorant Garamond',
                       fontSize: 13.5,
                       fontWeight: 600,
                       cursor: 'pointer',
@@ -330,7 +330,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                     </div>
                     <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
                   </div>
-                  <div style={{ fontFamily: 'Fraunces', fontSize: 16, color: T.goldDeep, fontWeight: 600 }}>{fmtMoney(bookService.price, currency)}</div>
+                  <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, color: T.goldDeep, fontWeight: 600 }}>{fmtMoney(bookService.price, currency)}</div>
                 </div>
               )}
 

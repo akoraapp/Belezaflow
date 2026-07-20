@@ -4,8 +4,6 @@ import { T } from '../theme';
 import { TextInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 
-const CREAM = '#F5F0E8';
-
 function deriveNameFromEmail(email: string) {
   const local = email.split('@')[0] || '';
   const cleaned = local.replace(/[._-]+/g, ' ').trim();
@@ -25,7 +23,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
   const submit = () => canSubmit && onLogin(deriveNameFromEmail(email.trim()));
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: CREAM }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '44px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
         <div style={{ flex: 0.5 }} />
 
@@ -40,11 +38,11 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
                 strokeLinecap="round"
               />
             </svg>
-            <span style={{ position: 'absolute', left: 2, top: 0, fontFamily: 'Fraunces', fontSize: 76, fontWeight: 600, color: T.ink, lineHeight: 1 }}>B</span>
-            <span style={{ position: 'absolute', left: 58, top: 28, fontFamily: 'Fraunces', fontSize: 52, fontWeight: 500, color: T.gold, lineHeight: 1 }}>F</span>
+            <span style={{ position: 'absolute', left: 2, top: 0, fontFamily: 'Cormorant Garamond', fontSize: 76, fontWeight: 600, color: T.ink, lineHeight: 1 }}>B</span>
+            <span style={{ position: 'absolute', left: 58, top: 28, fontFamily: 'Cormorant Garamond', fontSize: 52, fontWeight: 500, color: T.gold, lineHeight: 1 }}>F</span>
             <Sparkles size={16} color={T.gold} style={{ position: 'absolute', top: 10, right: 10 }} />
           </div>
-          <div style={{ fontFamily: 'Fraunces', fontSize: 25, fontWeight: 600, letterSpacing: 3, marginBottom: 10 }}>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, letterSpacing: 3, marginBottom: 10 }}>
             <span style={{ color: T.ink }}>BELEZA</span>
             <span style={{ position: 'relative', display: 'inline-block' }}>
               <span style={{ color: T.gold }}>FLOW</span>
@@ -74,9 +72,9 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
           style={{
             width: '100%',
             height: 52,
-            borderRadius: 14,
+            borderRadius: 999,
             border: 'none',
-            background: `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+            background: T.ink,
             color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,
@@ -102,15 +100,15 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
           style={{
             width: '100%',
             height: 52,
-            borderRadius: 14,
-            border: 'none',
-            background: T.ink,
-            color: '#fff',
+            borderRadius: 999,
+            border: `1.5px solid ${T.line}`,
+            background: '#fff',
+            color: T.ink,
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 15,
             cursor: canSubmit ? 'pointer' : 'default',
-            opacity: canSubmit ? 1 : 0.55,
+            opacity: canSubmit ? 1 : 0.6,
           }}
         >
           {t.login.createAccountCta}

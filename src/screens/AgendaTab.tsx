@@ -24,7 +24,7 @@ export function AgendaTab({ appointments, services, profile, currency, addAppoin
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Fraunces', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 14 }}>{t.agenda.title}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 14 }}>{t.agenda.title}</div>
 
       <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4, marginBottom: 18 }}>
         {(

@@ -25,7 +25,7 @@ export function MoreSheet({ onSelect, onClose, t }: { onSelect: (id: string) => 
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(27,23,18,0.35)', zIndex: 30, display: 'flex', alignItems: 'flex-end' }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', background: T.bg, borderRadius: '22px 22px 0 0', padding: '18px 20px 28px' }}>
         <div style={{ width: 36, height: 4, borderRadius: 4, background: T.line, margin: '0 auto 16px' }} />
-        <div style={{ fontFamily: 'Fraunces', fontSize: 17, color: T.ink, marginBottom: 14 }}>{t.nav.moreTitle}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 17, color: T.ink, marginBottom: 14 }}>{t.nav.moreTitle}</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {items.map((m) => (
             <div
