@@ -29,7 +29,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
           <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 220, height: 'auto', marginBottom: 4 }} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, letterSpacing: 0.6, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
