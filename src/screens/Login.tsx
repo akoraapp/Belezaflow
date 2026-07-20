@@ -30,19 +30,19 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
         <div style={{ flex: 0.5 }} />
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
-          <div style={{ position: 'relative', width: 128, height: 92, marginBottom: 8 }}>
-            <svg width="128" height="92" viewBox="0 0 128 92" style={{ position: 'absolute', inset: 0 }}>
+          <div style={{ position: 'relative', width: 132, height: 100, marginBottom: 8 }}>
+            <svg width="132" height="100" viewBox="0 0 132 100" style={{ position: 'absolute', inset: 0 }}>
               <path
-                d="M8,58 C 30,78 50,78 64,54 C 78,30 98,30 118,50"
+                d="M10,80 C 30,94 50,90 58,70 C 65,52 76,38 100,40"
                 fill="none"
                 stroke={T.gold}
                 strokeWidth={2.5}
                 strokeLinecap="round"
               />
             </svg>
-            <span style={{ position: 'absolute', left: 4, top: 4, fontFamily: 'Fraunces', fontSize: 60, fontWeight: 600, color: T.ink, lineHeight: 1 }}>B</span>
-            <span style={{ position: 'absolute', left: 58, top: 4, fontFamily: 'Fraunces', fontSize: 60, fontWeight: 500, color: T.gold, lineHeight: 1 }}>F</span>
-            <Sparkles size={17} color={T.gold} style={{ position: 'absolute', top: -2, right: 6 }} />
+            <span style={{ position: 'absolute', left: 2, top: 0, fontFamily: 'Fraunces', fontSize: 76, fontWeight: 600, color: T.ink, lineHeight: 1 }}>B</span>
+            <span style={{ position: 'absolute', left: 58, top: 28, fontFamily: 'Fraunces', fontSize: 52, fontWeight: 500, color: T.gold, lineHeight: 1 }}>F</span>
+            <Sparkles size={16} color={T.gold} style={{ position: 'absolute', top: 10, right: 10 }} />
           </div>
           <div style={{ fontFamily: 'Fraunces', fontSize: 25, fontWeight: 600, letterSpacing: 3, marginBottom: 10 }}>
             <span style={{ color: T.ink }}>BELEZA</span>
@@ -76,7 +76,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             height: 52,
             borderRadius: 14,
             border: 'none',
-            background: canSubmit ? T.ink : T.line,
+            background: canSubmit ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : T.line,
             color: canSubmit ? '#fff' : T.muted,
             fontFamily: 'Manrope',
             fontWeight: 700,
@@ -102,9 +102,9 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             width: '100%',
             height: 52,
             borderRadius: 14,
-            border: `1.5px solid ${T.line}`,
-            background: '#fff',
-            color: canSubmit ? T.ink : T.muted,
+            border: 'none',
+            background: canSubmit ? T.ink : T.line,
+            color: canSubmit ? '#fff' : T.muted,
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 15,
