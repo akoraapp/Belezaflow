@@ -38,6 +38,19 @@ export function fmtCurrency(value: number, currency: CurrencyCode) {
   return `${CURRENCIES[currency].symbol} ${fmtMoney(value, currency)}`;
 }
 
+// Slot times are stored internally as 24h "HH:MM" strings (sorting/comparison relies on
+// this). English speakers conventionally read schedules in 12h AM/PM, so only the display
+// label is reformatted for 'en' — pt and es keep the 24h format common in their locales.
+export function formatTimeLabel(time: string, lang: Lang) {
+  if (lang !== 'en') return time;
+  const [hStr, mStr] = time.split(':');
+  const h = Number(hStr);
+  if (Number.isNaN(h)) return time;
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${mStr} ${period}`;
+}
+
 const RELATIVE_TIME_WORDS: Record<Lang, { now: string; minAgo: (n: number) => string; hAgo: (n: number) => string; dAgo: (n: number) => string }> = {
   pt: { now: 'agora', minAgo: (n) => `há ${n} min`, hAgo: (n) => `há ${n} h`, dAgo: (n) => `há ${n} d` },
   en: { now: 'now', minAgo: (n) => `${n} min ago`, hAgo: (n) => `${n} h ago`, dAgo: (n) => `${n} d ago` },

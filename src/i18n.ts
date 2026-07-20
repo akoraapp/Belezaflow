@@ -165,6 +165,14 @@ export const MONTH_ABBR: Record<Lang, string[]> = {
   es: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
 };
 
+// Keyed by the canonical pt weekday abbreviation used across the app as the stored
+// data key (Profile.workingDays, WEEKDAY_LABELS) — only the displayed label changes.
+export const WEEKDAY_LABEL: Record<Lang, Record<string, string>> = {
+  pt: { Seg: 'Seg', Ter: 'Ter', Qua: 'Qua', Qui: 'Qui', Sex: 'Sex', 'Sáb': 'Sáb', Dom: 'Dom' },
+  en: { Seg: 'Mon', Ter: 'Tue', Qua: 'Wed', Qui: 'Thu', Sex: 'Fri', 'Sáb': 'Sat', Dom: 'Sun' },
+  es: { Seg: 'Lun', Ter: 'Mar', Qua: 'Mié', Qui: 'Jue', Sex: 'Vie', 'Sáb': 'Sáb', Dom: 'Dom' },
+};
+
 const pt = {
   nav: {
     tabHoje: 'Hoje',

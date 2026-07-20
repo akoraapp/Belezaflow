@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react';
 import { T, ALL_SLOTS } from '../theme';
-import { PROFESSION_LABEL } from '../i18n';
-import { getAvailability, fmtMoney } from '../lib/helpers';
+import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
+import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
@@ -123,7 +123,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {WEEKDAYS.map((d) => (
             <Chip key={d} active={workingDays.includes(d)} onClick={() => toggleDay(d)}>
-              {d}
+              {WEEKDAY_LABEL[lang][d]}
             </Chip>
           ))}
         </div>
@@ -131,7 +131,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {ALL_SLOTS.map((tm) => (
             <Chip key={tm} active={chosenSlots.includes(tm)} onClick={() => toggleSlot(tm)}>
-              {tm}
+              {formatTimeLabel(tm, lang)}
             </Chip>
           ))}
         </div>
@@ -310,7 +310,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                       color: bookTime === tm ? '#fff' : T.ink,
                     }}
                   >
-                    {tm}
+                    {formatTimeLabel(tm, lang)}
                   </button>
                 ))}
               </div>
@@ -326,7 +326,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                   <div>
                     <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, color: T.ink }}>
                       {bookService.name}
-                      {bookTime ? ` · ${bookTime}` : ''}
+                      {bookTime ? ` · ${formatTimeLabel(bookTime, lang)}` : ''}
                     </div>
                     <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
                   </div>
