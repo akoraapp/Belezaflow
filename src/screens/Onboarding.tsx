@@ -127,24 +127,12 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                     textAlign: 'center',
                     cursor: 'pointer',
                     border: `1.5px solid ${profession === p.id ? T.gold : T.line}`,
-                    background: profession === p.id ? T.goldSoft : T.surface,
+                    background: profession === p.id ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : T.surface,
                   }}
                 >
-                  <div
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: '50%',
-                      margin: '0 auto 10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: profession === p.id ? 'rgba(255,255,255,0.6)' : T.goldSoft,
-                    }}
-                  >
-                    <p.icon size={17} color={T.goldDeep} strokeWidth={1.6} />
+                  <div style={{ fontFamily: 'Manrope', fontSize: 13, fontWeight: 700, color: profession === p.id ? '#fff' : T.ink }}>
+                    {PROFESSION_LABEL[lang][p.id]}
                   </div>
-                  <div style={{ fontFamily: 'Manrope', fontSize: 12, fontWeight: 600, color: T.ink }}>{PROFESSION_LABEL[lang][p.id]}</div>
                 </div>
               ))}
             </div>
