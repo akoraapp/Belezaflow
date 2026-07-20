@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
 import { T } from '../theme';
 import { TextInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
+import belezaflowLogo from '../assets/belezaflow-logo.webp';
 
 function deriveNameFromEmail(email: string) {
   const local = email.split('@')[0] || '';
@@ -28,29 +28,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
         <div style={{ flex: 0.5 }} />
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
-          <div style={{ position: 'relative', width: 132, height: 100, marginBottom: 8 }}>
-            <svg width="132" height="100" viewBox="0 0 132 100" style={{ position: 'absolute', inset: 0 }}>
-              <path
-                d="M10,80 C 30,94 50,90 58,70 C 65,52 76,38 100,40"
-                fill="none"
-                stroke={T.gold}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-              />
-            </svg>
-            <span style={{ position: 'absolute', left: 2, top: 0, fontFamily: 'Cormorant Garamond', fontSize: 76, fontWeight: 600, color: T.ink, lineHeight: 1 }}>B</span>
-            <span style={{ position: 'absolute', left: 58, top: 28, fontFamily: 'Cormorant Garamond', fontSize: 52, fontWeight: 500, color: T.gold, lineHeight: 1 }}>F</span>
-            <Sparkles size={16} color={T.gold} style={{ position: 'absolute', top: 10, right: 10 }} />
-          </div>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, letterSpacing: 3, marginBottom: 10 }}>
-            <span style={{ color: T.ink }}>BELEZA</span>
-            <span style={{ position: 'relative', display: 'inline-block' }}>
-              <span style={{ color: T.gold }}>FLOW</span>
-              <svg width="76" height="14" viewBox="0 0 76 14" style={{ position: 'absolute', left: 0, bottom: -9 }}>
-                <path d="M2,3 C 20,13 40,13 50,5 C 58,-1 68,1 74,7" fill="none" stroke={T.gold} strokeWidth={1.6} strokeLinecap="round" />
-              </svg>
-            </span>
-          </div>
+          <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 220, height: 'auto', marginBottom: 4 }} />
           <div style={{ fontFamily: 'Manrope', fontSize: 12, letterSpacing: 0.6, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
         </div>
 
