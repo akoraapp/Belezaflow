@@ -76,12 +76,13 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             height: 52,
             borderRadius: 14,
             border: 'none',
-            background: canSubmit ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : T.line,
-            color: canSubmit ? '#fff' : T.muted,
+            background: `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+            color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 15,
             cursor: canSubmit ? 'pointer' : 'default',
+            opacity: canSubmit ? 1 : 0.55,
             marginTop: 22,
           }}
         >
@@ -103,12 +104,13 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             height: 52,
             borderRadius: 14,
             border: 'none',
-            background: canSubmit ? T.ink : T.line,
-            color: canSubmit ? '#fff' : T.muted,
+            background: T.ink,
+            color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 15,
             cursor: canSubmit ? 'pointer' : 'default',
+            opacity: canSubmit ? 1 : 0.55,
           }}
         >
           {t.login.createAccountCta}
