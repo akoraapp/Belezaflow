@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Check, ChevronLeft, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL } from '../i18n';
-import { fmtMoney } from '../lib/helpers';
+import { fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, ServiceItem } from '../types';
 
@@ -412,7 +412,7 @@ export function AppointmentRow({ a, currency, testId }: { a: Appointment; curren
     <Card testId={testId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ textAlign: 'center', minWidth: 40 }}>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{a.time}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
         </div>
         <div>
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>

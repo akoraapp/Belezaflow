@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T } from '../theme';
-import { getAvailability, fmtMoney } from '../lib/helpers';
+import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, Profile, ServiceItem } from '../types';
@@ -16,7 +16,7 @@ interface AgendaScreenProps {
 }
 
 export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded }: AgendaScreenProps) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
   const [clientName, setClientName] = useState('');
@@ -103,7 +103,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
             {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agenda.noSlotsToday}</span>}
             {availableSlots.map((tm) => (
               <Chip key={tm} active={time === tm} onClick={() => setTime(tm)}>
-                {tm}
+                {formatTimeLabel(tm, lang)}
               </Chip>
             ))}
           </div>
@@ -130,7 +130,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {availableSlots.map((tm) => (
               <div key={tm} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>
-                {tm}
+                {formatTimeLabel(tm, lang)}
               </div>
             ))}
           </div>
