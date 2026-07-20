@@ -4,16 +4,28 @@ import { T } from '../theme';
 import { TextInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 
+const CREAM = '#F5F0E8';
+
+function deriveNameFromEmail(email: string) {
+  const local = email.split('@')[0] || '';
+  const cleaned = local.replace(/[._-]+/g, ' ').trim();
+  if (!cleaned) return 'Profissional';
+  return cleaned
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 export function Login({ onLogin }: { onLogin: (name: string) => void }) {
   const { t } = useLang();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const canSubmit = name.trim().length > 0 && email.trim().length > 0 && password.trim().length > 0;
-  const submit = () => canSubmit && onLogin(name.trim());
+  const canSubmit = email.trim().length > 0 && password.trim().length > 0;
+  const submit = () => canSubmit && onLogin(deriveNameFromEmail(email.trim()));
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: CREAM }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '44px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
         <div style={{ flex: 0.5 }} />
 
@@ -41,13 +53,10 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
               </svg>
             </span>
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', color: T.muted, textAlign: 'center', fontWeight: 700 }}>
-            {t.login.brandTagline}
-          </div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, letterSpacing: 0.6, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <TextInput value={name} onChange={setName} placeholder={t.login.namePlaceholder} testId="login-name" />
           <TextInput type="email" value={email} onChange={setEmail} placeholder={t.login.emailPlaceholder} testId="login-email" />
           <TextInput type="password" value={password} onChange={setPassword} placeholder={t.login.passwordPlaceholder} testId="login-password" />
         </div>
@@ -67,7 +76,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             height: 52,
             borderRadius: 14,
             border: 'none',
-            background: canSubmit ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : T.line,
+            background: canSubmit ? T.ink : T.line,
             color: canSubmit ? '#fff' : T.muted,
             fontFamily: 'Manrope',
             fontWeight: 700,
@@ -93,9 +102,9 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             width: '100%',
             height: 52,
             borderRadius: 14,
-            border: 'none',
-            background: canSubmit ? T.ink : T.line,
-            color: canSubmit ? '#fff' : T.muted,
+            border: `1.5px solid ${T.line}`,
+            background: '#fff',
+            color: canSubmit ? T.ink : T.muted,
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 15,

@@ -198,8 +198,7 @@ const pt = {
     viewToggleDesktop: 'Computador',
   },
   login: {
-    brandTagline: 'O assistente que faz seu negócio de beleza crescer',
-    namePlaceholder: 'Nome completo',
+    brandTagline: 'Gestão premium para sua rotina',
     emailPlaceholder: 'E-mail',
     passwordPlaceholder: 'Senha',
     forgotPassword: 'Esqueci minha senha',
@@ -496,8 +495,7 @@ const en: typeof pt = {
     viewToggleDesktop: 'Desktop',
   },
   login: {
-    brandTagline: 'The assistant that grows your beauty business',
-    namePlaceholder: 'Full name',
+    brandTagline: 'Premium management for your routine',
     emailPlaceholder: 'Email',
     passwordPlaceholder: 'Password',
     forgotPassword: 'Forgot my password',
@@ -794,8 +792,7 @@ const es: typeof pt = {
     viewToggleDesktop: 'Computadora',
   },
   login: {
-    brandTagline: 'El asistente que hace crecer tu negocio de belleza',
-    namePlaceholder: 'Nombre completo',
+    brandTagline: 'Gestión premium para tu rutina',
     emailPlaceholder: 'Correo electrónico',
     passwordPlaceholder: 'Contraseña',
     forgotPassword: 'Olvidé mi contraseña',
