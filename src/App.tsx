@@ -24,7 +24,7 @@ import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult,
 
 export default function App() {
   return (
-    <LangProvider initialLang="pt">
+    <LangProvider>
       <AppShell />
     </LangProvider>
   );
