@@ -185,11 +185,13 @@ export const PHONE_COUNTRIES: PhoneCountry[] = [
   { iso: 'BR', dial: '+55', flag: '🇧🇷' },
   { iso: 'PT', dial: '+351', flag: '🇵🇹' },
   { iso: 'US', dial: '+1', flag: '🇺🇸' },
+  { iso: 'CA', dial: '+1', flag: '🇨🇦' },
   { iso: 'MX', dial: '+52', flag: '🇲🇽' },
   { iso: 'CO', dial: '+57', flag: '🇨🇴' },
   { iso: 'AR', dial: '+54', flag: '🇦🇷' },
   { iso: 'CL', dial: '+56', flag: '🇨🇱' },
   { iso: 'ES', dial: '+34', flag: '🇪🇸' },
+  { iso: 'CH', dial: '+41', flag: '🇨🇭' },
   { iso: 'GB', dial: '+44', flag: '🇬🇧' },
 ];
 
