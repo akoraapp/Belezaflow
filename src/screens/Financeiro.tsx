@@ -86,26 +86,48 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
   const [value, setValue] = useState('');
   const [data, setData] = useState('');
 
-  const totalRev = appointments.filter((a) => a.status !== 'Cancelado').reduce((s, a) => s + a.price, 0);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const isCurrentPeriod = selectedYear === currentYear && selectedMonth === currentMonth;
+  const yearOptions = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
+
+  const appointmentsInPeriod = (year: number, month: number) =>
+    appointments.filter((a) => a.status !== 'Cancelado' && new Date(a.createdAt).getFullYear() === year && new Date(a.createdAt).getMonth() === month);
+  const entriesInPeriod = (year: number, month: number) =>
+    entries.filter((e) => new Date(e.createdAt).getFullYear() === year && new Date(e.createdAt).getMonth() === month);
+
+  const periodAppointments = appointmentsInPeriod(selectedYear, selectedMonth);
+  const periodEntries = entriesInPeriod(selectedYear, selectedMonth);
+
+  const totalRev = periodAppointments.reduce((s, a) => s + a.price, 0);
   const goalPct = profile.goal > 0 ? Math.min(100, Math.round((totalRev / profile.goal) * 100)) : 0;
   const remaining = Math.max(0, profile.goal - totalRev);
-  const ticketMedio = appointments.length ? Math.round(appointments.reduce((s, a) => s + a.price, 0) / appointments.length) : 0;
+  const ticketMedio = periodAppointments.length ? Math.round(periodAppointments.reduce((s, a) => s + a.price, 0) / periodAppointments.length) : 0;
 
-  const aReceber = entries.filter((e) => e.tipo === 'receber').reduce((s, e) => s + Number(e.value), 0);
-  const aPagar = entries.filter((e) => e.tipo === 'pagar').reduce((s, e) => s + Number(e.value), 0);
+  const aReceber = periodEntries.filter((e) => e.tipo === 'receber').reduce((s, e) => s + Number(e.value), 0);
+  const aPagar = periodEntries.filter((e) => e.tipo === 'pagar').reduce((s, e) => s + Number(e.value), 0);
 
-  const now = new Date();
-  const monthName = MONTH_NAMES[lang][now.getMonth()];
+  const monthName = MONTH_NAMES[lang][selectedMonth];
   const history = Array.from({ length: 6 }).map((_, i) => {
-    const idx = now.getMonth() - (5 - i);
+    const idx = currentMonth - (5 - i);
     const monthIdx = ((idx % 12) + 12) % 12;
-    const isCurrent = i === 5;
-    return { label: MONTH_ABBR[lang][monthIdx], value: isCurrent ? totalRev : 0 };
+    const yearOffset = Math.floor((currentMonth - (5 - i)) / 12);
+    const yearForMonth = currentYear + yearOffset;
+    const revenue = appointmentsInPeriod(yearForMonth, monthIdx).reduce((s, a) => s + a.price, 0);
+    return { label: MONTH_ABBR[lang][monthIdx], value: revenue };
   });
+
+  const resetToCurrentPeriod = () => {
+    setSelectedYear(currentYear);
+    setSelectedMonth(currentMonth);
+  };
 
   const submit = () => {
     if (!label || !value) return;
-    addEntry({ id: `f${Date.now()}`, tipo, label, value: Number(value), data: data || '—' });
+    addEntry({ id: `f${Date.now()}`, tipo, label, value: Number(value), data: data || '—', createdAt: Date.now() });
     setLabel('');
     setValue('');
     setData('');
@@ -115,6 +137,51 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
   return (
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.financeiro.title}</div>
+
+      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 8 }}>
+        {t.financeiro.periodLabel}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          data-testid="finance-month-select"
+          style={{ flex: 1.4, padding: '11px 10px', borderRadius: 12, border: `1.5px solid ${T.line}`, fontFamily: 'Manrope', fontSize: 13, fontWeight: 600, color: T.ink, background: '#fff', outline: 'none' }}
+        >
+          {MONTH_NAMES[lang].map((m, i) => (
+            <option key={m} value={i}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          data-testid="finance-year-select"
+          style={{ flex: 1, padding: '11px 10px', borderRadius: 12, border: `1.5px solid ${T.line}`, fontFamily: 'Manrope', fontSize: 13, fontWeight: 600, color: T.ink, background: '#fff', outline: 'none' }}
+        >
+          {yearOptions.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {!isCurrentPeriod && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 12, padding: '10px 12px', background: T.goldSoft, borderRadius: 12 }}>
+          <span style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
+            {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
+          </span>
+          <button
+            onClick={resetToCurrentPeriod}
+            data-testid="finance-reset-period"
+            style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+          >
+            {t.financeiro.backToCurrentCta}
+          </button>
+        </div>
+      )}
 
       <div style={{ background: T.ink, borderRadius: 20, padding: 18, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
         <GoalGauge pct={goalPct} />
@@ -139,6 +206,10 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         <StatBox label={t.financeiro.totalReceber} value={fmtCurrency(aReceber, currency)} accent={T.success} />
         <StatBox label={t.financeiro.totalPagar} value={fmtCurrency(aPagar, currency)} accent={T.danger} />
       </div>
+
+      {!isCurrentPeriod && periodAppointments.length === 0 && periodEntries.length === 0 && (
+        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -10, marginBottom: 20 }}>{t.financeiro.noDataForPeriod}</div>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>

@@ -57,6 +57,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
       day: 'hoje',
       status: 'Agendado',
       origin: 'online',
+      createdAt: Date.now(),
     });
     addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '—' });
     setConfirmed(true);

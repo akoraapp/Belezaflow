@@ -56,6 +56,7 @@ export interface Appointment {
   day: string;
   status: string;
   origin?: 'online';
+  createdAt: number;
 }
 
 export interface Client {
@@ -74,4 +75,5 @@ export interface FinanceEntry {
   label: string;
   value: number;
   data: string;
+  createdAt: number;
 }

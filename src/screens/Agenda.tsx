@@ -35,6 +35,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       time,
       day: 'hoje',
       status: 'Agendado',
+      createdAt: Date.now(),
     });
     setShowAdd(false);
     setSelService(null);
