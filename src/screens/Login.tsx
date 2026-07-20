@@ -58,7 +58,6 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             fontWeight: 700,
             fontSize: 15,
             cursor: canSubmit ? 'pointer' : 'default',
-            opacity: canSubmit ? 1 : 0.55,
             marginTop: 22,
           }}
         >
