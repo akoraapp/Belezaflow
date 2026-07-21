@@ -35,7 +35,7 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
 export function DiagnosticoScreen({ profile, clients, appointments, products, currency, onOpenConteudo, onOpenClientes }: DiagnosticoScreenProps) {
   const { t } = useLang();
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
-  const revenue = appointments.filter((a) => a.status !== 'Cancelado').reduce((s, a) => s + a.price, 0);
+  const revenue = appointments.filter((a) => a.status === 'Compareceu').reduce((s, a) => s + a.price, 0);
   const gap = Math.max(0, (profile.goal || 0) - revenue);
   const leads = clients.filter((c) => c.status === 'Novo Lead').length;
   const activeClients = clients.filter((c) => c.status === 'Cliente' || c.status === 'Agendado').length;

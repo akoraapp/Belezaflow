@@ -1,4 +1,4 @@
-import { Calendar, Cake, MessageCircle, Package, Target, Users, type LucideIcon } from 'lucide-react';
+import { Calendar, Cake, MessageCircle, Package, Target, UserX, Users, type LucideIcon } from 'lucide-react';
 import { getAvailability, fmtCurrency, todayIsBirthday, format } from './helpers';
 import { productStatus } from '../screens/Estoque';
 import type { Dict } from '../i18n';
@@ -18,6 +18,7 @@ export interface AlertCallbacks {
   onOpenEstoque: () => void;
   onOpenClientesLeads: () => void;
   onSendReminders: () => void;
+  onFollowUpNoShow: (appointment: Appointment) => void;
 }
 
 interface BuildAlertsParams {
@@ -108,6 +109,17 @@ export function buildAlerts({ profile, appointments, clients, services, products
       onCta: callbacks.onOpenClientesLeads,
     });
   }
+
+  const noShows = appointments.filter((a) => a.status === 'NaoCompareceu' && !a.followUpSent);
+  noShows.forEach((a) => {
+    alerts.push({
+      key: `noshow-${a.id}`,
+      icon: UserX,
+      title: format(t.hoje.alertNoShowMessage, { name: a.clientName, service: a.service }),
+      ctaLabel: t.hoje.alertNoShowCta,
+      onCta: () => callbacks.onFollowUpNoShow(a),
+    });
+  });
 
   return alerts;
 }

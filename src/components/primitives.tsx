@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Check, ChevronLeft, type LucideIcon } from 'lucide-react';
+import { Check, ChevronLeft, X, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL } from '../i18n';
 import { fmtMoney, formatTimeLabel } from '../lib/helpers';
@@ -408,32 +408,121 @@ export function MiniField({ label, value, onChange }: { label: string; value: nu
   );
 }
 
-export function AppointmentRow({ a, currency, testId }: { a: Appointment; currency: CurrencyCode; testId?: string }) {
-  const { lang } = useLang();
+export function AppointmentRow({
+  a,
+  currency,
+  testId,
+  onMarkAttended,
+  onMarkNoShow,
+}: {
+  a: Appointment;
+  currency: CurrencyCode;
+  testId?: string;
+  onMarkAttended?: () => void;
+  onMarkNoShow?: () => void;
+}) {
+  const { t, lang } = useLang();
+  const isPending = a.status === 'Agendado' || a.status === 'Confirmado';
+  const showActions = isPending && (onMarkAttended || onMarkNoShow);
+
   return (
-    <Card testId={testId} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ textAlign: 'center', minWidth: 40 }}>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
+    <Card testId={testId}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ textAlign: 'center', minWidth: 40 }}>
+            <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
+          </div>
+          <div>
+            <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
+            <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
+              {a.service}
+              {a.clientPhone ? ` · ${a.clientPhone}` : ''}
+            </div>
+          </div>
         </div>
-        <div>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
-            {a.service}
-            {a.clientPhone ? ` · ${a.clientPhone}` : ''}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.goldDeep }}>
+            {CURRENCIES[currency].symbol}
+            {fmtMoney(a.price, currency)}
+          </div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: STATUS_COLOR[a.status] || T.muted }}>
+            {STATUS_LABEL[lang][a.status] || a.status}
+            {a.origin === 'online' ? ' · Online' : ''}
           </div>
         </div>
       </div>
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.goldDeep }}>
-          {CURRENCIES[currency].symbol}
-          {fmtMoney(a.price, currency)}
+
+      {showActions && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+          {onMarkAttended && (
+            <button
+              onClick={onMarkAttended}
+              data-testid={testId ? `${testId}-attended` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: 'none',
+                background: T.success,
+                color: '#fff',
+                fontFamily: 'Manrope',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: 'pointer',
+                padding: '7px 10px',
+                borderRadius: 999,
+              }}
+            >
+              <Check size={12} /> {t.attendance.markAttendedCta}
+            </button>
+          )}
+          {onMarkNoShow && (
+            <button
+              onClick={onMarkNoShow}
+              data-testid={testId ? `${testId}-noshow` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: 'none',
+                background: T.danger,
+                color: '#fff',
+                fontFamily: 'Manrope',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: 'pointer',
+                padding: '7px 10px',
+                borderRadius: 999,
+              }}
+            >
+              <X size={12} /> {t.attendance.markNoShowCta}
+            </button>
+          )}
         </div>
-        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: STATUS_COLOR[a.status] || T.muted }}>
-          {STATUS_LABEL[lang][a.status] || a.status}
-          {a.origin === 'online' ? ' · Online' : ''}
+      )}
+
+      {a.status === 'NaoCompareceu' && (
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            marginTop: 10,
+            padding: '4px 10px',
+            borderRadius: 999,
+            background: T.danger,
+            color: '#fff',
+            fontFamily: 'Manrope',
+            fontWeight: 700,
+            fontSize: 10.5,
+          }}
+        >
+          {t.attendance.needsFollowUpTag}
         </div>
-      </div>
+      )}
     </Card>
   );
 }

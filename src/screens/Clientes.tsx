@@ -4,21 +4,26 @@ import { T, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
 import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Client, ContactMethod, ServiceItem } from '../types';
+import { format } from '../lib/helpers';
+import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
+import type { Appointment, Client, ContactMethod, ServiceItem } from '../types';
 
 interface ClientesScreenProps {
   clients: Client[];
   services: ServiceItem[];
+  appointments: Appointment[];
   contactMethod: ContactMethod;
   addClient: (c: Omit<Client, 'id'>) => void;
   updateClient: (id: string, patch: Partial<Client>) => void;
   initialFilter?: string;
+  initialSelectedId?: string | null;
+  onFollowUpSent: (appointmentId: string) => void;
 }
 
-export function ClientesScreen({ clients, services, contactMethod, addClient, updateClient, initialFilter }: ClientesScreenProps) {
+export function ClientesScreen({ clients, services, appointments, contactMethod, addClient, updateClient, initialFilter, initialSelectedId, onFollowUpSent }: ClientesScreenProps) {
   const { t, lang } = useLang();
   const [filter, setFilter] = useState(initialFilter ?? 'Todos');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -40,6 +45,9 @@ export function ClientesScreen({ clients, services, contactMethod, addClient, up
 
   const selected = clients.find((c) => c.id === selectedId);
   if (selected) {
+    const pendingNoShow = appointments.find(
+      (a) => a.status === 'NaoCompareceu' && !a.followUpSent && ((selected.phone && a.clientPhone === selected.phone) || a.clientName === selected.name),
+    );
     return (
       <ClienteDetail
         client={selected}
@@ -47,6 +55,8 @@ export function ClientesScreen({ clients, services, contactMethod, addClient, up
         contactMethod={contactMethod}
         onChangeStatus={(status) => updateClient(selected.id, { status })}
         onChangeBirthday={(bday) => updateClient(selected.id, { birthday: bday })}
+        pendingNoShow={pendingNoShow}
+        onFollowUpSent={onFollowUpSent}
       />
     );
   }
@@ -165,16 +175,31 @@ function ClienteDetail({
   contactMethod,
   onChangeStatus,
   onChangeBirthday,
+  pendingNoShow,
+  onFollowUpSent,
 }: {
   client: Client;
   onBack: () => void;
   contactMethod: ContactMethod;
   onChangeStatus: (status: string) => void;
   onChangeBirthday: (bday: string) => void;
+  pendingNoShow?: Appointment;
+  onFollowUpSent: (appointmentId: string) => void;
 }) {
   const { t, lang } = useLang();
   const [msgType, setMsgType] = useState<string | null>(null);
   const [bdayInput, setBdayInput] = useState(client.birthday === '—' ? '' : client.birthday || '');
+  const [copied, setCopied] = useState(false);
+  const [noShowCopied, setNoShowCopied] = useState(false);
+
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const templateBodies: Record<string, Record<string, string>> = {
     pt: {
@@ -203,6 +228,23 @@ function ClienteDetail({
   const templateKeys = ['primeiroContato', 'followUp', 'quebraObjecao', 'fechamento', 'reativacao'] as const;
   const methodLabel = contactMethod === 'sms' ? 'SMS' : 'WhatsApp';
   const MethodIcon = contactMethod === 'sms' ? MessageSquare : MessageCircle;
+
+  const sendTemplateMessage = async () => {
+    if (!msgType) return;
+    const message = templateBodies[lang][msgType];
+    const waLink = client.phone ? buildWhatsAppLink(client.phone, message) : null;
+    if (contactMethod === 'whatsapp' && waLink) {
+      window.open(waLink, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (await copyText(message)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  const noShowMessage = pendingNoShow ? buildNoShowMessage(client.name, pendingNoShow.service, lang) : '';
+  const noShowWaLink = pendingNoShow && client.phone ? buildWhatsAppLink(client.phone, noShowMessage) : null;
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
@@ -274,6 +316,68 @@ function ClienteDetail({
         </div>
       </Card>
 
+      {pendingNoShow && (
+        <Card style={{ marginBottom: 14, border: `1.5px solid ${T.danger}` }}>
+          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.danger, marginBottom: 6 }}>{t.clientes.noShowFollowUpTitle}</div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.ink, marginBottom: 10, lineHeight: 1.5 }}>
+            {format(t.clientes.noShowFollowUpBody, { name: client.name, service: pendingNoShow.service })}
+          </div>
+          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5, background: T.surfaceAlt, borderRadius: 10, padding: 10, marginBottom: 10 }}>{noShowMessage}</div>
+          {!client.phone && <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginBottom: 10 }}>{t.clientes.noPhoneHint}</div>}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {noShowWaLink && (
+              <button
+                onClick={() => {
+                  window.open(noShowWaLink, '_blank', 'noopener,noreferrer');
+                  onFollowUpSent(pendingNoShow.id);
+                }}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  border: 'none',
+                  borderRadius: 999,
+                  background: T.ink,
+                  color: '#fff',
+                  fontFamily: 'Manrope',
+                  fontWeight: 700,
+                  fontSize: 12.5,
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                }}
+              >
+                <MessageCircle size={14} /> {t.clientes.openWhatsAppCta}
+              </button>
+            )}
+            <button
+              onClick={async () => {
+                if (await copyText(noShowMessage)) {
+                  setNoShowCopied(true);
+                  setTimeout(() => setNoShowCopied(false), 1500);
+                  onFollowUpSent(pendingNoShow.id);
+                }
+              }}
+              style={{
+                flex: 1,
+                border: `1.5px solid ${T.line}`,
+                borderRadius: 999,
+                background: '#fff',
+                color: T.ink,
+                fontFamily: 'Manrope',
+                fontWeight: 700,
+                fontSize: 12.5,
+                padding: '10px 12px',
+                cursor: 'pointer',
+              }}
+            >
+              {noShowCopied ? t.clientes.copiedMessageLabel : t.clientes.copyMessageCta}
+            </button>
+          </div>
+        </Card>
+      )}
+
       <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.clientStatusTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
         {STATUS_LIST.map((s) => (
@@ -294,9 +398,12 @@ function ClienteDetail({
       {msgType && (
         <Card style={{ marginBottom: 14 }}>
           <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templateBodies[lang][msgType]}</div>
+          {!client.phone && contactMethod === 'whatsapp' && (
+            <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginTop: 8 }}>{t.clientes.noPhoneHint}</div>
+          )}
           <div style={{ marginTop: 12 }}>
-            <PrimaryButton full icon={MethodIcon}>
-              {t.clientes.sendViaPrefix} {methodLabel}
+            <PrimaryButton full icon={MethodIcon} onClick={sendTemplateMessage} testId="clientes-send-template">
+              {copied ? t.clientes.copiedMessageLabel : `${t.clientes.sendViaPrefix} ${methodLabel}`}
             </PrimaryButton>
           </div>
         </Card>

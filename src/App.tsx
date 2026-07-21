@@ -19,6 +19,7 @@ import { NotificacoesScreen } from './screens/Notificacoes';
 import { getAvailability } from './lib/helpers';
 import { buildAlerts } from './lib/alerts';
 import { getNotificationPermission, requestNotificationPermission, fireNotification, type NotifPermission } from './lib/notifications';
+import { buildNoShowMessage, buildWhatsAppLink } from './lib/followup';
 import { productStatus } from './screens/Estoque';
 import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult, Product, Profile, ServiceItem } from './types';
 
@@ -31,7 +32,7 @@ export default function App() {
 }
 
 function AppShell() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [authedName, setAuthedName] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -45,6 +46,7 @@ function AppShell() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [clientesFilter, setClientesFilter] = useState('Todos');
   const [clientesNonce, setClientesNonce] = useState(0);
+  const [clientesInitialSelectedId, setClientesInitialSelectedId] = useState<string | null>(null);
   const [notifPermission, setNotifPermission] = useState<NotifPermission>(() => getNotificationPermission());
   const [alertTimestamps, setAlertTimestamps] = useState<Record<string, number>>({});
   const seenAlertKeysRef = useRef<Set<string>>(new Set());
@@ -98,10 +100,59 @@ function AppShell() {
   const moreItems = getMoreItems(t);
   const goTo = (id: string) => (tabs.some((tb) => tb.id === id) ? selectTab(id) : openMore(id));
 
-  const openClientesWithFilter = (filterValue: string) => {
+  const openClientesWithFilter = (filterValue: string, selectClientId: string | null = null) => {
     setClientesFilter(filterValue);
+    setClientesInitialSelectedId(selectClientId);
     setClientesNonce((n) => n + 1);
     selectTab('clientes');
+  };
+
+  const findClientForAppointment = (appt: Appointment) => clients.find((c) => (appt.clientPhone && c.phone === appt.clientPhone) || c.name === appt.clientName);
+
+  const markAttendance = (appointmentId: string, attended: boolean) => {
+    const appt = appointments.find((a) => a.id === appointmentId);
+    if (!appt) return;
+
+    if (attended) {
+      setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'Compareceu' } : a)));
+      const service = services.find((s) => s.name === appt.service);
+      if (service?.consumables?.length) {
+        const consumables = service.consumables;
+        setProducts((prev) =>
+          prev.map((p) => {
+            const consumable = consumables.find((c) => c.productId === p.id);
+            return consumable ? { ...p, qty: Math.max(0, p.qty - consumable.qty) } : p;
+          }),
+        );
+      }
+      return;
+    }
+
+    setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'NaoCompareceu' } : a)));
+    const existingClient = findClientForAppointment(appt);
+    if (existingClient) {
+      updateClient(existingClient.id, { status: 'Perdido' });
+    } else {
+      addClient({ name: appt.clientName, phone: appt.clientPhone || '', service: appt.service, origem: 'Agenda', status: 'Perdido', birthday: '—' });
+    }
+  };
+
+  const handleFollowUpNoShow = (appt: Appointment) => {
+    if (appt.clientPhone) {
+      const message = buildNoShowMessage(appt.clientName, appt.service, lang);
+      const waLink = buildWhatsAppLink(appt.clientPhone, message);
+      if (waLink) {
+        window.open(waLink, '_blank', 'noopener,noreferrer');
+        setAppointments((prev) => prev.map((a) => (a.id === appt.id ? { ...a, followUpSent: true } : a)));
+        return;
+      }
+    }
+    const client = findClientForAppointment(appt);
+    openClientesWithFilter('Perdido', client?.id ?? null);
+  };
+
+  const markFollowUpSent = (appointmentId: string) => {
+    setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, followUpSent: true } : a)));
   };
 
   const currency: CurrencyCode = profile?.currency || 'BRL';
@@ -121,6 +172,7 @@ function AppShell() {
           onOpenEstoque: () => openMore('estoque'),
           onOpenClientesLeads: () => openClientesWithFilter('Novo Lead'),
           onSendReminders: sendReminders,
+          onFollowUpNoShow: handleFollowUpNoShow,
         },
       })
     : [];
@@ -234,7 +286,9 @@ function AppShell() {
           onRequestNotifPermission={requestNotifPermission}
         />
       )}
-      {moreScreen === 'servicos' && <ServicosScreen services={services} setServices={setServicesUpdater} currency={currency} onBack={() => setMoreScreen(null)} />}
+      {moreScreen === 'servicos' && (
+        <ServicosScreen services={services} setServices={setServicesUpdater} products={products} currency={currency} onBack={() => setMoreScreen(null)} />
+      )}
 
       {!moreScreen && activeTab === 'hoje' && (
         <HojeScreen
@@ -246,6 +300,8 @@ function AppShell() {
           onOpenAgenda={() => selectTab('agenda')}
           onOpenFinanceiro={() => selectTab('financeiro')}
           onOpenClientes={() => selectTab('clientes')}
+          onMarkAttended={(id) => markAttendance(id, true)}
+          onMarkNoShow={(id) => markAttendance(id, false)}
         />
       )}
       {!moreScreen && activeTab === 'agenda' && (
@@ -258,6 +314,8 @@ function AppShell() {
           onUpdateProfile={updateProfile}
           addClient={addClient}
           onOpenServicos={() => setMoreScreen('servicos')}
+          onMarkAttended={(id) => markAttendance(id, true)}
+          onMarkNoShow={(id) => markAttendance(id, false)}
         />
       )}
       {!moreScreen && activeTab === 'clientes' && (
@@ -265,10 +323,13 @@ function AppShell() {
           key={clientesNonce}
           clients={clients}
           services={services}
+          appointments={appointments}
           contactMethod={profile.contactMethod}
           addClient={addClient}
           updateClient={updateClient}
           initialFilter={clientesFilter}
+          initialSelectedId={clientesInitialSelectedId}
+          onFollowUpSent={markFollowUpSent}
         />
       )}
       {!moreScreen && activeTab === 'financeiro' && (

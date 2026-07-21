@@ -13,9 +13,11 @@ interface AgendaScreenProps {
   currency: CurrencyCode;
   addAppointment: (a: Appointment) => void;
   embedded?: boolean;
+  onMarkAttended?: (appointmentId: string) => void;
+  onMarkNoShow?: (appointmentId: string) => void;
 }
 
-export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded }: AgendaScreenProps) {
+export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded, onMarkAttended, onMarkNoShow }: AgendaScreenProps) {
   const { t, lang } = useLang();
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
@@ -120,7 +122,14 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
           .map((a) => (
-            <AppointmentRow key={a.id} a={a} currency={currency} />
+            <AppointmentRow
+              key={a.id}
+              a={a}
+              currency={currency}
+              testId={`appt-${a.id}`}
+              onMarkAttended={onMarkAttended ? () => onMarkAttended(a.id) : undefined}
+              onMarkNoShow={onMarkNoShow ? () => onMarkNoShow(a.id) : undefined}
+            />
           ))}
       </div>
 

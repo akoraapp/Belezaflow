@@ -1,8 +1,14 @@
+export interface ServiceConsumable {
+  productId: string;
+  qty: number;
+}
+
 export interface ServiceItem {
   id: string;
   name: string;
   price: number;
   duration: number;
+  consumables?: ServiceConsumable[];
 }
 
 export type CurrencyCode = 'BRL' | 'USD' | 'EUR' | 'MXN' | 'COP' | 'GBP';
@@ -57,6 +63,7 @@ export interface Appointment {
   status: string;
   origin?: 'online';
   createdAt: number;
+  followUpSent?: boolean;
 }
 
 export interface Client {

@@ -95,7 +95,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
   const yearOptions = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
 
   const appointmentsInPeriod = (year: number, month: number) =>
-    appointments.filter((a) => a.status !== 'Cancelado' && new Date(a.createdAt).getFullYear() === year && new Date(a.createdAt).getMonth() === month);
+    appointments.filter((a) => a.status === 'Compareceu' && new Date(a.createdAt).getFullYear() === year && new Date(a.createdAt).getMonth() === month);
   const entriesInPeriod = (year: number, month: number) =>
     entries.filter((e) => new Date(e.createdAt).getFullYear() === year && new Date(e.createdAt).getMonth() === month);
 

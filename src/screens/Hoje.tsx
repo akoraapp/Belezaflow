@@ -16,12 +16,14 @@ interface HojeScreenProps {
   onOpenAgenda: () => void;
   onOpenFinanceiro: () => void;
   onOpenClientes: () => void;
+  onMarkAttended: (appointmentId: string) => void;
+  onMarkNoShow: (appointmentId: string) => void;
 }
 
-export function HojeScreen({ profile, appointments, currency, alerts, onOpenConteudo, onOpenAgenda, onOpenFinanceiro, onOpenClientes }: HojeScreenProps) {
+export function HojeScreen({ profile, appointments, currency, alerts, onOpenConteudo, onOpenAgenda, onOpenFinanceiro, onOpenClientes, onMarkAttended, onMarkNoShow }: HojeScreenProps) {
   const { t } = useLang();
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
-  const monthRevenue = useMemo(() => appointments.filter((a) => a.status !== 'Cancelado').reduce((sum, a) => sum + a.price, 0), [appointments]);
+  const monthRevenue = useMemo(() => appointments.filter((a) => a.status === 'Compareceu').reduce((sum, a) => sum + a.price, 0), [appointments]);
   const progress = Math.min(1, monthRevenue / (profile.goal || 1));
   const hour = new Date().getHours();
   const greet = hour < 12 ? t.hoje.greetMorning : hour < 18 ? t.hoje.greetAfternoon : t.hoje.greetEvening;
@@ -91,7 +93,14 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
           .map((a) => (
-            <AppointmentRow key={a.id} a={a} currency={currency} />
+            <AppointmentRow
+              key={a.id}
+              a={a}
+              currency={currency}
+              testId={`appt-${a.id}`}
+              onMarkAttended={() => onMarkAttended(a.id)}
+              onMarkNoShow={() => onMarkNoShow(a.id)}
+            />
           ))}
       </div>
     </div>

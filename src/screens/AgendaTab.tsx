@@ -14,11 +14,13 @@ interface AgendaTabProps {
   onUpdateProfile: (patch: Partial<Profile>) => void;
   addClient: (c: Omit<Client, 'id'>) => void;
   onOpenServicos: () => void;
+  onMarkAttended: (appointmentId: string) => void;
+  onMarkNoShow: (appointmentId: string) => void;
 }
 
 type SubTab = 'interna' | 'online';
 
-export function AgendaTab({ appointments, services, profile, currency, addAppointment, onUpdateProfile, addClient, onOpenServicos }: AgendaTabProps) {
+export function AgendaTab({ appointments, services, profile, currency, addAppointment, onUpdateProfile, addClient, onOpenServicos, onMarkAttended, onMarkNoShow }: AgendaTabProps) {
   const { t } = useLang();
   const [subTab, setSubTab] = useState<SubTab>('interna');
 
@@ -56,7 +58,16 @@ export function AgendaTab({ appointments, services, profile, currency, addAppoin
       </div>
 
       {subTab === 'interna' ? (
-        <AgendaScreen embedded appointments={appointments} services={services} profile={profile} currency={currency} addAppointment={addAppointment} />
+        <AgendaScreen
+          embedded
+          appointments={appointments}
+          services={services}
+          profile={profile}
+          currency={currency}
+          addAppointment={addAppointment}
+          onMarkAttended={onMarkAttended}
+          onMarkNoShow={onMarkNoShow}
+        />
       ) : (
         <AgendaOnlineScreen
           embedded

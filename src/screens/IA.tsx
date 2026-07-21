@@ -19,7 +19,7 @@ interface Insight {
 
 export function IAScreen({ profile, clients, appointments, currency }: IAScreenProps) {
   const { isWorkingToday, availableSlots } = getAvailability(profile, appointments);
-  const gap = Math.max(0, (profile.goal || 0) - appointments.filter((a) => a.status !== 'Cancelado').reduce((s, a) => s + a.price, 0));
+  const gap = Math.max(0, (profile.goal || 0) - appointments.filter((a) => a.status === 'Compareceu').reduce((s, a) => s + a.price, 0));
   const leads = clients.filter((c) => c.status === 'Novo Lead').length;
   const birthdayClients = clients.filter((c) => todayIsBirthday(c.birthday));
 
