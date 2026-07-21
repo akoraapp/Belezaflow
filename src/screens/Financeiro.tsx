@@ -222,7 +222,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
             alignItems: 'center',
             gap: 4,
             border: 'none',
-            background: T.ink,
+            background: T.goldDeep,
             color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,
@@ -252,7 +252,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
             <TextInput value={data} onChange={setData} placeholder={t.financeiro.vencimentoPlaceholder} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <PrimaryButton full onClick={submit} disabled={!label || !value} testId="finance-add-submit">
+            <PrimaryButton full onClick={submit} disabled={!label || !value} variant="gold" testId="finance-add-submit">
               {t.financeiro.salvarLancamentoCta}
             </PrimaryButton>
           </div>
