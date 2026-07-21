@@ -51,7 +51,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
   useEffect(() => {
     if (profession) {
       const base = SUGGESTED_SERVICES[profession] || SUGGESTED_SERVICES.other;
-      setServices(base.map((s, i) => ({ id: `s${i}`, name: SUGGESTED_SERVICE_LABEL[lang][s.key] || s.key, price: 0, duration: 0 })));
+      setServices(base.map((s, i) => ({ id: `s${i}`, name: SUGGESTED_SERVICE_LABEL[lang][s.key] || s.key, price: s.price, duration: s.duration })));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profession]);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, Megaphone, Sparkles } from 'lucide-react';
+import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles, SlidersHorizontal, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
 import { Card, Chip, FieldLabel, PrimaryButton } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
@@ -8,6 +8,13 @@ import { useLang } from '../lib/LangContext';
 const OBJETIVOS = ['Atrair clientes', 'Preencher agenda', 'Reativar clientes', 'Autoridade', 'Quebra de objeção'];
 const FORMATOS = ['Reel', 'Story', 'Carrossel', 'Post'];
 const INTENSIDADES = ['Rápido', 'Estratégico', 'Agressivo'];
+
+interface GeneratedItem {
+  id: string;
+  formato: string;
+  basedOn: string | null;
+  content: ContentResult;
+}
 
 function FieldGroup({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -24,11 +31,164 @@ function FieldGroup({ label, options, value, onChange }: { label: string; option
   );
 }
 
-function ResultCard({ label, text, accent }: { label: string; text: string; accent?: boolean }) {
+function EntryCard({
+  icon: Icon,
+  title,
+  description,
+  active,
+  onClick,
+  testId,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  active: boolean;
+  onClick: () => void;
+  testId?: string;
+}) {
   return (
-    <Card style={accent ? { background: T.goldSoft, borderColor: T.gold } : {}}>
-      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 11.5, color: T.goldDeep, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{text}</div>
+    <Card
+      onClick={onClick}
+      testId={testId}
+      style={{
+        flex: 1,
+        cursor: 'pointer',
+        border: `1.5px solid ${active ? T.gold : T.line}`,
+        background: active ? T.goldSoft : T.surface,
+      }}
+    >
+      <div
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          background: active ? T.ink : T.goldSoft,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 10,
+        }}
+      >
+        <Icon size={15} color={active ? T.goldLight : T.goldDeep} />
+      </div>
+      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 4 }}>{title}</div>
+      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{description}</div>
+    </Card>
+  );
+}
+
+function MiniSection({ label, text }: { label: string; text: string }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 10.5, color: T.goldDeep, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
+      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>{text}</div>
+    </div>
+  );
+}
+
+function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string }) {
+  const { t } = useLang();
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const preview = item.content.legenda.length > 100 ? `${item.content.legenda.slice(0, 100)}…` : item.content.legenda;
+
+  const copy = async () => {
+    const full = `${item.content.legenda}\n\n${item.content.cta}`;
+    try {
+      await navigator.clipboard.writeText(full);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // clipboard unavailable — silently ignore, button state simply won't confirm
+    }
+  };
+
+  return (
+    <Card testId={testId} style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8 }}>
+        <span
+          style={{
+            padding: '4px 10px',
+            borderRadius: 999,
+            background: T.goldSoft,
+            color: T.goldDeep,
+            fontFamily: 'Manrope',
+            fontWeight: 700,
+            fontSize: 10.5,
+            textTransform: 'uppercase',
+            letterSpacing: 0.4,
+            flexShrink: 0,
+          }}
+        >
+          {item.formato}
+        </span>
+        {item.basedOn && (
+          <span style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textAlign: 'right' }}>
+            {t.maquina.basedOnPrefix} {item.basedOn}
+          </span>
+        )}
+      </div>
+
+      <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5, marginBottom: expanded ? 14 : 12 }}>{expanded ? item.content.legenda : preview}</div>
+
+      {expanded && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingTop: 12, borderTop: `1px solid ${T.line}` }}>
+          <MiniSection label={t.maquina.diagnosticoLabel} text={item.content.diagnostico} />
+          <MiniSection label={t.maquina.estrategiaLabel} text={item.content.estrategia} />
+          <MiniSection label={t.maquina.roteiroLabel} text={item.content.roteiro} />
+          <MiniSection label={t.maquina.ctaLabel} text={item.content.cta} />
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          data-testid={testId ? `${testId}-toggle` : undefined}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+            border: `1px solid ${T.line}`,
+            background: 'transparent',
+            color: T.ink,
+            fontFamily: 'Manrope',
+            fontWeight: 700,
+            fontSize: 11.5,
+            cursor: 'pointer',
+            padding: '8px 10px',
+            borderRadius: 999,
+          }}
+        >
+          {expanded ? t.maquina.viewLessCta : t.maquina.viewFullCta}
+          <ChevronDown size={12} style={{ transform: expanded ? 'rotate(180deg)' : 'none' }} />
+        </button>
+        <button
+          onClick={copy}
+          data-testid={testId ? `${testId}-copy` : undefined}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+            border: 'none',
+            background: copied ? T.success : T.ink,
+            color: '#fff',
+            fontFamily: 'Manrope',
+            fontWeight: 700,
+            fontSize: 11.5,
+            cursor: 'pointer',
+            padding: '8px 10px',
+            borderRadius: 999,
+          }}
+        >
+          {copied ? <Check size={12} /> : <Copy size={12} />}
+          {copied ? t.maquina.copiedCta : t.maquina.copyCta}
+        </button>
+      </div>
     </Card>
   );
 }
@@ -45,15 +205,12 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
   const [formato, setFormato] = useState('Reel');
   const [intensidade, setIntensidade] = useState('Estratégico');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ContentResult | null>(null);
-  const [basedOn, setBasedOn] = useState<string | null>(null);
+  const [items, setItems] = useState<GeneratedItem[]>([]);
 
   const generate = async () => {
     setLoading(true);
-    setResult(null);
     const content = await generateContent(lang, objetivo, formato, intensidade);
-    setResult(content);
-    setBasedOn(null);
+    setItems((prev) => [{ id: `c${Date.now()}`, formato, basedOn: null, content }, ...prev]);
     setLoading(false);
   };
 
@@ -75,10 +232,8 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
     setFormato(autoFormato);
     setIntensidade(autoIntensidade);
     setLoading(true);
-    setResult(null);
     const content = await generateContent(lang, autoObjetivo, autoFormato, autoIntensidade);
-    setResult(content);
-    setBasedOn(signal);
+    setItems((prev) => [{ id: `c${Date.now()}`, formato: autoFormato, basedOn: signal, content }, ...prev]);
     setLoading(false);
   };
 
@@ -90,76 +245,54 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
       </div>
       <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
 
-      <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4, marginBottom: 18 }}>
-        <button
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <EntryCard
+          icon={Sparkles}
+          title={t.maquina.modeAutoLabel}
+          description={t.maquina.autoIntro}
+          active={mode === 'auto'}
           onClick={() => setMode('auto')}
-          style={{
-            flex: 1,
-            padding: '10px 12px',
-            borderRadius: 999,
-            border: 'none',
-            background: mode === 'auto' ? T.ink : 'transparent',
-            color: mode === 'auto' ? '#fff' : T.muted,
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 12.5,
-            cursor: 'pointer',
-          }}
-        >
-          {t.maquina.modeAutoLabel}
-        </button>
-        <button
+          testId="maquina-mode-auto"
+        />
+        <EntryCard
+          icon={SlidersHorizontal}
+          title={t.maquina.modeManualLabel}
+          description={t.maquina.manualCardDesc}
+          active={mode === 'manual'}
           onClick={() => setMode('manual')}
-          style={{
-            flex: 1,
-            padding: '10px 12px',
-            borderRadius: 999,
-            border: 'none',
-            background: mode === 'manual' ? T.ink : 'transparent',
-            color: mode === 'manual' ? '#fff' : T.muted,
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 12.5,
-            cursor: 'pointer',
-          }}
-        >
-          {t.maquina.modeManualLabel}
-        </button>
+          testId="maquina-mode-manual"
+        />
       </div>
 
       {mode === 'auto' ? (
-        <>
-          <Card style={{ marginBottom: 16, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <Sparkles size={18} color={T.goldDeep} style={{ marginTop: 2, flexShrink: 0 }} />
-            <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{t.maquina.autoIntro}</div>
-          </Card>
-          <PrimaryButton full onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
-            {loading ? t.maquina.generatingCta : t.maquina.autoGenerateCta}
-          </PrimaryButton>
-        </>
+        <PrimaryButton full onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
+          {loading ? t.maquina.generatingCta : t.maquina.autoGenerateCta}
+        </PrimaryButton>
       ) : (
-        <>
+        <Card>
           <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} />
           <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} />
           <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} />
           <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
             {loading ? t.maquina.generatingCta : t.maquina.generateCta}
           </PrimaryButton>
-        </>
+        </Card>
       )}
 
-      {result && (
-        <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {basedOn && (
-            <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted }}>
-              {t.maquina.basedOnPrefix} {basedOn}
-            </div>
-          )}
-          <ResultCard label={t.maquina.diagnosticoLabel} text={result.diagnostico} />
-          <ResultCard label={t.maquina.estrategiaLabel} text={result.estrategia} />
-          <ResultCard label={t.maquina.roteiroLabel} text={result.roteiro} />
-          <ResultCard label={t.maquina.legendaLabel} text={result.legenda} />
-          <ResultCard label={t.maquina.ctaLabel} text={result.cta} accent />
+      <div style={{ height: 30 }} />
+
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.maquina.generatedSectionTitle}</div>
+
+      {items.length === 0 ? (
+        <div style={{ padding: '32px 20px', textAlign: 'center', border: `1px dashed ${T.line}`, borderRadius: 16 }}>
+          <Inbox size={22} color={T.muted} style={{ marginBottom: 10 }} />
+          <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>{t.maquina.emptyStateText}</div>
+        </div>
+      ) : (
+        <div>
+          {items.map((item, i) => (
+            <GeneratedCard key={item.id} item={item} testId={`maquina-result-${i}`} />
+          ))}
         </div>
       )}
     </div>

@@ -292,10 +292,13 @@ export function Row({ label, value, last }: { label: string; value: string; last
   );
 }
 
-export function StatBox({ label, value, accent, testId }: { label: string; value: string; accent?: string; testId?: string }) {
+export function StatBox({ label, value, accent, icon: Icon, testId }: { label: string; value: string; accent?: string; icon?: LucideIcon; testId?: string }) {
   return (
     <Card testId={testId} style={{ flex: 1, padding: 16 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        {Icon && <Icon size={12} color={T.goldDeep} />}
+        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
+      </div>
       <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
     </Card>
   );

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign, Plus, Ticket, Trash2 } from 'lucide-react';
 import { T, CURRENCIES } from '../theme';
 import { MONTH_NAMES, MONTH_ABBR } from '../i18n';
-import { fmtCurrency, format } from '../lib/helpers';
+import { fmtCurrency, fmtMoney, format } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, PrimaryButton, StatBox } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, FinanceEntry, Profile } from '../types';
@@ -46,11 +46,14 @@ function GoalGauge({ pct }: { pct: number }) {
 function BarChart({ data, currency }: { data: { label: string; value: number }[]; currency: CurrencyCode }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 130, marginTop: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 150, marginTop: 6 }}>
       {data.map((d) => {
         const h = Math.max(4, Math.round((d.value / max) * 100));
         return (
-          <div key={d.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, height: '100%', justifyContent: 'flex-end' }}>
+          <div key={d.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, height: '100%', justifyContent: 'flex-end' }}>
+            {d.value > 0 && (
+              <div style={{ fontFamily: 'Manrope', fontSize: 9.5, fontWeight: 700, color: T.goldDeep, whiteSpace: 'nowrap' }}>{fmtMoney(d.value, currency)}</div>
+            )}
             <div
               title={d.value > 0 ? fmtCurrency(d.value, currency) : undefined}
               style={{
@@ -138,52 +141,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
 
-      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 9 }}>
-        {t.financeiro.periodLabel}
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          data-testid="finance-month-select"
-          style={{ flex: 1.4, padding: '11px 10px', borderRadius: 12, border: `1.5px solid ${T.line}`, fontFamily: 'Manrope', fontSize: 13, fontWeight: 600, color: T.ink, background: '#fff', outline: 'none' }}
-        >
-          {MONTH_NAMES[lang].map((m, i) => (
-            <option key={m} value={i}>
-              {m}
-            </option>
-          ))}
-        </select>
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          data-testid="finance-year-select"
-          style={{ flex: 1, padding: '11px 10px', borderRadius: 12, border: `1.5px solid ${T.line}`, fontFamily: 'Manrope', fontSize: 13, fontWeight: 600, color: T.ink, background: '#fff', outline: 'none' }}
-        >
-          {yearOptions.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {!isCurrentPeriod && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 12, padding: '10px 12px', background: T.goldSoft, borderRadius: 12 }}>
-          <span style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
-            {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
-          </span>
-          <button
-            onClick={resetToCurrentPeriod}
-            data-testid="finance-reset-period"
-            style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
-          >
-            {t.financeiro.backToCurrentCta}
-          </button>
-        </div>
-      )}
-
-      <div style={{ background: T.ink, borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22, boxShadow: '0 10px 28px -14px rgba(32,28,23,0.45)' }}>
+      <div style={{ background: T.ink, borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 10px 28px -14px rgba(32,28,23,0.45)' }}>
         <GoalGauge pct={goalPct} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: 'Manrope', fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: T.goldLight }}>
@@ -197,18 +155,61 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-        <StatBox label={t.financeiro.receitaMes} value={fmtCurrency(totalRev, currency)} />
-        <StatBox label={t.financeiro.ticketMedio} value={fmtCurrency(ticketMedio, currency)} />
+      <div title={t.financeiro.periodLabel} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12, marginBottom: isCurrentPeriod ? 26 : 10 }}>
+        <Calendar size={12} color={T.muted} />
+        <select
+          value={selectedMonth}
+          onChange={(e) => setSelectedMonth(Number(e.target.value))}
+          data-testid="finance-month-select"
+          style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
+        >
+          {MONTH_NAMES[lang].map((m, i) => (
+            <option key={m} value={i}>
+              {m}
+            </option>
+          ))}
+        </select>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          data-testid="finance-year-select"
+          style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
+        >
+          {yearOptions.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 26 }}>
-        <StatBox label={t.financeiro.totalReceber} value={fmtCurrency(aReceber, currency)} accent={T.success} />
-        <StatBox label={t.financeiro.totalPagar} value={fmtCurrency(aPagar, currency)} accent={T.danger} />
+      {!isCurrentPeriod && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.goldSoft, borderRadius: 12 }}>
+          <span style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
+            {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
+          </span>
+          <button
+            onClick={resetToCurrentPeriod}
+            data-testid="finance-reset-period"
+            style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+          >
+            {t.financeiro.backToCurrentCta}
+          </button>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+        <StatBox label={t.financeiro.receitaMes} value={fmtCurrency(totalRev, currency)} icon={DollarSign} />
+        <StatBox label={t.financeiro.ticketMedio} value={fmtCurrency(ticketMedio, currency)} icon={Ticket} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 30 }}>
+        <StatBox label={t.financeiro.totalReceber} value={fmtCurrency(aReceber, currency)} accent={T.success} icon={ArrowDownCircle} />
+        <StatBox label={t.financeiro.totalPagar} value={fmtCurrency(aPagar, currency)} accent={T.danger} icon={ArrowUpCircle} />
       </div>
 
       {!isCurrentPeriod && periodAppointments.length === 0 && periodEntries.length === 0 && (
-        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -16, marginBottom: 26 }}>{t.financeiro.noDataForPeriod}</div>
+        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -20, marginBottom: 30 }}>{t.financeiro.noDataForPeriod}</div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -258,7 +259,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         </Card>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 26 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 30 }}>
         {entries.length === 0 && !showAdd && <EmptyHint text={t.financeiro.noLancamentos} />}
         {entries.map((e) => (
           <Card key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
