@@ -1,24 +1,41 @@
 import { Eye, Hand, PenTool, Droplet, Scissors, Flame, Palette, Stethoscope, Store, MoreHorizontal, type LucideIcon } from 'lucide-react';
 import type { CurrencyCode } from './types';
 
+// Design system tokens — single source of truth. Every screen/component must
+// consume these instead of hardcoding hex values, radii, shadows, or fonts.
 export const T = {
-  bg: '#FAF7F0',
+  bg: '#F5F0E8',
   surface: '#FFFFFF',
-  surfaceAlt: '#F6EFE1',
-  ink: '#201C17',
-  gold: '#B98D3E',
-  goldLight: '#E3C989',
-  goldOnDark: '#C9A24B',
-  goldDeep: '#8A6D2F',
-  goldSoft: '#F0E6D2',
-  muted: '#8A8074',
-  mutedDeep: '#6B6459',
-  line: '#EBE2CF',
-  danger: '#8A4A3E',
-  success: '#4E7A49',
+  surfaceAlt: '#EFE7D8',
+  ink: '#1A1A1A',
+  gold: '#C9A227',
+  goldLight: '#E4C765',
+  goldOnDark: '#E4C765',
+  goldDeep: '#A6841F',
+  goldSoft: '#F6EDD6',
+  muted: '#8A8A8A',
+  mutedDeep: '#6E6E6E',
+  line: '#E5DCC8',
+  danger: '#B5654A',
+  success: '#6B8E5A',
 };
 
-export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Manrope:wght@400;500;600;700;800&display=swap');`;
+// Fixed spacing scale — use these multiples everywhere instead of ad-hoc px values.
+export const SPACE = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 };
+
+// Border-radius scale: cards/containers, inputs/buttons, pills/badges.
+export const RADIUS = { card: 20, control: 16, pill: 999 };
+
+// Canonical shadow tokens.
+export const SHADOW = {
+  card: '0px 2px 8px rgba(26,26,26,0.06)',
+  elevated: '0px 4px 16px rgba(26,26,26,0.12)',
+};
+
+export const FONT_SERIF = "'Playfair Display', serif";
+export const FONT_SANS = "'Inter', sans-serif";
+
+export const FONT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@400;500;600;700;800&display=swap');`;
 
 interface CurrencyMeta {
   symbol: string;

@@ -39,7 +39,7 @@ export function IAScreen({ profile, clients, appointments, currency }: IAScreenP
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
         <Bot size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>Assistente IA</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink }}>Assistente IA</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {insights.length === 0 && <EmptyHint text="Nada para destacar agora. À medida que você cadastra clientes e agendamentos, os insights aparecem aqui." />}
@@ -48,7 +48,7 @@ export function IAScreen({ profile, clients, appointments, currency }: IAScreenP
             <div style={{ width: 30, height: 30, borderRadius: 9, background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ins.icon size={14} color={T.goldDeep} />
             </div>
-            <div style={{ flex: 1, fontFamily: 'Manrope', fontWeight: 600, fontSize: 12.5, color: T.ink }}>{ins.title}</div>
+            <div style={{ flex: 1, fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: T.ink }}>{ins.title}</div>
             <button
               style={{
                 display: 'flex',
@@ -57,7 +57,7 @@ export function IAScreen({ profile, clients, appointments, currency }: IAScreenP
                 border: 'none',
                 background: T.goldDeep,
                 color: '#fff',
-                fontFamily: 'Manrope',
+                fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',

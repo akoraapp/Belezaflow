@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react';
-import { T, ALL_SLOTS } from '../theme';
+import { T, ALL_SLOTS, RADIUS, SHADOW } from '../theme';
 import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
@@ -74,14 +74,14 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>{t.agendaOnline.subtitle}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 18 }}>{t.agendaOnline.subtitle}</div>
         </>
       )}
 
       <Card style={{ marginBottom: 22 }}>
-        <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>{t.agendaOnline.publicLinkLabel}</div>
-        <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12 }}>{link}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>{t.agendaOnline.publicLinkLabel}</div>
+        <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12 }}>{link}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <IconButton
             icon={Copy}
@@ -96,7 +96,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agendaOnline.publicInfoTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agendaOnline.publicInfoTitle}</div>
       <Card style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
@@ -113,12 +113,12 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         <div>
           <FieldLabel>{t.agendaOnline.mapsLinkLabel}</FieldLabel>
           <TextInput value={profile.mapsLink || ''} onChange={(v) => onUpdateProfile({ mapsLink: v })} placeholder={t.agendaOnline.mapsPlaceholder} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 4 }}>{t.agendaOnline.mapsHint}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, marginTop: 4 }}>{t.agendaOnline.mapsHint}</div>
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 5 }}>{t.agendaOnline.slotsTitle}</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 12 }}>{t.agendaOnline.slotsSubtitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 5 }}>{t.agendaOnline.slotsTitle}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 12 }}>{t.agendaOnline.slotsSubtitle}</div>
       <Card style={{ marginBottom: 26 }}>
         <FieldLabel>{t.agendaOnline.workingDaysLabel}</FieldLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
@@ -136,33 +136,33 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
             </Chip>
           ))}
         </div>
-        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginTop: 10 }}>{t.agendaOnline.slotsHint}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, marginTop: 10 }}>{t.agendaOnline.slotsHint}</div>
       </Card>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
-        <button onClick={onOpenServicos} style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
+        <button onClick={onOpenServicos} style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
           {t.agendaOnline.editServicesCta}
         </button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
         {services.length === 0 && <EmptyHint text={t.agendaOnline.noServicesShort} />}
         {services.map((s) => (
-          <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 12, background: T.surfaceAlt }}>
-            <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 600, color: T.ink }}>
+          <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderRadius: RADIUS.control, background: T.surfaceAlt }}>
+            <span style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 600, color: T.ink }}>
               {s.name} · {s.duration}min
             </span>
-            <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 700, color: T.goldDeep }}>{fmtMoney(s.price, currency)}</span>
+            <span style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 700, color: T.goldDeep }}>{fmtMoney(s.price, currency)}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
-      <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${T.line}`, boxShadow: '0 18px 40px -20px rgba(27,23,18,0.25)' }}>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
+      <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${T.line}`, boxShadow: SHADOW.elevated }}>
         <div
           style={{
             position: 'relative',
-            background: `radial-gradient(circle at 30% 20%, #4A3B22, #1B1712 70%)`,
+            background: `radial-gradient(circle at 30% 20%, #3A3A3A, ${T.ink} 70%)`,
             padding: '34px 20px 30px',
             textAlign: 'center',
             overflow: 'hidden',
@@ -183,11 +183,11 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               height: 74,
               borderRadius: '50%',
               margin: '0 auto 14px',
-              background: `linear-gradient(135deg, #D9BA6D, #8A6D2F)`,
+              background: `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: 'Cormorant Garamond',
+              fontFamily: 'Playfair Display',
               fontSize: 27,
               color: '#fff',
               fontWeight: 600,
@@ -196,8 +196,8 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
           >
             {(profile.publicName || 'S').charAt(0)}
           </div>
-          <div style={{ position: 'relative', fontFamily: 'Cormorant Garamond', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
-          <div style={{ position: 'relative', fontFamily: 'Manrope', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
+          <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
+          <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
             {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
           <div style={{ position: 'relative', width: 28, height: 1.5, background: T.gold, margin: '12px auto 14px', opacity: 0.7 }} />
@@ -215,7 +215,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                   borderRadius: 999,
                   background: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(232,213,168,0.25)',
-                  fontFamily: 'Manrope',
+                  fontFamily: 'Inter',
                   fontSize: 11,
                   color: T.goldLight,
                   textDecoration: 'none',
@@ -235,7 +235,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                   borderRadius: 999,
                   background: 'rgba(255,255,255,0.1)',
                   border: '1px solid rgba(232,213,168,0.25)',
-                  fontFamily: 'Manrope',
+                  fontFamily: 'Inter',
                   fontSize: 11,
                   color: T.goldLight,
                   textDecoration: 'none',
@@ -257,7 +257,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                   borderRadius: 999,
                   background: 'rgba(232,213,168,0.16)',
                   border: `1px solid ${T.gold}`,
-                  fontFamily: 'Manrope',
+                  fontFamily: 'Inter',
                   fontWeight: 700,
                   fontSize: 11,
                   color: T.goldLight,
@@ -268,7 +268,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               </a>
             )}
             {!profile.instagram && !profile.whatsapp && !profile.endereco && (
-              <span style={{ fontFamily: 'Manrope', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{t.agendaOnline.fillInfoHint}</span>
+              <span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{t.agendaOnline.fillInfoHint}</span>
             )}
           </div>
         </div>
@@ -279,8 +279,8 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               <div style={{ width: 52, height: 52, borderRadius: '50%', background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
                 <Check size={24} color={T.goldDeep} />
               </div>
-              <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 17, color: T.ink }}>{t.agendaOnline.confirmedTitle}</div>
-              <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: 3 }}>{t.agendaOnline.confirmedSubtitle}</div>
+              <div style={{ fontFamily: 'Playfair Display', fontSize: 17, color: T.ink }}>{t.agendaOnline.confirmedTitle}</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginTop: 3 }}>{t.agendaOnline.confirmedSubtitle}</div>
             </div>
           ) : (
             <>
@@ -294,20 +294,20 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
 
               <StepLabel n={2}>{t.agendaOnline.step2}</StepLabel>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agendaOnline.noSlotsFree}</span>}
+                {availableSlots.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agendaOnline.noSlotsFree}</span>}
                 {availableSlots.map((tm) => (
                   <button
                     key={tm}
                     onClick={() => setBookTime(tm)}
                     style={{
                       padding: '10px 16px',
-                      borderRadius: 12,
-                      fontFamily: 'Cormorant Garamond',
+                      borderRadius: RADIUS.pill,
+                      fontFamily: 'Playfair Display',
                       fontSize: 13.5,
                       fontWeight: 600,
                       cursor: 'pointer',
                       border: `1.5px solid ${bookTime === tm ? T.gold : T.line}`,
-                      background: bookTime === tm ? `linear-gradient(135deg, #D9BA6D, #8A6D2F)` : T.surface,
+                      background: bookTime === tm ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
                       color: bookTime === tm ? '#fff' : T.ink,
                     }}
                   >
@@ -323,22 +323,22 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               </div>
 
               {bookService && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: 14, background: T.goldSoft, marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: RADIUS.control, background: T.goldSoft, marginBottom: 16 }}>
                   <div>
-                    <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, color: T.ink }}>
+                    <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.ink }}>
                       {bookService.name}
                       {bookTime ? ` · ${formatTimeLabel(bookTime, lang)}` : ''}
                     </div>
-                    <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
+                    <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
                   </div>
-                  <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, color: T.goldDeep, fontWeight: 600 }}>{fmtMoney(bookService.price, currency)}</div>
+                  <div style={{ fontFamily: 'Playfair Display', fontSize: 16, color: T.goldDeep, fontWeight: 600 }}>{fmtMoney(bookService.price, currency)}</div>
                 </div>
               )}
 
               <PrimaryButton full onClick={confirmBooking} disabled={!bookService || !bookTime || !bookName || !bookPhone}>
                 {t.agendaOnline.confirmApptCta}
               </PrimaryButton>
-              <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 10, color: T.muted, marginTop: 14, letterSpacing: 0.3 }}>{t.agendaOnline.secureBookingFooter}</div>
+              <div style={{ textAlign: 'center', fontFamily: 'Inter', fontSize: 10, color: T.muted, marginTop: 14, letterSpacing: 0.3 }}>{t.agendaOnline.secureBookingFooter}</div>
             </>
           )}
         </div>

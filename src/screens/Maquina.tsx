@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles, SlidersHorizontal, type LucideIcon } from 'lucide-react';
-import { T } from '../theme';
+import { T, RADIUS } from '../theme';
 import { Card, FieldLabel, PrimaryButton } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
 import { useLang } from '../lib/LangContext';
@@ -23,12 +23,12 @@ function GridOption({ label, active, onClick, testId }: { label: string; active:
       data-testid={testId}
       style={{
         padding: '16px 12px',
-        borderRadius: 14,
+        borderRadius: RADIUS.control,
         textAlign: 'center',
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
         background: active ? T.goldSoft : T.surface,
-        fontFamily: 'Manrope',
+        fontFamily: 'Inter',
         fontWeight: 700,
         fontSize: 13,
         color: T.ink,
@@ -93,8 +93,8 @@ function EntryCard({
       >
         <Icon size={15} color={active ? T.goldLight : T.goldDeep} />
       </div>
-      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 4 }}>{title}</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{description}</div>
+      <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 4 }}>{title}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{description}</div>
     </Card>
   );
 }
@@ -102,8 +102,8 @@ function EntryCard({
 function MiniSection({ label, text }: { label: string; text: string }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 10.5, color: T.goldDeep, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>{text}</div>
+      <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 10.5, color: T.goldDeep, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>{text}</div>
     </div>
   );
 }
@@ -135,7 +135,7 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
             borderRadius: 999,
             background: T.goldSoft,
             color: T.goldDeep,
-            fontFamily: 'Manrope',
+            fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: 10.5,
             textTransform: 'uppercase',
@@ -146,13 +146,13 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
           {item.formato}
         </span>
         {item.basedOn && (
-          <span style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textAlign: 'right' }}>
+          <span style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, textAlign: 'right' }}>
             {t.maquina.basedOnPrefix} {item.basedOn}
           </span>
         )}
       </div>
 
-      <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5, marginBottom: expanded ? 14 : 12 }}>{expanded ? item.content.legenda : preview}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.ink, lineHeight: 1.5, marginBottom: expanded ? 14 : 12 }}>{expanded ? item.content.legenda : preview}</div>
 
       {expanded && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingTop: 12, borderTop: `1px solid ${T.line}` }}>
@@ -174,14 +174,14 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
             justifyContent: 'center',
             gap: 5,
             border: `1px solid ${T.line}`,
-            background: 'transparent',
+            background: T.surface,
             color: T.ink,
-            fontFamily: 'Manrope',
+            fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: 11.5,
             cursor: 'pointer',
             padding: '8px 10px',
-            borderRadius: 999,
+            borderRadius: RADIUS.control,
           }}
         >
           {expanded ? t.maquina.viewLessCta : t.maquina.viewFullCta}
@@ -199,12 +199,12 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
             border: 'none',
             background: copied ? T.success : T.ink,
             color: '#fff',
-            fontFamily: 'Manrope',
+            fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: 11.5,
             cursor: 'pointer',
             padding: '8px 10px',
-            borderRadius: 999,
+            borderRadius: RADIUS.control,
           }}
         >
           {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -263,9 +263,9 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <Megaphone size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.maquina.title}</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.maquina.title}</div>
       </div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
         <EntryCard
@@ -303,12 +303,12 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
 
       <div style={{ height: 30 }} />
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.maquina.generatedSectionTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.maquina.generatedSectionTitle}</div>
 
       {items.length === 0 ? (
-        <div style={{ padding: '32px 20px', textAlign: 'center', border: `1px dashed ${T.line}`, borderRadius: 16 }}>
+        <div style={{ padding: '32px 20px', textAlign: 'center', border: `1px dashed ${T.line}`, borderRadius: RADIUS.control }}>
           <Inbox size={22} color={T.muted} style={{ marginBottom: 10 }} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>{t.maquina.emptyStateText}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>{t.maquina.emptyStateText}</div>
         </div>
       ) : (
         <div>

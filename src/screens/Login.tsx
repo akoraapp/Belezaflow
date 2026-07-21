@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { T } from '../theme';
-import { TextInput } from '../components/primitives';
+import { TextInput, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import belezaflowLogo from '../assets/belezaflow-logo.webp';
 
@@ -29,7 +29,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
           <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 220, height: 'auto', marginBottom: 4 }} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -38,58 +38,26 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
         </div>
 
         <div style={{ textAlign: 'right', marginTop: 12 }}>
-          <span style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.goldDeep, fontWeight: 700 }}>{t.login.forgotPassword}</span>
+          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.goldDeep, fontWeight: 700 }}>{t.login.forgotPassword}</span>
         </div>
 
         <div style={{ flex: 1 }} />
 
-        <button
-          onClick={submit}
-          disabled={!canSubmit}
-          data-testid="login-submit"
-          style={{
-            width: '100%',
-            height: 52,
-            borderRadius: 999,
-            border: 'none',
-            background: T.ink,
-            color: '#fff',
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 15,
-            cursor: canSubmit ? 'pointer' : 'default',
-            marginTop: 22,
-          }}
-        >
-          {t.login.enterCta}
-        </button>
+        <div style={{ marginTop: 22 }}>
+          <PrimaryButton full onClick={submit} disabled={!canSubmit} testId="login-submit">
+            {t.login.enterCta}
+          </PrimaryButton>
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '18px 0' }}>
           <div style={{ flex: 1, height: 1, background: T.line }} />
-          <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.login.orDivider}</span>
+          <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.login.orDivider}</span>
           <div style={{ flex: 1, height: 1, background: T.line }} />
         </div>
 
-        <button
-          onClick={submit}
-          disabled={!canSubmit}
-          data-testid="login-create-account"
-          style={{
-            width: '100%',
-            height: 52,
-            borderRadius: 999,
-            border: 'none',
-            background: T.goldDeep,
-            color: '#fff',
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 15,
-            cursor: canSubmit ? 'pointer' : 'default',
-            opacity: canSubmit ? 1 : 0.6,
-          }}
-        >
+        <PrimaryButton full onClick={submit} disabled={!canSubmit} variant="accent" testId="login-create-account">
           {t.login.createAccountCta}
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

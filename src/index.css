@@ -5,11 +5,11 @@
 html,
 body {
   margin: 0;
-  background: #ece4d3;
+  background: #efe7d8;
 }
 
 body {
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 #root {
@@ -18,23 +18,23 @@ body {
 }
 
 a {
-  color: #b98d3e;
+  color: #c9a227;
 }
 
 a:hover {
-  color: #96712c;
+  color: #a6841f;
 }
 
 ::selection {
-  background: #e6d3aa;
+  background: #f6edd6;
 }
 
 input::placeholder {
-  color: #b0a78f;
+  color: #8a8a8a;
   opacity: 1;
 }
 
 input:focus {
   outline: none;
-  border-color: #b98d3e !important;
+  border-color: #c9a227 !important;
 }

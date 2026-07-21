@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
-import { T, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
+import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
 import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -64,42 +64,24 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
   return (
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
-        <button
-          onClick={() => setShowAdd((v) => !v)}
-          data-testid="clientes-add-toggle"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '10px 16px',
-            borderRadius: 999,
-            border: 'none',
-            background: T.ink,
-            color: '#fff',
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 12.5,
-            cursor: 'pointer',
-            boxShadow: '0 6px 16px -6px rgba(32,28,23,0.35)',
-          }}
-        >
-          <Plus size={15} /> {t.clientes.newClientCta}
-        </button>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
+        <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="clientes-add-toggle">
+          {t.clientes.newClientCta}
+        </PrimaryButton>
       </div>
 
       {showAdd && (
         <Card style={{ marginBottom: 22 }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.clientes.newClientFormTitle}</div>
+          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.clientes.newClientFormTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={name} onChange={setName} placeholder={t.clientes.namePlaceholder} testId="clientes-name" />
             <PhoneInput value={phone} onChange={setPhone} placeholder={t.clientes.phonePlaceholder} testId="clientes-phone" />
             <TextInput value={birthday} onChange={setBirthday} placeholder={t.clientes.birthdayPlaceholder} />
           </div>
 
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.serviceLabel}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.serviceLabel}</div>
           {services.length === 0 ? (
-            <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 4 }}>{t.clientes.noServicesToSelect}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 4 }}>{t.clientes.noServicesToSelect}</div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
               {services.map((s) => (
@@ -110,7 +92,7 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
             </div>
           )}
 
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.originLabel}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.originLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             {ORIGENS.map((o) => (
               <Chip key={o} active={origem === o} onClick={() => setOrigem(o)}>
@@ -145,7 +127,7 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: 'Cormorant Garamond',
+                  fontFamily: 'Playfair Display',
                   color: T.goldDeep,
                   fontWeight: 700,
                 }}
@@ -153,13 +135,13 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
                 {c.name.charAt(0)}
               </div>
               <div>
-                <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{c.name}</div>
-                <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted }}>
+                <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{c.name}</div>
+                <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted }}>
                   {ORIGEM_LABEL[lang][c.origem] || c.origem} · {c.service}
                 </div>
               </div>
             </div>
-            <div style={{ fontFamily: 'Manrope', fontSize: 10.5, fontWeight: 700, color: STATUS_COLOR[c.status], padding: '3px 9px', borderRadius: 999, background: T.surfaceAlt }}>
+            <div style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 700, color: STATUS_COLOR[c.status], padding: '3px 9px', borderRadius: 999, background: T.surfaceAlt }}>
               {STATUS_LABEL[lang][c.status] || c.status}
             </div>
           </Card>
@@ -257,7 +239,7 @@ function ClienteDetail({
           border: 'none',
           background: 'transparent',
           cursor: 'pointer',
-          fontFamily: 'Manrope',
+          fontFamily: 'Inter',
           fontSize: 13,
           color: T.muted,
           marginBottom: 14,
@@ -276,7 +258,7 @@ function ClienteDetail({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'Cormorant Garamond',
+            fontFamily: 'Playfair Display',
             fontSize: 22,
             color: T.goldDeep,
             fontWeight: 700,
@@ -285,8 +267,8 @@ function ClienteDetail({
           {client.name.charAt(0)}
         </div>
         <div>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: T.ink }}>{client.name}</div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{client.phone}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink }}>{client.name}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{client.phone}</div>
         </div>
       </div>
 
@@ -294,7 +276,7 @@ function ClienteDetail({
         <Row label={t.clientes.originRowLabel} value={ORIGEM_LABEL[lang][client.origem] || client.origem} />
         <Row label={t.clientes.serviceRowLabel} value={client.service} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
-          <span style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
+          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
           <input
             value={bdayInput}
             onChange={(e) => setBdayInput(e.target.value)}
@@ -304,7 +286,7 @@ function ClienteDetail({
               border: 'none',
               borderBottom: `1px solid ${T.line}`,
               textAlign: 'right',
-              fontFamily: 'Manrope',
+              fontFamily: 'Inter',
               fontSize: 12.5,
               fontWeight: 700,
               color: T.ink,
@@ -318,12 +300,12 @@ function ClienteDetail({
 
       {pendingNoShow && (
         <Card style={{ marginBottom: 20, border: `1.5px solid ${T.danger}` }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.danger, marginBottom: 6 }}>{t.clientes.noShowFollowUpTitle}</div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.ink, marginBottom: 10, lineHeight: 1.5 }}>
+          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.danger, marginBottom: 6 }}>{t.clientes.noShowFollowUpTitle}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.ink, marginBottom: 10, lineHeight: 1.5 }}>
             {format(t.clientes.noShowFollowUpBody, { name: client.name, service: pendingNoShow.service })}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5, background: T.surfaceAlt, borderRadius: 10, padding: 10, marginBottom: 10 }}>{noShowMessage}</div>
-          {!client.phone && <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginBottom: 10 }}>{t.clientes.noPhoneHint}</div>}
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.ink, lineHeight: 1.5, background: T.surfaceAlt, borderRadius: RADIUS.control, padding: 12, marginBottom: 10 }}>{noShowMessage}</div>
+          {!client.phone && <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginBottom: 10 }}>{t.clientes.noPhoneHint}</div>}
           <div style={{ display: 'flex', gap: 8 }}>
             {noShowWaLink && (
               <button
@@ -338,11 +320,11 @@ function ClienteDetail({
                   justifyContent: 'center',
                   gap: 6,
                   border: 'none',
-                  borderRadius: 999,
+                  borderRadius: RADIUS.control,
                   background: T.ink,
                   color: '#fff',
-                  fontFamily: 'Manrope',
-                  fontWeight: 700,
+                  fontFamily: 'Inter',
+                  fontWeight: 600,
                   fontSize: 12.5,
                   padding: '10px 12px',
                   cursor: 'pointer',
@@ -362,11 +344,11 @@ function ClienteDetail({
               style={{
                 flex: 1,
                 border: `1.5px solid ${T.line}`,
-                borderRadius: 999,
-                background: '#fff',
+                borderRadius: RADIUS.control,
+                background: T.surface,
                 color: T.ink,
-                fontFamily: 'Manrope',
-                fontWeight: 700,
+                fontFamily: 'Inter',
+                fontWeight: 600,
                 fontSize: 12.5,
                 padding: '10px 12px',
                 cursor: 'pointer',
@@ -378,7 +360,7 @@ function ClienteDetail({
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.clientStatusTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.clientStatusTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
         {STATUS_LIST.map((s) => (
           <Chip key={s} active={client.status === s} onClick={() => onChangeStatus(s)}>
@@ -387,7 +369,7 @@ function ClienteDetail({
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.centralRespostasTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.centralRespostasTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {templateKeys.map((k) => (
           <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>
@@ -397,9 +379,9 @@ function ClienteDetail({
       </div>
       {msgType && (
         <Card style={{ marginBottom: 14 }}>
-          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templateBodies[lang][msgType]}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templateBodies[lang][msgType]}</div>
           {!client.phone && contactMethod === 'whatsapp' && (
-            <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginTop: 8 }}>{t.clientes.noPhoneHint}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginTop: 8 }}>{t.clientes.noPhoneHint}</div>
           )}
           <div style={{ marginTop: 12 }}>
             <PrimaryButton full icon={MethodIcon} onClick={sendTemplateMessage} testId="clientes-send-template">

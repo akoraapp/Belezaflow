@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Check, ChevronLeft, X, type LucideIcon } from 'lucide-react';
-import { T, CURRENCIES, STATUS_COLOR } from '../theme';
+import { T, CURRENCIES, STATUS_COLOR, RADIUS, SHADOW } from '../theme';
 import { STATUS_LABEL } from '../i18n';
 import { fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
@@ -14,8 +14,8 @@ export function GoalRing({ progress, size = 120, stroke = 10, center, dark }: { 
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <defs>
         <linearGradient id="goldSweep" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#D9BA6D" />
-          <stop offset="100%" stopColor="#8A6D2F" />
+          <stop offset="0%" stopColor={T.goldLight} />
+          <stop offset="100%" stopColor={T.goldDeep} />
         </linearGradient>
       </defs>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={dark ? 'rgba(255,255,255,0.15)' : T.goldSoft} strokeWidth={stroke} />
@@ -31,10 +31,10 @@ export function GoalRing({ progress, size = 120, stroke = 10, center, dark }: { 
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dasharray 0.6s ease' }}
       />
-      <text x="50%" y="47%" textAnchor="middle" fontFamily="Cormorant Garamond" fontSize={size * 0.19} fill={dark ? '#fff' : T.ink} fontWeight="600">
+      <text x="50%" y="47%" textAnchor="middle" fontFamily="Playfair Display" fontSize={size * 0.19} fill={dark ? '#fff' : T.ink} fontWeight="600">
         {Math.round(pct * 100)}%
       </text>
-      <text x="50%" y="63%" textAnchor="middle" fontFamily="Manrope" fontSize={size * 0.075} fill={dark ? T.goldOnDark : T.muted}>
+      <text x="50%" y="63%" textAnchor="middle" fontFamily="Inter" fontSize={size * 0.075} fill={dark ? T.goldOnDark : T.muted}>
         {center || 'da meta'}
       </text>
     </svg>
@@ -48,12 +48,12 @@ export function Chip({ active, onClick, children, testId }: { active: boolean; o
       data-testid={testId}
       style={{
         padding: '9px 16px',
-        borderRadius: 999,
-        fontFamily: 'Manrope',
+        borderRadius: RADIUS.pill,
+        fontFamily: 'Inter',
         fontSize: 13.5,
         fontWeight: 600,
         border: `1px solid ${active ? T.gold : T.line}`,
-        background: active ? T.ink : 'transparent',
+        background: active ? T.ink : T.surface,
         color: active ? '#fff' : T.ink,
         cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -72,7 +72,7 @@ export function PrimaryButton({
   disabled,
   icon: Icon,
   testId,
-  variant = 'ink',
+  variant = 'primary',
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -80,8 +80,11 @@ export function PrimaryButton({
   disabled?: boolean;
   icon?: LucideIcon;
   testId?: string;
-  variant?: 'ink' | 'gold';
+  variant?: 'primary' | 'accent' | 'secondary';
 }) {
+  const background = disabled ? T.line : variant === 'accent' ? T.gold : variant === 'secondary' ? T.surface : T.ink;
+  const color = disabled ? T.muted : variant === 'secondary' ? T.ink : variant === 'accent' ? T.ink : '#fff';
+  const border = variant === 'secondary' ? `1px solid ${T.line}` : 'none';
   return (
     <button
       onClick={onClick}
@@ -89,20 +92,21 @@ export function PrimaryButton({
       data-testid={testId}
       style={{
         width: full ? '100%' : 'auto',
+        minHeight: 52,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
         padding: '14px 22px',
-        borderRadius: 999,
-        border: 'none',
-        background: disabled ? T.line : variant === 'gold' ? T.goldDeep : T.ink,
-        color: disabled ? T.muted : '#fff',
-        fontFamily: 'Manrope',
-        fontWeight: 700,
+        borderRadius: RADIUS.control,
+        border,
+        background,
+        color,
+        fontFamily: 'Inter',
+        fontWeight: 600,
         fontSize: 14.5,
         cursor: disabled ? 'default' : 'pointer',
-        boxShadow: disabled ? 'none' : '0 6px 16px -6px rgba(32,28,23,0.35)',
+        boxShadow: disabled || variant === 'secondary' ? 'none' : SHADOW.elevated,
       }}
     >
       {Icon && <Icon size={16} />}
@@ -118,10 +122,10 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
       data-testid={testId}
       style={{
         background: T.surface,
-        borderRadius: 20,
-        padding: 18,
+        borderRadius: RADIUS.card,
+        padding: 20,
         border: `1px solid ${T.line}`,
-        boxShadow: '0 4px 18px -10px rgba(32,28,23,0.14)',
+        boxShadow: SHADOW.card,
         ...style,
       }}
     >
@@ -133,7 +137,7 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
       {right}
     </div>
   );
@@ -164,15 +168,15 @@ export function TextInput({
       style={{
         width: '100%',
         padding: '13px 16px',
-        borderRadius: 16,
+        borderRadius: RADIUS.control,
         border: `1.5px solid ${T.line}`,
-        fontFamily: 'Manrope',
+        fontFamily: 'Inter',
         fontSize: 14,
         fontWeight: 600,
         color: T.ink,
         outline: 'none',
         boxSizing: 'border-box',
-        background: '#fff',
+        background: T.surface,
       }}
     />
   );
@@ -216,14 +220,14 @@ export function PhoneInput({ value, onChange, placeholder, testId }: { value: st
           width: 96,
           flexShrink: 0,
           padding: '13px 6px',
-          borderRadius: 16,
+          borderRadius: RADIUS.control,
           border: `1.5px solid ${T.line}`,
-          fontFamily: 'Manrope',
+          fontFamily: 'Inter',
           fontSize: 13,
           fontWeight: 600,
           color: T.ink,
           outline: 'none',
-          background: '#fff',
+          background: T.surface,
         }}
       >
         {PHONE_COUNTRIES.map((c) => (
@@ -242,15 +246,15 @@ export function PhoneInput({ value, onChange, placeholder, testId }: { value: st
           flex: 1,
           minWidth: 0,
           padding: '13px 16px',
-          borderRadius: 16,
+          borderRadius: RADIUS.control,
           border: `1.5px solid ${T.line}`,
-          fontFamily: 'Manrope',
+          fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: 600,
           color: T.ink,
           outline: 'none',
           boxSizing: 'border-box',
-          background: '#fff',
+          background: T.surface,
         }}
       />
     </div>
@@ -258,7 +262,7 @@ export function PhoneInput({ value, onChange, placeholder, testId }: { value: st
 }
 
 export function FieldLabel({ children }: { children: ReactNode }) {
-  return <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>{children}</div>;
+  return <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>{children}</div>;
 }
 
 export function BackHeader({ title, onBack }: { title: string; onBack: () => void }) {
@@ -266,18 +270,18 @@ export function BackHeader({ title, onBack }: { title: string; onBack: () => voi
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
       <button
         onClick={onBack}
-        style={{ width: 32, height: 32, borderRadius: 10, border: `1px solid ${T.line}`, background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+        style={{ width: 32, height: 32, borderRadius: RADIUS.control, border: `1px solid ${T.line}`, background: T.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
       >
         <ChevronLeft size={16} color={T.ink} />
       </button>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 21, fontWeight: 600, color: T.ink }}>{title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 21, fontWeight: 600, color: T.ink }}>{title}</div>
     </div>
   );
 }
 
 export function EmptyHint({ text }: { text: string }) {
   return (
-    <div style={{ padding: 16, textAlign: 'center', fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, border: `1px dashed ${T.line}`, borderRadius: 14 }}>
+    <div style={{ padding: 20, textAlign: 'center', fontFamily: 'Inter', fontSize: 12.5, color: T.muted, border: `1px dashed ${T.line}`, borderRadius: RADIUS.card }}>
       {text}
     </div>
   );
@@ -286,8 +290,8 @@ export function EmptyHint({ text }: { text: string }) {
 export function Row({ label, value, last }: { label: string; value: string; last?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: last ? 'none' : `1px solid ${T.line}` }}>
-      <span style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>{label}</span>
-      <span style={{ fontFamily: 'Manrope', fontSize: 12.5, fontWeight: 700, color: T.ink }}>{value}</span>
+      <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>{label}</span>
+      <span style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 700, color: T.ink }}>{value}</span>
     </div>
   );
 }
@@ -297,9 +301,9 @@ export function StatBox({ label, value, accent, icon: Icon, testId }: { label: s
     <Card testId={testId} style={{ flex: 1, padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         {Icon && <Icon size={12} color={T.goldDeep} />}
-        <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
       </div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
     </Card>
   );
 }
@@ -317,7 +321,7 @@ export function StepLabel({ n, children }: { n: number; children: ReactNode }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Manrope',
+          fontFamily: 'Inter',
           fontWeight: 700,
           fontSize: 10.5,
           flexShrink: 0,
@@ -325,7 +329,7 @@ export function StepLabel({ n, children }: { n: number; children: ReactNode }) {
       >
         {n}
       </div>
-      <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 12.5, color: T.ink, textTransform: 'uppercase', letterSpacing: 0.4 }}>{children}</div>
+      <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.ink, textTransform: 'uppercase', letterSpacing: 0.4 }}>{children}</div>
     </div>
   );
 }
@@ -339,18 +343,18 @@ export function ServiceOption({ s, active, currency, onClick }: { s: ServiceItem
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '13px 14px',
-        borderRadius: 14,
+        borderRadius: RADIUS.control,
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
         background: active ? T.goldSoft : T.surface,
       }}
     >
       <div>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 14.5, color: T.ink }}>{s.name}</div>
-        <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, marginTop: 1 }}>{s.duration} min</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 14.5, color: T.ink }}>{s.name}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginTop: 1 }}>{s.duration} min</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.goldDeep, fontWeight: 600 }}>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 15, color: T.goldDeep, fontWeight: 600 }}>
           {CURRENCIES[currency].symbol}
           {fmtMoney(s.price, currency)}
         </div>
@@ -378,10 +382,10 @@ export function IconButton({ icon: Icon, label, onClick }: { icon: LucideIcon; l
   return (
     <button
       onClick={onClick}
-      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 6px', borderRadius: 12, border: `1px solid ${T.line}`, background: 'transparent', cursor: 'pointer' }}
+      style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '10px 6px', borderRadius: RADIUS.control, border: `1px solid ${T.line}`, background: T.surface, cursor: 'pointer' }}
     >
       <Icon size={15} color={T.goldDeep} />
-      <span style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.ink }}>{label}</span>
+      <span style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.ink }}>{label}</span>
     </button>
   );
 }
@@ -389,7 +393,7 @@ export function IconButton({ icon: Icon, label, onClick }: { icon: LucideIcon; l
 export function MiniField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div style={{ flex: 1 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, marginBottom: 3 }}>{label}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, marginBottom: 3 }}>{label}</div>
       <input
         value={value}
         onChange={(e) => onChange(Number(e.target.value.replace(/[^0-9]/g, '')))}
@@ -397,15 +401,15 @@ export function MiniField({ label, value, onChange }: { label: string; value: nu
           width: '100%',
           minWidth: 0,
           border: `1px solid ${T.line}`,
-          borderRadius: 8,
+          borderRadius: RADIUS.control,
           padding: '6px 8px',
-          fontFamily: 'Manrope',
+          fontFamily: 'Inter',
           fontWeight: 600,
           fontSize: 13,
           color: T.ink,
           outline: 'none',
           boxSizing: 'border-box',
-          background: '#fff',
+          background: T.surface,
         }}
       />
     </div>
@@ -434,22 +438,22 @@ export function AppointmentRow({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ textAlign: 'center', minWidth: 40 }}>
-            <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
+            <div style={{ fontFamily: 'Playfair Display', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
           </div>
           <div>
-            <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
-            <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
+            <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
               {a.service}
               {a.clientPhone ? ` · ${a.clientPhone}` : ''}
             </div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.goldDeep }}>
+          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.goldDeep }}>
             {CURRENCIES[currency].symbol}
             {fmtMoney(a.price, currency)}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: STATUS_COLOR[a.status] || T.muted }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: STATUS_COLOR[a.status] || T.muted }}>
             {STATUS_LABEL[lang][a.status] || a.status}
             {a.origin === 'online' ? ' · Online' : ''}
           </div>
@@ -471,12 +475,12 @@ export function AppointmentRow({
                 border: 'none',
                 background: T.success,
                 color: '#fff',
-                fontFamily: 'Manrope',
+                fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',
                 padding: '7px 10px',
-                borderRadius: 999,
+                borderRadius: RADIUS.control,
               }}
             >
               <Check size={12} /> {t.attendance.markAttendedCta}
@@ -495,12 +499,12 @@ export function AppointmentRow({
                 border: 'none',
                 background: T.danger,
                 color: '#fff',
-                fontFamily: 'Manrope',
+                fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',
                 padding: '7px 10px',
-                borderRadius: 999,
+                borderRadius: RADIUS.control,
               }}
             >
               <X size={12} /> {t.attendance.markNoShowCta}
@@ -519,7 +523,7 @@ export function AppointmentRow({
             borderRadius: 999,
             background: T.danger,
             color: '#fff',
-            fontFamily: 'Manrope',
+            fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: 10.5,
           }}

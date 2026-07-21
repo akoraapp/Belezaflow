@@ -1,5 +1,5 @@
 import { BellRing } from 'lucide-react';
-import { T } from '../theme';
+import { T, RADIUS } from '../theme';
 import { Card, EmptyHint, PrimaryButton } from '../components/primitives';
 import { relativeTimeLabel } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
@@ -18,13 +18,13 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
 
       {permission === 'default' && (
         <Card style={{ marginBottom: 16, borderColor: T.gold, background: T.goldSoft }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
             <BellRing size={18} color={T.goldDeep} style={{ marginTop: 2, flexShrink: 0 }} />
-            <div style={{ fontFamily: 'Manrope', fontWeight: 600, fontSize: 13, color: T.ink, lineHeight: 1.45 }}>{t.notificacoes.permissionBannerTitle}</div>
+            <div style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: T.ink, lineHeight: 1.45 }}>{t.notificacoes.permissionBannerTitle}</div>
           </div>
           <PrimaryButton full onClick={onRequestPermission} testId="notif-request-permission">
             {t.notificacoes.permissionBannerCta}
@@ -33,15 +33,15 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
       )}
 
       {permission === 'denied' && (
-        <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.danger, marginBottom: 16, lineHeight: 1.5 }}>{t.notificacoes.permissionDenied}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger, marginBottom: 16, lineHeight: 1.5 }}>{t.notificacoes.permissionDenied}</div>
       )}
 
       {permission === 'granted' && (
-        <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.success, marginBottom: 16 }}>{t.notificacoes.permissionGranted}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.success, marginBottom: 16 }}>{t.notificacoes.permissionGranted}</div>
       )}
 
       {permission === 'unsupported' && (
-        <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 16 }}>{t.notificacoes.permissionUnsupported}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 16 }}>{t.notificacoes.permissionUnsupported}</div>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -52,7 +52,7 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
               <a.icon size={14} color={T.goldDeep} />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.ink, lineHeight: 1.4 }}>{a.title}</div>
+              <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink, lineHeight: 1.4 }}>{a.title}</div>
               {a.ctaLabel && a.onCta && (
                 <button
                   onClick={a.onCta}
@@ -61,19 +61,19 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
                     border: 'none',
                     background: T.goldDeep,
                     color: '#fff',
-                    fontFamily: 'Manrope',
+                    fontFamily: 'Inter',
                     fontWeight: 700,
                     fontSize: 11.5,
                     cursor: 'pointer',
                     padding: '7px 12px',
-                    borderRadius: 999,
+                    borderRadius: RADIUS.control,
                   }}
                 >
                   {a.ctaLabel}
                 </button>
               )}
             </div>
-            <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, whiteSpace: 'nowrap' }}>
+            <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, whiteSpace: 'nowrap' }}>
               {timestamps[a.key] ? relativeTimeLabel(timestamps[a.key], lang) : ''}
             </div>
           </Card>

@@ -211,7 +211,7 @@ function AppShell() {
 
   if (!authedName) {
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Manrope' }}>
+      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
         <style>{FONT_IMPORT}</style>
         <div
           style={{
@@ -234,7 +234,7 @@ function AppShell() {
 
   if (!profile) {
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Manrope' }}>
+      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
         <style>{FONT_IMPORT}</style>
         <div
           style={{
@@ -357,7 +357,7 @@ function AppShell() {
               border: 'none',
               background: viewMode === v.id ? T.ink : 'transparent',
               color: viewMode === v.id ? '#fff' : T.muted,
-              fontFamily: 'Manrope',
+              fontFamily: 'Inter',
               fontWeight: 700,
               fontSize: 12.5,
               cursor: 'pointer',
@@ -373,7 +373,7 @@ function AppShell() {
   if (viewMode === 'desktop') {
     const navItems = [...tabs, ...moreItems];
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, padding: '24px 0', fontFamily: 'Manrope' }}>
+      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, padding: '24px 0', fontFamily: 'Inter' }}>
         <style>{FONT_IMPORT}</style>
         {toggleBar}
         <div
@@ -391,10 +391,10 @@ function AppShell() {
           }}
         >
           <div style={{ width: 230, background: T.surface, borderRight: `1px solid ${T.line}`, padding: '26px 16px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
+            <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
               BeautyFlow <span style={{ color: T.goldDeep }}>AI</span>
             </div>
-            <div style={{ padding: '0 10px 14px', fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>
+            <div style={{ padding: '0 10px 14px', fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
               {t.nav.greetingLoggedAs}, {profile.name} 👋
             </div>
             {navItems.map((item) => {
@@ -413,7 +413,7 @@ function AppShell() {
                     border: 'none',
                     background: isActive ? T.goldSoft : 'transparent',
                     color: isActive ? T.goldDeep : T.ink,
-                    fontFamily: 'Manrope',
+                    fontFamily: 'Inter',
                     fontWeight: isActive ? 700 : 600,
                     fontSize: 13.5,
                     cursor: 'pointer',
@@ -452,7 +452,7 @@ function AppShell() {
   }
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Manrope' }}>
+    <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
       <style>{FONT_IMPORT}</style>
       {toggleBar}
       <div

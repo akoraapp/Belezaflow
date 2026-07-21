@@ -56,7 +56,7 @@ export function BottomNav({
             style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}
           >
             <tb.icon size={19} color={isActive ? T.goldDeep : T.muted} strokeWidth={isActive ? 2.4 : 1.9} />
-            <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? T.goldDeep : T.muted }}>{tb.label}</span>
+            <span style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? T.goldDeep : T.muted }}>{tb.label}</span>
           </button>
         );
       })}
@@ -66,7 +66,7 @@ export function BottomNav({
         style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0' }}
       >
         <Grid3x3 size={19} color={moreActive ? T.goldDeep : T.muted} strokeWidth={moreActive ? 2.4 : 1.9} />
-        <span style={{ fontFamily: 'Manrope', fontSize: 10, fontWeight: moreActive ? 700 : 500, color: moreActive ? T.goldDeep : T.muted }}>{t.nav.tabMais}</span>
+        <span style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: moreActive ? 700 : 500, color: moreActive ? T.goldDeep : T.muted }}>{t.nav.tabMais}</span>
       </button>
     </div>
   );

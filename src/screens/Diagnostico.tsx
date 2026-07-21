@@ -1,5 +1,5 @@
 import { ArrowRight, BarChart3, Cake, Clock, Target, Users, type LucideIcon } from 'lucide-react';
-import { T, CURRENCIES } from '../theme';
+import { T, CURRENCIES, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, todayIsBirthday } from '../lib/helpers';
 import { productStatus } from './Estoque';
 import { Card, EmptyHint } from '../components/primitives';
@@ -26,8 +26,8 @@ interface Insight {
 function Metric({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <Card style={{ flex: '1 1 45%', padding: 16 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 20, fontWeight: 600, color: accent || T.ink, marginTop: 5 }}>{value}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 20, fontWeight: 600, color: accent || T.ink, marginTop: 5 }}>{value}</div>
     </Card>
   );
 }
@@ -59,9 +59,9 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
         <BarChart3 size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
       </div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 22 }}>{t.diagnostico.subtitle}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, marginBottom: 22 }}>{t.diagnostico.subtitle}</div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 26 }}>
         <Metric label={t.diagnostico.metricRevenue} value={`${CURRENCIES[currency].symbol}${fmtMoney(revenue, currency)}`} />
@@ -73,7 +73,7 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
         <Metric label={t.diagnostico.metricLowStock} value={`${lowStock}`} accent={lowStock > 0 ? T.danger : undefined} />
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.diagnostico.insightsTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.diagnostico.insightsTitle}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {insights.length === 0 && <EmptyHint text={t.diagnostico.noInsights} />}
         {insights.map((ins, i) => (
@@ -81,7 +81,7 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
             <div style={{ width: 30, height: 30, borderRadius: 9, background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ins.icon size={14} color={T.goldDeep} />
             </div>
-            <div style={{ flex: 1, fontFamily: 'Manrope', fontWeight: 600, fontSize: 12.5, color: T.ink }}>{ins.title}</div>
+            <div style={{ flex: 1, fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: T.ink }}>{ins.title}</div>
             <button
               onClick={ins.onClick}
               style={{
@@ -91,12 +91,12 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
                 border: 'none',
                 background: T.goldDeep,
                 color: '#fff',
-                fontFamily: 'Manrope',
+                fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',
                 padding: '6px 10px',
-                borderRadius: 999,
+                borderRadius: RADIUS.control,
                 flexShrink: 0,
               }}
             >

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, Plus, X } from 'lucide-react';
-import { T, CURRENCIES, PROFESSIONS, SUGGESTED_SERVICES } from '../theme';
+import { T, CURRENCIES, PROFESSIONS, SUGGESTED_SERVICES, RADIUS } from '../theme';
 import { PROFESSION_LABEL, SUGGESTED_SERVICE_LABEL, LANG_OPTIONS } from '../i18n';
 import { PrimaryButton, TextInput, MiniField, GoalRing } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -9,8 +9,8 @@ import type { CurrencyCode, Lang, OnboardingResult, ServiceItem } from '../types
 function StepBlock({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 23, fontWeight: 600, color: T.ink, lineHeight: 1.25 }}>{title}</div>
-      {subtitle && <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted, marginTop: 6, marginBottom: 22 }}>{subtitle}</div>}
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 23, fontWeight: 600, color: T.ink, lineHeight: 1.25 }}>{title}</div>
+      {subtitle && <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted, marginTop: 6, marginBottom: 22 }}>{subtitle}</div>}
       {!subtitle && <div style={{ marginBottom: 22 }} />}
       {children}
     </div>
@@ -27,13 +27,13 @@ function SelectRow({ active, onClick, label, compact, testId }: { active: boolea
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: compact ? '13px 14px' : '16px 16px',
-        borderRadius: 14,
+        borderRadius: RADIUS.control,
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
         background: active ? T.goldSoft : T.surface,
       }}
     >
-      <span style={{ fontFamily: 'Manrope', fontWeight: 600, fontSize: 14, color: T.ink }}>{label}</span>
+      <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: T.ink }}>{label}</span>
       {active && <Check size={16} color={T.goldDeep} />}
     </div>
   );
@@ -105,7 +105,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
           <StepBlock title={t.onboarding.stepPublicNameTitle} subtitle={t.onboarding.stepPublicNameSubtitle}>
             <TextInput value={publicName} onChange={setPublicName} placeholder={t.onboarding.publicNamePlaceholder} testId="onboarding-public-name" />
             {publicName && (
-              <div style={{ marginTop: 18, padding: 12, background: T.goldSoft, borderRadius: 12, fontFamily: 'Manrope', fontSize: 13, color: T.goldDeep }}>
+              <div style={{ marginTop: 18, padding: 12, background: T.goldSoft, borderRadius: RADIUS.control, fontFamily: 'Inter', fontSize: 13, color: T.goldDeep }}>
                 {t.onboarding.publicLinkPrefix}
                 {publicName.toLowerCase().replace(/\s+/g, '')}
               </div>
@@ -123,14 +123,14 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                   data-testid={`onboarding-profession-${p.id}`}
                   style={{
                     padding: '18px 10px',
-                    borderRadius: 14,
+                    borderRadius: RADIUS.control,
                     textAlign: 'center',
                     cursor: 'pointer',
                     border: `1.5px solid ${profession === p.id ? T.gold : T.line}`,
-                    background: profession === p.id ? `linear-gradient(135deg, #C9A24B, #8A6D2F)` : T.surface,
+                    background: profession === p.id ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
                   }}
                 >
-                  <div style={{ fontFamily: 'Manrope', fontSize: 13, fontWeight: 700, color: profession === p.id ? '#fff' : T.ink }}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: 700, color: profession === p.id ? '#fff' : T.ink }}>
                     {PROFESSION_LABEL[lang][p.id]}
                   </div>
                 </div>
@@ -142,7 +142,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         {step === 4 && (
           <StepBlock title={t.onboarding.stepGoalTitle} subtitle={t.onboarding.stepGoalSubtitle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, color: T.ink }}>{CURRENCIES[currency].symbol}</span>
+              <span style={{ fontFamily: 'Playfair Display', fontSize: 22, color: T.ink }}>{CURRENCIES[currency].symbol}</span>
               <TextInput value={goal} onChange={setGoal} placeholder="0" numeric testId="onboarding-goal" />
             </div>
             {goal && Number(goal) > 0 && (
@@ -157,12 +157,12 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
           <StepBlock title={t.onboarding.stepServicesTitle} subtitle={t.onboarding.stepServicesSubtitle}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {services.map((s) => (
-                <div key={s.id} style={{ border: `1px solid ${T.line}`, borderRadius: 14, padding: 12, background: T.surface }}>
+                <div key={s.id} style={{ border: `1px solid ${T.line}`, borderRadius: RADIUS.control, padding: 12, background: T.surface }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <input
                       value={s.name}
                       onChange={(e) => updateService(s.id, 'name', e.target.value)}
-                      style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontWeight: 700, fontSize: 14, color: T.ink, outline: 'none', width: '70%' }}
+                      style={{ border: 'none', background: 'transparent', fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: T.ink, outline: 'none', width: '70%' }}
                     />
                     <X size={16} color={T.muted} style={{ cursor: 'pointer' }} onClick={() => removeService(s.id)} />
                   </div>
@@ -181,10 +181,10 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
                   justifyContent: 'center',
                   padding: 12,
                   border: 'none',
-                  borderRadius: 14,
+                  borderRadius: RADIUS.control,
                   background: T.goldDeep,
                   color: '#fff',
-                  fontFamily: 'Manrope',
+                  fontFamily: 'Inter',
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -201,7 +201,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
         {step > 0 && (
           <button
             onClick={() => setStep((s) => s - 1)}
-            style={{ padding: '14px 16px', borderRadius: 14, border: `1px solid ${T.line}`, background: 'transparent', cursor: 'pointer' }}
+            style={{ padding: '14px 16px', borderRadius: RADIUS.control, border: `1px solid ${T.line}`, background: T.surface, cursor: 'pointer' }}
           >
             <ChevronLeft size={18} color={T.ink} />
           </button>

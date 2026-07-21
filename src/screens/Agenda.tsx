@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { T } from '../theme';
+import { T, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -49,47 +49,29 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
         </div>
       )}
-      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>
+      <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 18 }}>
         {isWorkingToday
           ? `${today.length} ${t.agenda.apptsCountSuffix} · ${availableSlots.length} ${t.agenda.slotsCountSuffix}`
           : t.agenda.notWorkingDayShort}
       </div>
 
-      <div
-        onClick={() => setShowAdd((v) => !v)}
-        data-testid="agenda-add-toggle"
-        style={{
-          cursor: 'pointer',
-          height: 52,
-          borderRadius: 14,
-          background: T.ink,
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          fontFamily: 'Manrope',
-          fontWeight: 700,
-          fontSize: 14.5,
-          boxShadow: '0 6px 16px -6px rgba(32,28,23,0.35)',
-          marginBottom: 16,
-        }}
-      >
-        <Plus size={17} />
-        {t.agenda.addApptCta}
+      <div style={{ marginBottom: 16 }}>
+        <PrimaryButton full onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="agenda-add-toggle">
+          {t.agenda.addApptCta}
+        </PrimaryButton>
       </div>
 
       {showAdd && (
         <Card style={{ marginBottom: 16 }}>
-          <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.agenda.newApptFormTitle}</div>
+          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.agenda.newApptFormTitle}</div>
           <TextInput value={clientName} onChange={setClientName} placeholder={t.agenda.clientNamePlaceholder} testId="agenda-client-name" />
           <div style={{ height: 8 }} />
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.selectServiceLabel}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.selectServiceLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-            {services.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agenda.noServicesRegistered}</span>}
+            {services.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agenda.noServicesRegistered}</span>}
             {services.map((s) => (
               <Chip key={s.id} active={selService?.id === s.id} onClick={() => setSelService(s)}>
                 {s.name}
@@ -97,13 +79,13 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
             ))}
           </div>
           {selService && (
-            <div style={{ marginBottom: 12, fontFamily: 'Manrope', fontSize: 12, color: T.goldDeep }}>
+            <div style={{ marginBottom: 12, fontFamily: 'Inter', fontSize: 12, color: T.goldDeep }}>
               {t.agenda.autoFilledValuePrefix} {fmtMoney(selService.price, currency)} · {selService.duration} min
             </div>
           )}
-          <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.availableTodayLabel}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.availableTodayLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-            {availableSlots.length === 0 && <span style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted }}>{t.agenda.noSlotsToday}</span>}
+            {availableSlots.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agenda.noSlotsToday}</span>}
             {availableSlots.map((tm) => (
               <Chip key={tm} active={time === tm} onClick={() => setTime(tm)}>
                 {formatTimeLabel(tm, lang)}
@@ -116,7 +98,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.todayLabel}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.todayLabel}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {today.length === 0 && <EmptyHint text={t.agenda.noApptsToday} />}
         {[...today]
@@ -136,10 +118,10 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       {availableSlots.length > 0 && (
         <>
           <div style={{ height: 24 }} />
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.freeSlotsToday}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.freeSlotsToday}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {availableSlots.map((tm) => (
-              <div key={tm} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>
+              <div key={tm} style={{ padding: '8px 14px', borderRadius: RADIUS.pill, border: `1px dashed ${T.line}`, fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>
                 {formatTimeLabel(tm, lang)}
               </div>
             ))}

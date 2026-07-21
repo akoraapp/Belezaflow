@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign, Plus, Ticket, Trash2 } from 'lucide-react';
-import { T, CURRENCIES } from '../theme';
+import { T, CURRENCIES, RADIUS, SHADOW } from '../theme';
 import { MONTH_NAMES, MONTH_ABBR } from '../i18n';
 import { fmtCurrency, fmtMoney, format } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, PrimaryButton, StatBox } from '../components/primitives';
@@ -11,7 +11,7 @@ function GoalGauge({ pct }: { pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
   const textOnFill = clamped >= 50;
   return (
-    <div style={{ width: 64, height: 64, borderRadius: 16, position: 'relative', overflow: 'hidden', background: 'rgba(244,233,210,0.14)', flexShrink: 0 }}>
+    <div style={{ width: 64, height: 64, borderRadius: RADIUS.control, position: 'relative', overflow: 'hidden', background: 'rgba(244,233,210,0.14)', flexShrink: 0 }}>
       <div
         style={{
           position: 'absolute',
@@ -19,7 +19,7 @@ function GoalGauge({ pct }: { pct: number }) {
           left: 0,
           right: 0,
           height: `${clamped}%`,
-          background: 'linear-gradient(180deg, #E3C989, #B98D3E)',
+          background: `linear-gradient(180deg, ${T.goldLight}, ${T.gold})`,
           transition: 'height 0.6s ease',
         }}
       />
@@ -31,10 +31,10 @@ function GoalGauge({ pct }: { pct: number }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Cormorant Garamond',
+          fontFamily: 'Playfair Display',
           fontWeight: 700,
           fontSize: 15,
-          color: textOnFill ? '#1B1712' : '#F4E9D2',
+          color: textOnFill ? T.ink : T.bg,
         }}
       >
         {Math.round(clamped)}%
@@ -52,7 +52,7 @@ function BarChart({ data, currency }: { data: { label: string; value: number }[]
         return (
           <div key={d.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, height: '100%', justifyContent: 'flex-end' }}>
             {d.value > 0 && (
-              <div style={{ fontFamily: 'Manrope', fontSize: 9.5, fontWeight: 700, color: T.goldDeep, whiteSpace: 'nowrap' }}>{fmtMoney(d.value, currency)}</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 700, color: T.goldDeep, whiteSpace: 'nowrap' }}>{fmtMoney(d.value, currency)}</div>
             )}
             <div
               title={d.value > 0 ? fmtCurrency(d.value, currency) : undefined}
@@ -61,10 +61,10 @@ function BarChart({ data, currency }: { data: { label: string; value: number }[]
                 maxWidth: 26,
                 height: `${h}%`,
                 borderRadius: '6px 6px 3px 3px',
-                background: d.value > 0 ? `linear-gradient(180deg, #D9BA6D, #B8933E)` : T.line,
+                background: d.value > 0 ? `linear-gradient(180deg, ${T.goldLight}, ${T.gold})` : T.line,
               }}
             />
-            <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted }}>{d.label}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted }}>{d.label}</div>
           </div>
         );
       })}
@@ -139,15 +139,15 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
 
   return (
     <div style={{ padding: '24px 20px 100px' }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
 
-      <div style={{ background: T.ink, borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 10px 28px -14px rgba(32,28,23,0.45)' }}>
+      <div style={{ background: T.ink, borderRadius: RADIUS.card, padding: 20, display: 'flex', alignItems: 'center', gap: 16, boxShadow: SHADOW.elevated }}>
         <GoalGauge pct={goalPct} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'Manrope', fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: T.goldLight }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: T.goldLight }}>
             {t.financeiro.metaOfMonthPrefix} {monthName}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: '#F4E9D2', marginTop: 7, lineHeight: 1.5 }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.bg, marginTop: 7, lineHeight: 1.5 }}>
             {remaining > 0
               ? `${t.financeiro.remainingToGoalPrefix} ${fmtCurrency(remaining, currency)} ${t.financeiro.remainingToGoalMiddle} ${fmtCurrency(profile.goal, currency)}`
               : t.financeiro.goalReached}
@@ -161,7 +161,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}
           data-testid="finance-month-select"
-          style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
+          style={{ border: 'none', background: 'transparent', fontFamily: 'Inter', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
         >
           {MONTH_NAMES[lang].map((m, i) => (
             <option key={m} value={i}>
@@ -173,7 +173,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
           data-testid="finance-year-select"
-          style={{ border: 'none', background: 'transparent', fontFamily: 'Manrope', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
+          style={{ border: 'none', background: 'transparent', fontFamily: 'Inter', fontSize: 12, fontWeight: 700, color: T.muted, outline: 'none', cursor: 'pointer' }}
         >
           {yearOptions.map((y) => (
             <option key={y} value={y}>
@@ -184,14 +184,14 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
       </div>
 
       {!isCurrentPeriod && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.goldSoft, borderRadius: 12 }}>
-          <span style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.goldSoft, borderRadius: RADIUS.control }}>
+          <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
             {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
           </span>
           <button
             onClick={resetToCurrentPeriod}
             data-testid="finance-reset-period"
-            style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Manrope', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
+            style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Inter', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', textDecoration: 'underline', flexShrink: 0 }}
           >
             {t.financeiro.backToCurrentCta}
           </button>
@@ -209,31 +209,14 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
       </div>
 
       {!isCurrentPeriod && periodAppointments.length === 0 && periodEntries.length === 0 && (
-        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -20, marginBottom: 30 }}>{t.financeiro.noDataForPeriod}</div>
+        <div style={{ textAlign: 'center', fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginTop: -20, marginBottom: 30 }}>{t.financeiro.noDataForPeriod}</div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
-        <button
-          onClick={() => setShowAdd((v) => !v)}
-          data-testid="finance-add-toggle"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            border: 'none',
-            background: T.goldDeep,
-            color: '#fff',
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: 12.5,
-            cursor: 'pointer',
-            padding: '7px 12px',
-            borderRadius: 999,
-          }}
-        >
-          <Plus size={14} /> {t.financeiro.addLancamentoCta}
-        </button>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
+        <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} variant="accent" testId="finance-add-toggle">
+          {t.financeiro.addLancamentoCta}
+        </PrimaryButton>
       </div>
 
       {showAdd && (
@@ -252,7 +235,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
             <TextInput value={data} onChange={setData} placeholder={t.financeiro.vencimentoPlaceholder} />
           </div>
           <div style={{ marginTop: 12 }}>
-            <PrimaryButton full onClick={submit} disabled={!label || !value} variant="gold" testId="finance-add-submit">
+            <PrimaryButton full onClick={submit} disabled={!label || !value} variant="accent" testId="finance-add-submit">
               {t.financeiro.salvarLancamentoCta}
             </PrimaryButton>
           </div>
@@ -264,13 +247,13 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         {entries.map((e) => (
           <Card key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.ink }}>{e.label}</div>
-              <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted }}>
+              <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink }}>{e.label}</div>
+              <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
                 {t.financeiro.venceLabel} {e.data}
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: e.tipo === 'receber' ? T.success : T.danger }}>
+              <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: e.tipo === 'receber' ? T.success : T.danger }}>
                 {e.tipo === 'receber' ? '+' : '-'}
                 {fmtCurrency(e.value, currency)}
               </div>
@@ -280,12 +263,12 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.financeiro.historicoTitle}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.financeiro.historicoTitle}</div>
       <Card style={{ marginBottom: 18 }}>
         <BarChart data={history} currency={currency} />
       </Card>
 
-      <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11, color: T.muted }}>
+      <div style={{ textAlign: 'center', fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
         {format('{prefix} {currency} · {suffix}', { prefix: t.financeiro.footerNotePrefix, currency, suffix: t.financeiro.footerNoteSuffix })}
       </div>
     </div>
