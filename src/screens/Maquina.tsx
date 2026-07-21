@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles, SlidersHorizontal, type LucideIcon } from 'lucide-react';
 import { T } from '../theme';
-import { Card, Chip, FieldLabel, PrimaryButton } from '../components/primitives';
+import { Card, FieldLabel, PrimaryButton } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
 import { useLang } from '../lib/LangContext';
 
@@ -16,15 +16,37 @@ interface GeneratedItem {
   content: ContentResult;
 }
 
-function FieldGroup({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
+function GridOption({ label, active, onClick, testId }: { label: string; active: boolean; onClick: () => void; testId?: string }) {
   return (
-    <div style={{ marginBottom: 16 }}>
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      style={{
+        padding: '16px 12px',
+        borderRadius: 14,
+        textAlign: 'center',
+        cursor: 'pointer',
+        border: `1.5px solid ${active ? T.gold : T.line}`,
+        background: active ? T.goldSoft : T.surface,
+        fontFamily: 'Manrope',
+        fontWeight: 700,
+        fontSize: 13,
+        color: T.ink,
+      }}
+    >
+      {active && <Check size={13} color={T.goldDeep} style={{ marginRight: 5, verticalAlign: -2 }} />}
+      {label}
+    </button>
+  );
+}
+
+function FieldGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
       <FieldLabel>{label}</FieldLabel>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {options.map((o) => (
-          <Chip key={o} active={value === o} onClick={() => onChange(o)}>
-            {o}
-          </Chip>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {options.map((o, i) => (
+          <GridOption key={o} label={o} active={value === o} onClick={() => onChange(o)} testId={testId ? `${testId}-${i}` : undefined} />
         ))}
       </div>
     </div>
@@ -270,9 +292,9 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
         </PrimaryButton>
       ) : (
         <Card>
-          <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} />
-          <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} />
-          <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} />
+          <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
+          <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
+          <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
           <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
             {loading ? t.maquina.generatingCta : t.maquina.generateCta}
           </PrimaryButton>
