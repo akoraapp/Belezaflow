@@ -72,6 +72,7 @@ export function PrimaryButton({
   disabled,
   icon: Icon,
   testId,
+  variant = 'ink',
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -79,6 +80,7 @@ export function PrimaryButton({
   disabled?: boolean;
   icon?: LucideIcon;
   testId?: string;
+  variant?: 'ink' | 'gold';
 }) {
   return (
     <button
@@ -94,13 +96,13 @@ export function PrimaryButton({
         padding: '14px 22px',
         borderRadius: 999,
         border: 'none',
-        background: disabled ? T.line : `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+        background: disabled ? T.line : variant === 'gold' ? T.goldDeep : T.ink,
         color: disabled ? T.muted : '#fff',
         fontFamily: 'Manrope',
         fontWeight: 700,
         fontSize: 14.5,
         cursor: disabled ? 'default' : 'pointer',
-        boxShadow: disabled ? 'none' : '0 6px 16px -6px rgba(138,109,47,0.55)',
+        boxShadow: disabled ? 'none' : '0 6px 16px -6px rgba(32,28,23,0.35)',
       }}
     >
       {Icon && <Icon size={16} />}

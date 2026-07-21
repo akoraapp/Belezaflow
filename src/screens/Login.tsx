@@ -79,7 +79,7 @@ export function Login({ onLogin }: { onLogin: (name: string) => void }) {
             height: 52,
             borderRadius: 999,
             border: 'none',
-            background: `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+            background: T.goldDeep,
             color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,

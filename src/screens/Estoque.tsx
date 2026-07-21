@@ -54,13 +54,13 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
             padding: '10px 16px',
             borderRadius: 999,
             border: 'none',
-            background: `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+            background: T.ink,
             color: '#fff',
             fontFamily: 'Manrope',
             fontWeight: 700,
             fontSize: 12.5,
             cursor: 'pointer',
-            boxShadow: '0 6px 16px -6px rgba(138,109,47,0.55)',
+            boxShadow: '0 6px 16px -6px rgba(32,28,23,0.35)',
           }}
         >
           <Plus size={15} /> {t.estoque.addProductCta}

@@ -59,7 +59,7 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
                   style={{
                     marginTop: 8,
                     border: 'none',
-                    background: T.ink,
+                    background: T.goldDeep,
                     color: '#fff',
                     fontFamily: 'Manrope',
                     fontWeight: 700,

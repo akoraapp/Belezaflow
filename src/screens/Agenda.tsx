@@ -63,7 +63,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
           cursor: 'pointer',
           height: 52,
           borderRadius: 14,
-          background: `linear-gradient(135deg, #C9A24B, #8A6D2F)`,
+          background: T.ink,
           color: '#fff',
           display: 'flex',
           alignItems: 'center',
@@ -72,7 +72,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
           fontFamily: 'Manrope',
           fontWeight: 700,
           fontSize: 14.5,
-          boxShadow: '0 6px 16px -6px rgba(138,109,47,0.55)',
+          boxShadow: '0 6px 16px -6px rgba(32,28,23,0.35)',
           marginBottom: 16,
         }}
       >
