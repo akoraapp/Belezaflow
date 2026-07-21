@@ -31,39 +31,39 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
   const showFull = isWorkingToday && availableSlots.length === 0 && today.length > 0;
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
+    <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted }}>{greet},</div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 26, fontWeight: 600, color: T.ink, marginBottom: 20 }} data-testid="hoje-greeting">
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 27, fontWeight: 600, color: T.ink, marginBottom: 26 }} data-testid="hoje-greeting">
         {profile.name}.
       </div>
 
-      <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, background: T.ink, border: 'none' }}>
+      <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, background: T.ink, border: 'none', boxShadow: '0 10px 28px -14px rgba(32,28,23,0.45)' }}>
         <div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>{t.hoje.revenueLabel}</div>
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, color: '#fff' }}>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 5 }}>{t.hoje.revenueLabel}</div>
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, color: '#fff', fontWeight: 600 }}>
             {CURRENCIES[currency].symbol} {fmtMoney(monthRevenue, currency)}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.goldOnDark }}>
+          <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.goldOnDark, marginTop: 2 }}>
             {CURRENCIES[currency].symbol} {fmtMoney(profile.goal, currency)} {t.hoje.ofGoalSuffix}
           </div>
         </div>
         <GoalRing progress={progress} size={88} stroke={8} center={t.onboarding.goalRingCenter} dark />
       </Card>
 
-      <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 10 }}>{t.hoje.quickActionsTitle}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 12 }}>{t.hoje.quickActionsTitle}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
         <QuickActionButton label={t.hoje.quickConteudo} onClick={onOpenConteudo} primary testId="quick-conteudo" />
         <QuickActionButton label={t.hoje.quickAtendimento} onClick={onOpenAgenda} testId="quick-atendimento" />
         <QuickActionButton label={t.hoje.quickFinanceiro} onClick={onOpenFinanceiro} testId="quick-financeiro" />
         <QuickActionButton label={t.hoje.quickCliente} onClick={onOpenClientes} testId="quick-cliente" />
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <Bot size={15} color={T.goldDeep} />
         <div style={{ fontFamily: 'Manrope', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.goldDeep }}>{t.hoje.sectionEyebrow}</div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
         {!isWorkingToday && (
           <Card>
             <div style={{ fontFamily: 'Manrope', fontSize: 13, color: T.muted }}>{t.hoje.notWorkingDay}</div>
@@ -87,8 +87,8 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         )}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.hoje.appointmentsToday}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.hoje.appointmentsToday}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {today.length === 0 && <EmptyHint text={t.hoje.noAppointmentsToday} />}
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
@@ -151,12 +151,13 @@ function QuickActionButton({ label, onClick, primary, testId }: { label: string;
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px 14px',
-        borderRadius: 16,
+        padding: '22px 14px',
+        borderRadius: 18,
         cursor: 'pointer',
         textAlign: 'center',
         border: primary ? 'none' : `1px solid ${T.line}`,
         background: primary ? T.ink : '#fff',
+        boxShadow: primary ? '0 8px 20px -12px rgba(32,28,23,0.5)' : '0 4px 14px -10px rgba(32,28,23,0.12)',
       }}
     >
       <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: primary ? '#fff' : T.ink, lineHeight: 1.3 }}>{label}</div>

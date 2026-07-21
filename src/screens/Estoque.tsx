@@ -41,9 +41,9 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
   };
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.estoque.title}</div>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.estoque.title}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="estoque-add-toggle"
@@ -68,7 +68,7 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
       </div>
 
       {showAdd && (
-        <Card style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 22 }}>
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.estoque.newProductFormTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={name} onChange={setName} placeholder={t.estoque.productNamePlaceholder} testId="estoque-name" />
@@ -85,7 +85,7 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
         </Card>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {products.length === 0 && <EmptyHint text={t.estoque.noProducts} />}
         {products.map((p) => {
           const status = productStatus(p);

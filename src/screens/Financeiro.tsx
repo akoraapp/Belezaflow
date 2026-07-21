@@ -135,13 +135,13 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
   };
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.financeiro.title}</div>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
 
-      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 8 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 11, color: T.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 9 }}>
         {t.financeiro.periodLabel}
       </div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}
@@ -183,13 +183,13 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         </div>
       )}
 
-      <div style={{ background: T.ink, borderRadius: 20, padding: 18, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+      <div style={{ background: T.ink, borderRadius: 20, padding: 20, display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22, boxShadow: '0 10px 28px -14px rgba(32,28,23,0.45)' }}>
         <GoalGauge pct={goalPct} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: 'Manrope', fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: T.goldLight }}>
             {t.financeiro.metaOfMonthPrefix} {monthName}
           </div>
-          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: '#F4E9D2', marginTop: 6, lineHeight: 1.4 }}>
+          <div style={{ fontFamily: 'Manrope', fontSize: 13, color: '#F4E9D2', marginTop: 7, lineHeight: 1.5 }}>
             {remaining > 0
               ? `${t.financeiro.remainingToGoalPrefix} ${fmtCurrency(remaining, currency)} ${t.financeiro.remainingToGoalMiddle} ${fmtCurrency(profile.goal, currency)}`
               : t.financeiro.goalReached}
@@ -197,22 +197,22 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <StatBox label={t.financeiro.receitaMes} value={fmtCurrency(totalRev, currency)} />
         <StatBox label={t.financeiro.ticketMedio} value={fmtCurrency(ticketMedio, currency)} />
       </div>
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 12, marginBottom: 26 }}>
         <StatBox label={t.financeiro.totalReceber} value={fmtCurrency(aReceber, currency)} accent={T.success} />
         <StatBox label={t.financeiro.totalPagar} value={fmtCurrency(aPagar, currency)} accent={T.danger} />
       </div>
 
       {!isCurrentPeriod && periodAppointments.length === 0 && periodEntries.length === 0 && (
-        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -10, marginBottom: 20 }}>{t.financeiro.noDataForPeriod}</div>
+        <div style={{ textAlign: 'center', fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginTop: -16, marginBottom: 26 }}>{t.financeiro.noDataForPeriod}</div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="finance-add-toggle"
@@ -258,7 +258,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         </Card>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 26 }}>
         {entries.length === 0 && !showAdd && <EmptyHint text={t.financeiro.noLancamentos} />}
         {entries.map((e) => (
           <Card key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -279,8 +279,8 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.financeiro.historicoTitle}</div>
-      <Card style={{ marginBottom: 14 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.financeiro.historicoTitle}</div>
+      <Card style={{ marginBottom: 18 }}>
         <BarChart data={history} currency={currency} />
       </Card>
 

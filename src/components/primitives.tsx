@@ -118,9 +118,10 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
       data-testid={testId}
       style={{
         background: T.surface,
-        borderRadius: 18,
-        padding: 16,
+        borderRadius: 20,
+        padding: 18,
         border: `1px solid ${T.line}`,
+        boxShadow: '0 4px 18px -10px rgba(32,28,23,0.14)',
         ...style,
       }}
     >
@@ -131,8 +132,8 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
 
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
+    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
       {right}
     </div>
   );
@@ -293,9 +294,9 @@ export function Row({ label, value, last }: { label: string; value: string; last
 
 export function StatBox({ label, value, accent, testId }: { label: string; value: string; accent?: string; testId?: string }) {
   return (
-    <Card testId={testId} style={{ flex: 1, padding: 14 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>{label}</div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 22, fontWeight: 600, color: accent || T.ink, marginTop: 6 }}>{value}</div>
+    <Card testId={testId} style={{ flex: 1, padding: 16 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
     </Card>
   );
 }

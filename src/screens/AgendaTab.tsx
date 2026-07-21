@@ -25,10 +25,10 @@ export function AgendaTab({ appointments, services, profile, currency, addAppoin
   const [subTab, setSubTab] = useState<SubTab>('interna');
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 14 }}>{t.agenda.title}</div>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 18 }}>{t.agenda.title}</div>
 
-      <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4, marginBottom: 18 }}>
+      <div style={{ display: 'flex', background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999, padding: 4, gap: 4, marginBottom: 22, boxShadow: '0 2px 10px -6px rgba(32,28,23,0.1)' }}>
         {(
           [
             { id: 'interna' as const, label: t.agenda.subtabInterna },

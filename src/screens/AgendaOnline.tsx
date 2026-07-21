@@ -79,7 +79,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </>
       )}
 
-      <Card style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 22 }}>
         <div style={{ fontFamily: 'Manrope', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>{t.agendaOnline.publicLinkLabel}</div>
         <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12 }}>{link}</div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -96,8 +96,8 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.publicInfoTitle}</div>
-      <Card style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agendaOnline.publicInfoTitle}</div>
+      <Card style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
           <TextInput value={profile.instagram || ''} onChange={(v) => onUpdateProfile({ instagram: v })} placeholder={t.agendaOnline.instagramPlaceholder} />
@@ -117,9 +117,9 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.slotsTitle}</div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.agendaOnline.slotsSubtitle}</div>
-      <Card style={{ marginBottom: 20 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 5 }}>{t.agendaOnline.slotsTitle}</div>
+      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 12 }}>{t.agendaOnline.slotsSubtitle}</div>
+      <Card style={{ marginBottom: 26 }}>
         <FieldLabel>{t.agendaOnline.workingDaysLabel}</FieldLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
           {WEEKDAYS.map((d) => (

@@ -62,9 +62,9 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
   }
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
         <button
           onClick={() => setShowAdd((v) => !v)}
           data-testid="clientes-add-toggle"
@@ -89,7 +89,7 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
       </div>
 
       {showAdd && (
-        <Card style={{ marginBottom: 16 }}>
+        <Card style={{ marginBottom: 22 }}>
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.clientes.newClientFormTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={name} onChange={setName} placeholder={t.clientes.namePlaceholder} testId="clientes-name" />
@@ -124,14 +124,14 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
         </Card>
       )}
 
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 18, paddingBottom: 4 }}>
         {['Todos', ...STATUS_LIST].map((s) => (
           <Chip key={s} active={filter === s} onClick={() => setFilter(s)}>
             {s === 'Todos' ? t.clientes.filterAll : STATUS_LABEL[lang][s]}
           </Chip>
         ))}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.length === 0 && <EmptyHint text={t.clientes.noClientsInFilter} />}
         {filtered.map((c) => (
           <Card key={c.id} onClick={() => setSelectedId(c.id)} testId={`cliente-row-${c.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
@@ -290,7 +290,7 @@ function ClienteDetail({
         </div>
       </div>
 
-      <Card style={{ marginBottom: 14 }}>
+      <Card style={{ marginBottom: 20 }}>
         <Row label={t.clientes.originRowLabel} value={ORIGEM_LABEL[lang][client.origem] || client.origem} />
         <Row label={t.clientes.serviceRowLabel} value={client.service} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
@@ -317,7 +317,7 @@ function ClienteDetail({
       </Card>
 
       {pendingNoShow && (
-        <Card style={{ marginBottom: 14, border: `1.5px solid ${T.danger}` }}>
+        <Card style={{ marginBottom: 20, border: `1.5px solid ${T.danger}` }}>
           <div style={{ fontFamily: 'Manrope', fontWeight: 700, fontSize: 13, color: T.danger, marginBottom: 6 }}>{t.clientes.noShowFollowUpTitle}</div>
           <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.ink, marginBottom: 10, lineHeight: 1.5 }}>
             {format(t.clientes.noShowFollowUpBody, { name: client.name, service: pendingNoShow.service })}
@@ -378,8 +378,8 @@ function ClienteDetail({
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.clientStatusTitle}</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.clientStatusTitle}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
         {STATUS_LIST.map((s) => (
           <Chip key={s} active={client.status === s} onClick={() => onChangeStatus(s)}>
             {STATUS_LABEL[lang][s]}
@@ -387,7 +387,7 @@ function ClienteDetail({
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.clientes.centralRespostasTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.centralRespostasTitle}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {templateKeys.map((k) => (
           <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>

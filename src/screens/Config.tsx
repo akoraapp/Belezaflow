@@ -34,10 +34,10 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
   const toggle = (row: OpenRow) => setOpenRow((r) => (r === row ? null : row));
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.config.title}</div>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.config.title}</div>
 
-      <Card onClick={onOpenServicos} style={{ marginBottom: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <Card onClick={onOpenServicos} style={{ marginBottom: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Scissors size={16} color={T.goldDeep} />
         </div>
@@ -50,8 +50,8 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
         <ChevronRight size={16} color={T.muted} />
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.config.contactMethodTitle}</div>
-      <Card style={{ marginBottom: 16 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.config.contactMethodTitle}</div>
+      <Card style={{ marginBottom: 22 }}>
         <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.config.contactMethodHint}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Chip active={(profile.contactMethod || 'whatsapp') === 'whatsapp'} onClick={() => onUpdateProfile({ contactMethod: 'whatsapp' })}>
@@ -63,9 +63,9 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.config.generalTitle}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.config.generalTitle}</div>
       <Card style={{ padding: 0 }}>
-        <div onClick={() => toggle('idioma')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}>
+        <div onClick={() => toggle('idioma')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}>
           <span style={{ fontFamily: 'Manrope', fontSize: 13.5, color: T.ink }}>{t.config.itemIdioma}</span>
           <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'idioma' ? 'rotate(180deg)' : 'none' }} />
         </div>

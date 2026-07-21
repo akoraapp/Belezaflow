@@ -52,7 +52,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
           <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
         </div>
       )}
-      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 16 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 12, color: T.muted, marginBottom: 18 }}>
         {isWorkingToday
           ? `${today.length} ${t.agenda.apptsCountSuffix} · ${availableSlots.length} ${t.agenda.slotsCountSuffix}`
           : t.agenda.notWorkingDayShort}
@@ -116,8 +116,8 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.todayLabel}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.todayLabel}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {today.length === 0 && <EmptyHint text={t.agenda.noApptsToday} />}
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
@@ -135,8 +135,8 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
 
       {availableSlots.length > 0 && (
         <>
-          <div style={{ height: 18 }} />
-          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agenda.freeSlotsToday}</div>
+          <div style={{ height: 24 }} />
+          <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.freeSlotsToday}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {availableSlots.map((tm) => (
               <div key={tm} style={{ padding: '8px 14px', borderRadius: 10, border: `1px dashed ${T.line}`, fontFamily: 'Manrope', fontSize: 12.5, color: T.muted }}>

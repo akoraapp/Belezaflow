@@ -25,9 +25,9 @@ interface Insight {
 
 function Metric({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <Card style={{ flex: '1 1 45%', padding: 14 }}>
-      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 19, color: accent || T.ink, marginTop: 4 }}>{value}</div>
+    <Card style={{ flex: '1 1 45%', padding: 16 }}>
+      <div style={{ fontFamily: 'Manrope', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6 }}>{label}</div>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 20, fontWeight: 600, color: accent || T.ink, marginTop: 5 }}>{value}</div>
     </Card>
   );
 }
@@ -56,14 +56,14 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
   }
 
   return (
-    <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+    <div style={{ padding: '24px 20px 100px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
         <BarChart3 size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
+        <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.diagnostico.title}</div>
       </div>
-      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.diagnostico.subtitle}</div>
+      <div style={{ fontFamily: 'Manrope', fontSize: 12.5, color: T.muted, marginBottom: 22 }}>{t.diagnostico.subtitle}</div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 26 }}>
         <Metric label={t.diagnostico.metricRevenue} value={`${CURRENCIES[currency].symbol}${fmtMoney(revenue, currency)}`} />
         <Metric label={t.diagnostico.metricGoal} value={`${CURRENCIES[currency].symbol}${fmtMoney(profile.goal, currency)}`} />
         <Metric label={t.diagnostico.metricApptsToday} value={`${today.length}`} />
@@ -73,8 +73,8 @@ export function DiagnosticoScreen({ profile, clients, appointments, products, cu
         <Metric label={t.diagnostico.metricLowStock} value={`${lowStock}`} accent={lowStock > 0 ? T.danger : undefined} />
       </div>
 
-      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.diagnostico.insightsTitle}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontFamily: 'Cormorant Garamond', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.diagnostico.insightsTitle}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {insights.length === 0 && <EmptyHint text={t.diagnostico.noInsights} />}
         {insights.map((ins, i) => (
           <Card key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
