@@ -324,6 +324,7 @@ function AppShell() {
           clients={clients}
           services={services}
           appointments={appointments}
+          currency={currency}
           contactMethod={profile.contactMethod}
           addClient={addClient}
           updateClient={updateClient}

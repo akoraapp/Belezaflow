@@ -393,6 +393,10 @@ const pt = {
     copyMessageCta: 'Copiar mensagem',
     copiedMessageLabel: 'Mensagem copiada!',
     noPhoneHint: 'Cadastre um telefone para enviar direto pelo WhatsApp.',
+    attendanceRateLabel: 'Taxa de comparecimento',
+    noAttendanceDataLabel: 'Nenhum registro ainda',
+    totalGastoLabel: 'Total gasto',
+    visitasLabel: 'Visitas',
   },
   financeiro: {
     title: 'Profit Hub',
@@ -721,6 +725,10 @@ const en: typeof pt = {
     copyMessageCta: 'Copy message',
     copiedMessageLabel: 'Message copied!',
     noPhoneHint: 'Add a phone number to send directly via WhatsApp.',
+    attendanceRateLabel: 'Attendance rate',
+    noAttendanceDataLabel: 'No records yet',
+    totalGastoLabel: 'Total spent',
+    visitasLabel: 'Visits',
   },
   financeiro: {
     title: 'Profit Hub',
@@ -1049,6 +1057,10 @@ const es: typeof pt = {
     copyMessageCta: 'Copiar mensaje',
     copiedMessageLabel: '¡Mensaje copiado!',
     noPhoneHint: 'Registra un teléfono para enviar directo por WhatsApp.',
+    attendanceRateLabel: 'Tasa de asistencia',
+    noAttendanceDataLabel: 'Aún no hay registros',
+    totalGastoLabel: 'Total gastado',
+    visitasLabel: 'Visitas',
   },
   financeiro: {
     title: 'Profit Hub',

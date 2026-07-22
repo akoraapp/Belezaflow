@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles } from 'lucide-react';
+import { Check, ChevronDown, Copy, Inbox, Loader2, Sparkles } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { Card, PrimaryButton, SectionTitle } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
@@ -176,7 +176,6 @@ interface MaquinaScreenProps {
 
 export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScreenProps) {
   const { t, lang } = useLang();
-  const [mode, setMode] = useState<'manual' | 'auto'>('auto');
   const [objetivo, setObjetivo] = useState('Preencher agenda');
   const [formato, setFormato] = useState('Reel');
   const [intensidade, setIntensidade] = useState('Estratégico');
@@ -215,63 +214,27 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <Megaphone size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink }}>{t.maquina.title}</div>
-      </div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink, marginBottom: 4 }}>{t.maquina.title}</div>
       <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
 
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <div
-          onClick={() => setMode('auto')}
-          data-testid="maquina-mode-auto"
-          style={{
-            flex: 1,
-            cursor: 'pointer',
-            borderRadius: RADIUS.card,
-            padding: 18,
-            background: T.ink,
-            border: `1.5px solid ${mode === 'auto' ? T.gold : 'transparent'}`,
-          }}
-        >
-          <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: T.gold, marginBottom: 8 }}>
-            {t.maquina.modeAutoLabel}
-          </div>
-          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.bg, lineHeight: 1.4 }}>{t.maquina.autoIntro}</div>
+      <div style={{ borderRadius: RADIUS.card, padding: 20, background: T.ink, marginBottom: 26 }}>
+        <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: T.gold, marginBottom: 8 }}>
+          {t.maquina.modeAutoLabel}
         </div>
-        <div
-          onClick={() => setMode('manual')}
-          data-testid="maquina-mode-manual"
-          style={{
-            flex: 1,
-            cursor: 'pointer',
-            borderRadius: RADIUS.card,
-            padding: 18,
-            background: T.surface,
-            border: `1.5px solid ${mode === 'manual' ? T.gold : T.line}`,
-          }}
-        >
-          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 6 }}>{t.maquina.modeManualLabel}</div>
-          <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{t.maquina.manualCardDesc}</div>
-        </div>
-      </div>
-
-      {mode === 'auto' ? (
+        <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.bg, lineHeight: 1.5, marginBottom: 16 }}>{t.maquina.autoIntro}</div>
         <PrimaryButton full variant="champagne" onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
           {loading ? t.maquina.generatingCta : t.maquina.autoGenerateCta}
         </PrimaryButton>
-      ) : (
-        <Card>
-          <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
-          <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
-          <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
-          <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
-            {loading ? t.maquina.generatingCta : t.maquina.generateCta}
-          </PrimaryButton>
-        </Card>
-      )}
+      </div>
 
-      <div style={{ height: 30 }} />
+      <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
+      <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
+      <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
+      <div style={{ marginBottom: 26 }}>
+        <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
+          {loading ? t.maquina.generatingCta : t.maquina.generateCta}
+        </PrimaryButton>
+      </div>
 
       <SectionTitle>{t.maquina.generatedSectionTitle}</SectionTitle>
 

@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
-import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
+import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR, CURRENCIES } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
-import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle, StatBox } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import { format } from '../lib/helpers';
+import { format, fmtMoney } from '../lib/helpers';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
-import type { Appointment, Client, ContactMethod, ServiceItem } from '../types';
+import type { Appointment, Client, ContactMethod, CurrencyCode, ServiceItem } from '../types';
 
 interface ClientesScreenProps {
   clients: Client[];
   services: ServiceItem[];
   appointments: Appointment[];
+  currency: CurrencyCode;
   contactMethod: ContactMethod;
   addClient: (c: Omit<Client, 'id'>) => void;
   updateClient: (id: string, patch: Partial<Client>) => void;
@@ -20,7 +21,7 @@ interface ClientesScreenProps {
   onFollowUpSent: (appointmentId: string) => void;
 }
 
-export function ClientesScreen({ clients, services, appointments, contactMethod, addClient, updateClient, initialFilter, initialSelectedId, onFollowUpSent }: ClientesScreenProps) {
+export function ClientesScreen({ clients, services, appointments, currency, contactMethod, addClient, updateClient, initialFilter, initialSelectedId, onFollowUpSent }: ClientesScreenProps) {
   const { t, lang } = useLang();
   const [filter, setFilter] = useState(initialFilter ?? 'Todos');
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
@@ -45,12 +46,13 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
 
   const selected = clients.find((c) => c.id === selectedId);
   if (selected) {
-    const pendingNoShow = appointments.find(
-      (a) => a.status === 'NaoCompareceu' && !a.followUpSent && ((selected.phone && a.clientPhone === selected.phone) || a.clientName === selected.name),
-    );
+    const clientAppointments = appointments.filter((a) => (selected.phone && a.clientPhone === selected.phone) || a.clientName === selected.name);
+    const pendingNoShow = clientAppointments.find((a) => a.status === 'NaoCompareceu' && !a.followUpSent);
     return (
       <ClienteDetail
         client={selected}
+        currency={currency}
+        clientAppointments={clientAppointments}
         onBack={() => setSelectedId(null)}
         contactMethod={contactMethod}
         onChangeStatus={(status) => updateClient(selected.id, { status })}
@@ -61,6 +63,11 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
     );
   }
 
+  const attendedCount = appointments.filter((a) => a.status === 'Compareceu').length;
+  const noShowCount = appointments.filter((a) => a.status === 'NaoCompareceu').length;
+  const trackedCount = attendedCount + noShowCount;
+  const attendanceRate = trackedCount > 0 ? Math.round((attendedCount / trackedCount) * 100) : null;
+
   return (
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
@@ -68,6 +75,13 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
         <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="clientes-add-toggle">
           {t.clientes.newClientCta}
         </PrimaryButton>
+      </div>
+
+      <div style={{ borderRadius: RADIUS.card, padding: '14px 18px', background: T.ink, marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: T.gold }}>{t.clientes.attendanceRateLabel}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: attendanceRate === null ? 12.5 : 18, fontWeight: 700, color: attendanceRate === null ? 'rgba(255,255,255,0.5)' : '#fff' }}>
+          {attendanceRate === null ? t.clientes.noAttendanceDataLabel : `${attendanceRate}%`}
+        </div>
       </div>
 
       {showAdd && (
@@ -153,6 +167,8 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
 
 function ClienteDetail({
   client,
+  currency,
+  clientAppointments,
   onBack,
   contactMethod,
   onChangeStatus,
@@ -161,6 +177,8 @@ function ClienteDetail({
   onFollowUpSent,
 }: {
   client: Client;
+  currency: CurrencyCode;
+  clientAppointments: Appointment[];
   onBack: () => void;
   contactMethod: ContactMethod;
   onChangeStatus: (status: string) => void;
@@ -169,6 +187,9 @@ function ClienteDetail({
   onFollowUpSent: (appointmentId: string) => void;
 }) {
   const { t, lang } = useLang();
+  const attendedAppointments = clientAppointments.filter((a) => a.status === 'Compareceu');
+  const totalGasto = attendedAppointments.reduce((s, a) => s + a.price, 0);
+  const visitas = attendedAppointments.length;
   const [msgType, setMsgType] = useState<string | null>(null);
   const [bdayInput, setBdayInput] = useState(client.birthday === '—' ? '' : client.birthday || '');
   const [copied, setCopied] = useState(false);
@@ -270,6 +291,11 @@ function ClienteDetail({
           <div style={{ fontFamily: 'Playfair Display', fontSize: 19, fontWeight: 400, color: T.ink }}>{client.name}</div>
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{client.phone}</div>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <StatBox label={t.clientes.totalGastoLabel} value={`${CURRENCIES[currency].symbol}${fmtMoney(totalGasto, currency)}`} />
+        <StatBox label={t.clientes.visitasLabel} value={String(visitas)} />
       </div>
 
       <Card style={{ marginBottom: 20 }}>
