@@ -3,7 +3,7 @@ import { ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign, Plus, Ticket, Tra
 import { T, CURRENCIES, RADIUS, SHADOW } from '../theme';
 import { MONTH_NAMES, MONTH_ABBR } from '../i18n';
 import { fmtCurrency, fmtMoney, format } from '../lib/helpers';
-import { Card, Chip, TextInput, EmptyHint, PrimaryButton, StatBox } from '../components/primitives';
+import { Card, Chip, TextInput, EmptyHint, PrimaryButton, StatBox, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, FinanceEntry, Profile } from '../types';
 
@@ -31,7 +31,7 @@ function GoalGauge({ pct }: { pct: number }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'Playfair Display',
+          fontFamily: 'Inter',
           fontWeight: 700,
           fontSize: 15,
           color: textOnFill ? T.ink : T.bg,
@@ -139,7 +139,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
 
   return (
     <div style={{ padding: '24px 20px 100px' }}>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink, marginBottom: 22 }}>{t.financeiro.title}</div>
 
       <div style={{ background: T.ink, borderRadius: RADIUS.card, padding: 20, display: 'flex', alignItems: 'center', gap: 16, boxShadow: SHADOW.elevated }}>
         <GoalGauge pct={goalPct} />
@@ -184,7 +184,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
       </div>
 
       {!isCurrentPeriod && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.goldSoft, borderRadius: RADIUS.control }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.surface, border: `1px solid ${T.gold}`, borderRadius: RADIUS.control }}>
           <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
             {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
           </span>
@@ -212,12 +212,15 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         <div style={{ textAlign: 'center', fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginTop: -20, marginBottom: 30 }}>{t.financeiro.noDataForPeriod}</div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink }}>{t.financeiro.contasTitle}</div>
-        <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} variant="accent" testId="finance-add-toggle">
-          {t.financeiro.addLancamentoCta}
-        </PrimaryButton>
-      </div>
+      <SectionTitle
+        right={
+          <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} variant="accent" testId="finance-add-toggle">
+            {t.financeiro.addLancamentoCta}
+          </PrimaryButton>
+        }
+      >
+        {t.financeiro.contasTitle}
+      </SectionTitle>
 
       {showAdd && (
         <Card style={{ marginBottom: 12 }}>
@@ -263,7 +266,7 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.financeiro.historicoTitle}</div>
+      <SectionTitle>{t.financeiro.historicoTitle}</SectionTitle>
       <Card style={{ marginBottom: 18 }}>
         <BarChart data={history} currency={currency} />
       </Card>

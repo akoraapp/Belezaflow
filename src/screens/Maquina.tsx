@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles, SlidersHorizontal, type LucideIcon } from 'lucide-react';
+import { Check, ChevronDown, Copy, Inbox, Loader2, Megaphone, Sparkles } from 'lucide-react';
 import { T, RADIUS } from '../theme';
-import { Card, FieldLabel, PrimaryButton } from '../components/primitives';
+import { Card, PrimaryButton, SectionTitle } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
 import { useLang } from '../lib/LangContext';
 
@@ -27,14 +27,13 @@ function GridOption({ label, active, onClick, testId }: { label: string; active:
         textAlign: 'center',
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: active ? T.goldSoft : T.surface,
+        background: T.surface,
         fontFamily: 'Inter',
         fontWeight: 700,
         fontSize: 13,
         color: T.ink,
       }}
     >
-      {active && <Check size={13} color={T.goldDeep} style={{ marginRight: 5, verticalAlign: -2 }} />}
       {label}
     </button>
   );
@@ -43,59 +42,13 @@ function GridOption({ label, active, onClick, testId }: { label: string; active:
 function FieldGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <FieldLabel>{label}</FieldLabel>
+      <SectionTitle>{label}</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {options.map((o, i) => (
           <GridOption key={o} label={o} active={value === o} onClick={() => onChange(o)} testId={testId ? `${testId}-${i}` : undefined} />
         ))}
       </div>
     </div>
-  );
-}
-
-function EntryCard({
-  icon: Icon,
-  title,
-  description,
-  active,
-  onClick,
-  testId,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  active: boolean;
-  onClick: () => void;
-  testId?: string;
-}) {
-  return (
-    <Card
-      onClick={onClick}
-      testId={testId}
-      style={{
-        flex: 1,
-        cursor: 'pointer',
-        border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: active ? T.goldSoft : T.surface,
-      }}
-    >
-      <div
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 10,
-          background: active ? T.ink : T.goldSoft,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 10,
-        }}
-      >
-        <Icon size={15} color={active ? T.goldLight : T.goldDeep} />
-      </div>
-      <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 4 }}>{title}</div>
-      <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{description}</div>
-    </Card>
   );
 }
 
@@ -132,8 +85,9 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
         <span
           style={{
             padding: '4px 10px',
-            borderRadius: 999,
-            background: T.goldSoft,
+            borderRadius: RADIUS.pill,
+            background: T.surface,
+            border: `1px solid ${T.gold}`,
             color: T.goldDeep,
             fontFamily: 'Inter',
             fontWeight: 700,
@@ -263,31 +217,47 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
     <div style={{ padding: '22px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <Megaphone size={20} color={T.goldDeep} />
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.maquina.title}</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink }}>{t.maquina.title}</div>
       </div>
       <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, marginBottom: 18 }}>{t.maquina.subtitle}</div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-        <EntryCard
-          icon={Sparkles}
-          title={t.maquina.modeAutoLabel}
-          description={t.maquina.autoIntro}
-          active={mode === 'auto'}
+        <div
           onClick={() => setMode('auto')}
-          testId="maquina-mode-auto"
-        />
-        <EntryCard
-          icon={SlidersHorizontal}
-          title={t.maquina.modeManualLabel}
-          description={t.maquina.manualCardDesc}
-          active={mode === 'manual'}
+          data-testid="maquina-mode-auto"
+          style={{
+            flex: 1,
+            cursor: 'pointer',
+            borderRadius: RADIUS.card,
+            padding: 18,
+            background: T.ink,
+            border: `1.5px solid ${mode === 'auto' ? T.gold : 'transparent'}`,
+          }}
+        >
+          <div style={{ fontFamily: 'Inter', fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: T.gold, marginBottom: 8 }}>
+            {t.maquina.modeAutoLabel}
+          </div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.bg, lineHeight: 1.4 }}>{t.maquina.autoIntro}</div>
+        </div>
+        <div
           onClick={() => setMode('manual')}
-          testId="maquina-mode-manual"
-        />
+          data-testid="maquina-mode-manual"
+          style={{
+            flex: 1,
+            cursor: 'pointer',
+            borderRadius: RADIUS.card,
+            padding: 18,
+            background: T.surface,
+            border: `1.5px solid ${mode === 'manual' ? T.gold : T.line}`,
+          }}
+        >
+          <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink, marginBottom: 6 }}>{t.maquina.modeManualLabel}</div>
+          <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, lineHeight: 1.4 }}>{t.maquina.manualCardDesc}</div>
+        </div>
       </div>
 
       {mode === 'auto' ? (
-        <PrimaryButton full onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
+        <PrimaryButton full variant="champagne" onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
           {loading ? t.maquina.generatingCta : t.maquina.autoGenerateCta}
         </PrimaryButton>
       ) : (
@@ -303,7 +273,7 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
 
       <div style={{ height: 30 }} />
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.maquina.generatedSectionTitle}</div>
+      <SectionTitle>{t.maquina.generatedSectionTitle}</SectionTitle>
 
       {items.length === 0 ? (
         <div style={{ padding: '32px 20px', textAlign: 'center', border: `1px dashed ${T.line}`, borderRadius: RADIUS.control }}>

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { AlertCircle, Bot } from 'lucide-react';
 import { T, CURRENCIES, RADIUS, SHADOW } from '../theme';
 import { getAvailability, fmtMoney } from '../lib/helpers';
-import { Card, GoalRing, EmptyHint, AppointmentRow } from '../components/primitives';
+import { Card, GoalRing, EmptyHint, AppointmentRow, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { AlertItem } from '../lib/alerts';
 import type { Appointment, CurrencyCode, Profile } from '../types';
@@ -33,14 +33,14 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
   return (
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted }}>{greet},</div>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 27, fontWeight: 600, color: T.ink, marginBottom: 26 }} data-testid="hoje-greeting">
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 27, fontWeight: 400, color: T.ink, marginBottom: 26 }} data-testid="hoje-greeting">
         {profile.name}.
       </div>
 
       <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, background: T.ink, border: 'none', boxShadow: SHADOW.elevated }}>
         <div>
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 5 }}>{t.hoje.revenueLabel}</div>
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, color: '#fff', fontWeight: 600 }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 22, color: '#fff', fontWeight: 700 }}>
             {CURRENCIES[currency].symbol} {fmtMoney(monthRevenue, currency)}
           </div>
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.goldOnDark, marginTop: 2 }}>
@@ -50,7 +50,7 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         <GoalRing progress={progress} size={88} stroke={8} center={t.onboarding.goalRingCenter} dark />
       </Card>
 
-      <div style={{ fontFamily: 'Inter', fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', fontWeight: 700, color: T.muted, marginBottom: 12 }}>{t.hoje.quickActionsTitle}</div>
+      <SectionTitle>{t.hoje.quickActionsTitle}</SectionTitle>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
         <QuickActionButton label={t.hoje.quickConteudo} onClick={onOpenConteudo} primary testId="quick-conteudo" />
         <QuickActionButton label={t.hoje.quickAtendimento} onClick={onOpenAgenda} testId="quick-atendimento" />
@@ -71,7 +71,7 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         )}
 
         {showFull && (
-          <Card style={{ borderColor: T.gold, background: T.goldSoft }}>
+          <Card style={{ border: `1.5px solid ${T.gold}` }}>
             <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: T.ink }}>{t.hoje.alertFullToday}</div>
           </Card>
         )}
@@ -87,7 +87,7 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
         )}
       </div>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.hoje.appointmentsToday}</div>
+      <SectionTitle>{t.hoje.appointmentsToday}</SectionTitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {today.length === 0 && <EmptyHint text={t.hoje.noAppointmentsToday} />}
         {[...today]

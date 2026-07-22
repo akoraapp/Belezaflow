@@ -9,7 +9,7 @@ import type { CurrencyCode, Lang, OnboardingResult, ServiceItem } from '../types
 function StepBlock({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 23, fontWeight: 600, color: T.ink, lineHeight: 1.25 }}>{title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 23, fontWeight: 400, color: T.ink, lineHeight: 1.25 }}>{title}</div>
       {subtitle && <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted, marginTop: 6, marginBottom: 22 }}>{subtitle}</div>}
       {!subtitle && <div style={{ marginBottom: 22 }} />}
       {children}
@@ -30,7 +30,7 @@ function SelectRow({ active, onClick, label, compact, testId }: { active: boolea
         borderRadius: RADIUS.control,
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: active ? T.goldSoft : T.surface,
+        background: T.surface,
       }}
     >
       <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: T.ink }}>{label}</span>
@@ -105,7 +105,7 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
           <StepBlock title={t.onboarding.stepPublicNameTitle} subtitle={t.onboarding.stepPublicNameSubtitle}>
             <TextInput value={publicName} onChange={setPublicName} placeholder={t.onboarding.publicNamePlaceholder} testId="onboarding-public-name" />
             {publicName && (
-              <div style={{ marginTop: 18, padding: 12, background: T.goldSoft, borderRadius: RADIUS.control, fontFamily: 'Inter', fontSize: 13, color: T.goldDeep }}>
+              <div style={{ marginTop: 18, padding: 12, background: T.surface, border: `1px solid ${T.gold}`, borderRadius: RADIUS.control, fontFamily: 'Inter', fontSize: 13, color: T.goldDeep }}>
                 {t.onboarding.publicLinkPrefix}
                 {publicName.toLowerCase().replace(/\s+/g, '')}
               </div>

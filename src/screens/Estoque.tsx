@@ -36,14 +36,14 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
 
   const statusMeta = {
     ok: { label: t.estoque.statusOk, bg: '#E7EDE2', color: T.success },
-    low: { label: t.estoque.statusLow, bg: T.goldSoft, color: T.goldDeep },
+    low: { label: t.estoque.statusLow, bg: T.surface, color: T.goldDeep },
     out: { label: t.estoque.statusOut, bg: '#F2E0D8', color: T.danger },
   };
 
   return (
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.estoque.title}</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink }}>{t.estoque.title}</div>
         <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="estoque-add-toggle">
           {t.estoque.addProductCta}
         </PrimaryButton>

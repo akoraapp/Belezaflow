@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
-import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
@@ -64,7 +64,7 @@ export function ClientesScreen({ clients, services, appointments, contactMethod,
   return (
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink }}>{t.clientes.title}</div>
+        <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink }}>{t.clientes.title}</div>
         <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="clientes-add-toggle">
           {t.clientes.newClientCta}
         </PrimaryButton>
@@ -267,7 +267,7 @@ function ClienteDetail({
           {client.name.charAt(0)}
         </div>
         <div>
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink }}>{client.name}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, fontWeight: 400, color: T.ink }}>{client.name}</div>
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{client.phone}</div>
         </div>
       </div>
@@ -360,7 +360,7 @@ function ClienteDetail({
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.clientStatusTitle}</div>
+      <SectionTitle>{t.clientes.clientStatusTitle}</SectionTitle>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
         {STATUS_LIST.map((s) => (
           <Chip key={s} active={client.status === s} onClick={() => onChangeStatus(s)}>
@@ -369,7 +369,7 @@ function ClienteDetail({
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.clientes.centralRespostasTitle}</div>
+      <SectionTitle>{t.clientes.centralRespostasTitle}</SectionTitle>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {templateKeys.map((k) => (
           <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>

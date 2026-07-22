@@ -3,7 +3,7 @@ import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react
 import { T, ALL_SLOTS, RADIUS, SHADOW } from '../theme';
 import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
-import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
 
@@ -74,7 +74,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <>
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink, marginBottom: 4 }}>{t.agendaOnline.title}</div>
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 18 }}>{t.agendaOnline.subtitle}</div>
         </>
       )}
@@ -96,7 +96,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agendaOnline.publicInfoTitle}</div>
+      <SectionTitle>{t.agendaOnline.publicInfoTitle}</SectionTitle>
       <Card style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
@@ -117,7 +117,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 5 }}>{t.agendaOnline.slotsTitle}</div>
+      <SectionTitle>{t.agendaOnline.slotsTitle}</SectionTitle>
       <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 12 }}>{t.agendaOnline.slotsSubtitle}</div>
       <Card style={{ marginBottom: 26 }}>
         <FieldLabel>{t.agendaOnline.workingDaysLabel}</FieldLabel>
@@ -140,7 +140,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
       </Card>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 15.5, fontWeight: 600, color: T.ink }}>{t.agendaOnline.servicesShownTitle}</div>
+        <div style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, letterSpacing: 1.1, textTransform: 'uppercase', color: T.gold }}>{t.agendaOnline.servicesShownTitle}</div>
         <button onClick={onOpenServicos} style={{ border: 'none', background: 'transparent', color: T.goldDeep, fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
           {t.agendaOnline.editServicesCta}
         </button>
@@ -157,7 +157,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
         ))}
       </div>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 15.5, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{t.agendaOnline.previewTitle}</div>
+      <SectionTitle>{t.agendaOnline.previewTitle}</SectionTitle>
       <Card style={{ padding: 0, overflow: 'hidden', border: `1px solid ${T.line}`, boxShadow: SHADOW.elevated }}>
         <div
           style={{
@@ -196,7 +196,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
           >
             {(profile.publicName || 'S').charAt(0)}
           </div>
-          <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: '#fff', fontWeight: 600 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
+          <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: '#fff', fontWeight: 400 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
           <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
             {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
@@ -323,7 +323,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
               </div>
 
               {bookService && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: RADIUS.control, background: T.goldSoft, marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderRadius: RADIUS.control, background: T.surface, border: `1px solid ${T.gold}`, marginBottom: 16 }}>
                   <div>
                     <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.ink }}>
                       {bookService.name}
@@ -331,7 +331,7 @@ export function AgendaOnlineScreen({ profile, services, appointments, currency, 
                     </div>
                     <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
                   </div>
-                  <div style={{ fontFamily: 'Playfair Display', fontSize: 16, color: T.goldDeep, fontWeight: 600 }}>{fmtMoney(bookService.price, currency)}</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 15, color: T.goldDeep, fontWeight: 700 }}>{fmtMoney(bookService.price, currency)}</div>
                 </div>
               )}
 

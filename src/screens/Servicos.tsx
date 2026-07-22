@@ -108,7 +108,7 @@ export function ServicosScreen({ services, setServices, products, currency, onBa
                         padding: '8px 10px',
                         borderRadius: RADIUS.control,
                         border: `1.5px dashed ${T.gold}`,
-                        background: T.goldSoft,
+                        background: T.surface,
                         fontFamily: 'Inter',
                         fontWeight: 700,
                         fontSize: 12,

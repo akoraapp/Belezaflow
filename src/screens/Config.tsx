@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
-import { Card, Chip, PrimaryButton, TextInput, PhoneInput } from '../components/primitives';
+import { Card, Chip, PrimaryButton, TextInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
 import type { NotifPermission } from '../lib/notifications';
@@ -35,7 +35,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
 
   return (
     <div style={{ padding: '24px 20px 100px' }}>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 600, color: T.ink, marginBottom: 22 }}>{t.config.title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink, marginBottom: 22 }}>{t.config.title}</div>
 
       <Card onClick={onOpenServicos} style={{ marginBottom: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ width: 36, height: 36, borderRadius: 10, background: T.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -50,7 +50,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
         <ChevronRight size={16} color={T.muted} />
       </Card>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.config.contactMethodTitle}</div>
+      <SectionTitle>{t.config.contactMethodTitle}</SectionTitle>
       <Card style={{ marginBottom: 22 }}>
         <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.config.contactMethodHint}</div>
         <div style={{ display: 'flex', gap: 8 }}>
@@ -63,7 +63,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
         </div>
       </Card>
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.config.generalTitle}</div>
+      <SectionTitle>{t.config.generalTitle}</SectionTitle>
       <Card style={{ padding: 0 }}>
         <div onClick={() => toggle('idioma')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}>
           <span style={{ fontFamily: 'Inter', fontSize: 13.5, color: T.ink }}>{t.config.itemIdioma}</span>
@@ -83,7 +83,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
                   borderRadius: RADIUS.control,
                   cursor: 'pointer',
                   border: `1.5px solid ${lang === opt.code ? T.gold : T.line}`,
-                  background: lang === opt.code ? T.goldSoft : T.surface,
+                  background: T.surface,
                 }}
               >
                 <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13 }}>{opt.label}</span>
@@ -111,7 +111,7 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
                   borderRadius: RADIUS.control,
                   cursor: 'pointer',
                   border: `1.5px solid ${profile.currency === c ? T.gold : T.line}`,
-                  background: profile.currency === c ? T.goldSoft : T.surface,
+                  background: T.surface,
                 }}
               >
                 <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5 }}>

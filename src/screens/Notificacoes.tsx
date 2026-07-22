@@ -18,10 +18,10 @@ export function NotificacoesScreen({ alerts, timestamps, permission, onRequestPe
 
   return (
     <div style={{ padding: '22px 20px 100px' }}>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink, marginBottom: 16 }}>{t.notificacoes.title}</div>
 
       {permission === 'default' && (
-        <Card style={{ marginBottom: 16, borderColor: T.gold, background: T.goldSoft }}>
+        <Card style={{ marginBottom: 16, border: `1.5px solid ${T.gold}` }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
             <BellRing size={18} color={T.goldDeep} style={{ marginTop: 2, flexShrink: 0 }} />
             <div style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: T.ink, lineHeight: 1.45 }}>{t.notificacoes.permissionBannerTitle}</div>

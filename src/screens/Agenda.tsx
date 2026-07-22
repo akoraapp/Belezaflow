@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
-import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton } from '../components/primitives';
+import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import type { Appointment, CurrencyCode, Profile, ServiceItem } from '../types';
 
@@ -49,7 +49,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
     <div style={embedded ? undefined : { padding: '22px 20px 100px' }}>
       {!embedded && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: T.ink }}>{t.agenda.title}</div>
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 400, color: T.ink }}>{t.agenda.title}</div>
         </div>
       )}
       <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 18 }}>
@@ -98,7 +98,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
         </Card>
       )}
 
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.todayLabel}</div>
+      <SectionTitle>{t.agenda.todayLabel}</SectionTitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {today.length === 0 && <EmptyHint text={t.agenda.noApptsToday} />}
         {[...today]
@@ -118,7 +118,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       {availableSlots.length > 0 && (
         <>
           <div style={{ height: 24 }} />
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, marginBottom: 12 }}>{t.agenda.freeSlotsToday}</div>
+          <SectionTitle>{t.agenda.freeSlotsToday}</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {availableSlots.map((tm) => (
               <div key={tm} style={{ padding: '8px 14px', borderRadius: RADIUS.pill, border: `1px dashed ${T.line}`, fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>

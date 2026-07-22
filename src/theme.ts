@@ -17,7 +17,9 @@ export const T = {
   mutedDeep: '#6E6E6E',
   line: '#E5DCC8',
   danger: '#B5654A',
+  dangerSoft: '#F3E1DA',
   success: '#6B8E5A',
+  successSoft: '#E6EDE1',
 };
 
 // Fixed spacing scale — use these multiples everywhere instead of ad-hoc px values.

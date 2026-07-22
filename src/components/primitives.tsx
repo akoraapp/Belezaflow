@@ -31,7 +31,7 @@ export function GoalRing({ progress, size = 120, stroke = 10, center, dark }: { 
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dasharray 0.6s ease' }}
       />
-      <text x="50%" y="47%" textAnchor="middle" fontFamily="Playfair Display" fontSize={size * 0.19} fill={dark ? '#fff' : T.ink} fontWeight="600">
+      <text x="50%" y="47%" textAnchor="middle" fontFamily="Inter" fontSize={size * 0.19} fill={dark ? '#fff' : T.ink} fontWeight="700">
         {Math.round(pct * 100)}%
       </text>
       <text x="50%" y="63%" textAnchor="middle" fontFamily="Inter" fontSize={size * 0.075} fill={dark ? T.goldOnDark : T.muted}>
@@ -52,9 +52,9 @@ export function Chip({ active, onClick, children, testId }: { active: boolean; o
         fontFamily: 'Inter',
         fontSize: 13.5,
         fontWeight: 600,
-        border: `1px solid ${active ? T.gold : T.line}`,
+        border: `1px solid ${active ? T.ink : T.line}`,
         background: active ? T.ink : T.surface,
-        color: active ? '#fff' : T.ink,
+        color: active ? '#fff' : T.muted,
         cursor: 'pointer',
         whiteSpace: 'nowrap',
         transition: 'all .15s',
@@ -80,10 +80,10 @@ export function PrimaryButton({
   disabled?: boolean;
   icon?: LucideIcon;
   testId?: string;
-  variant?: 'primary' | 'accent' | 'secondary';
+  variant?: 'primary' | 'accent' | 'secondary' | 'champagne';
 }) {
-  const background = disabled ? T.line : variant === 'accent' ? T.gold : variant === 'secondary' ? T.surface : T.ink;
-  const color = disabled ? T.muted : variant === 'secondary' ? T.ink : variant === 'accent' ? T.ink : '#fff';
+  const background = disabled ? T.line : variant === 'accent' ? T.gold : variant === 'champagne' ? T.goldLight : variant === 'secondary' ? T.surface : T.ink;
+  const color = disabled ? T.muted : variant === 'secondary' ? T.ink : variant === 'accent' || variant === 'champagne' ? T.ink : '#fff';
   const border = variant === 'secondary' ? `1px solid ${T.line}` : 'none';
   return (
     <button
@@ -98,7 +98,7 @@ export function PrimaryButton({
         justifyContent: 'center',
         gap: 8,
         padding: '14px 22px',
-        borderRadius: RADIUS.control,
+        borderRadius: variant === 'champagne' ? RADIUS.pill : RADIUS.control,
         border,
         background,
         color,
@@ -136,8 +136,8 @@ export function Card({ children, style, onClick, testId }: { children: ReactNode
 
 export function SectionTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 16, fontWeight: 600, color: T.ink, letterSpacing: 0.2 }}>{children}</div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 700, letterSpacing: 1.1, textTransform: 'uppercase', color: T.gold }}>{children}</div>
       {right}
     </div>
   );
@@ -274,7 +274,7 @@ export function BackHeader({ title, onBack }: { title: string; onBack: () => voi
       >
         <ChevronLeft size={16} color={T.ink} />
       </button>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 21, fontWeight: 600, color: T.ink }}>{title}</div>
+      <div style={{ fontFamily: 'Playfair Display', fontSize: 21, fontWeight: 400, color: T.ink }}>{title}</div>
     </div>
   );
 }
@@ -303,7 +303,7 @@ export function StatBox({ label, value, accent, icon: Icon, testId }: { label: s
         {Icon && <Icon size={12} color={T.goldDeep} />}
         <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 700 }}>{label}</div>
       </div>
-      <div style={{ fontFamily: 'Playfair Display', fontSize: 24, fontWeight: 600, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 21, fontWeight: 700, color: accent || T.ink, marginTop: 7, lineHeight: 1.2 }}>{value}</div>
     </Card>
   );
 }
@@ -346,7 +346,7 @@ export function ServiceOption({ s, active, currency, onClick }: { s: ServiceItem
         borderRadius: RADIUS.control,
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: active ? T.goldSoft : T.surface,
+        background: T.surface,
       }}
     >
       <div>
@@ -354,7 +354,7 @@ export function ServiceOption({ s, active, currency, onClick }: { s: ServiceItem
         <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginTop: 1 }}>{s.duration} min</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 15, color: T.goldDeep, fontWeight: 600 }}>
+        <div style={{ fontFamily: 'Inter', fontSize: 14, color: T.goldDeep, fontWeight: 700 }}>
           {CURRENCIES[currency].symbol}
           {fmtMoney(s.price, currency)}
         </div>
@@ -438,7 +438,7 @@ export function AppointmentRow({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ textAlign: 'center', minWidth: 40 }}>
-            <div style={{ fontFamily: 'Playfair Display', fontSize: 15, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
+            <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
           </div>
           <div>
             <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
@@ -473,14 +473,14 @@ export function AppointmentRow({
                 justifyContent: 'center',
                 gap: 4,
                 border: 'none',
-                background: T.success,
-                color: '#fff',
+                background: T.successSoft,
+                color: T.success,
                 fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',
                 padding: '7px 10px',
-                borderRadius: RADIUS.control,
+                borderRadius: RADIUS.pill,
               }}
             >
               <Check size={12} /> {t.attendance.markAttendedCta}
@@ -497,14 +497,14 @@ export function AppointmentRow({
                 justifyContent: 'center',
                 gap: 4,
                 border: 'none',
-                background: T.danger,
-                color: '#fff',
+                background: T.dangerSoft,
+                color: T.danger,
                 fontFamily: 'Inter',
                 fontWeight: 700,
                 fontSize: 11.5,
                 cursor: 'pointer',
                 padding: '7px 10px',
-                borderRadius: RADIUS.control,
+                borderRadius: RADIUS.pill,
               }}
             >
               <X size={12} /> {t.attendance.markNoShowCta}
@@ -520,9 +520,9 @@ export function AppointmentRow({
             alignItems: 'center',
             marginTop: 10,
             padding: '4px 10px',
-            borderRadius: 999,
-            background: T.danger,
-            color: '#fff',
+            borderRadius: RADIUS.pill,
+            background: T.dangerSoft,
+            color: T.danger,
             fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: 10.5,
