@@ -30,11 +30,11 @@ function SelectRow({ active, onClick, label, compact, testId }: { active: boolea
         borderRadius: RADIUS.control,
         cursor: 'pointer',
         border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: T.surface,
+        background: active ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
       }}
     >
-      <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 14, color: T.ink }}>{label}</span>
-      {active && <Check size={16} color={T.goldDeep} />}
+      <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: active ? '#fff' : T.ink }}>{label}</span>
+      {active && <Check size={16} color="#fff" />}
     </div>
   );
 }
