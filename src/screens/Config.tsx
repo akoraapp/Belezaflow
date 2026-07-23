@@ -14,11 +14,12 @@ interface ConfigScreenProps {
   onOpenServicos: () => void;
   notifPermission: NotifPermission;
   onRequestNotifPermission: () => void;
+  onSignOut: () => void;
 }
 
 type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | null;
 
-export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
+export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos, notifPermission, onRequestNotifPermission, onSignOut }: ConfigScreenProps) {
   const { t, lang, setLang } = useLang();
   const [openRow, setOpenRow] = useState<OpenRow>(null);
 
@@ -206,6 +207,12 @@ export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServico
           </div>
         )}
       </Card>
+
+      <div style={{ marginTop: 22 }}>
+        <PrimaryButton full variant="secondary" onClick={onSignOut} testId="config-sign-out">
+          {t.config.signOutCta}
+        </PrimaryButton>
+      </div>
     </div>
   );
 }

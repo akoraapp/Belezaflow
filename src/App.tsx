@@ -1,9 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
+import type { Session } from '@supabase/supabase-js';
 import { T, FONT_IMPORT, ALL_SLOTS } from './theme';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
 import { LangProvider, useLang } from './lib/LangContext';
+import { supabase } from './lib/supabaseClient';
+import {
+  fetchProfile,
+  insertProfile,
+  updateProfileRow,
+  fetchServices,
+  insertServices,
+  replaceServices,
+  fetchProducts,
+  insertProduct,
+  updateProductRow,
+  deleteProductRow,
+  fetchClients,
+  insertClient,
+  updateClientRow,
+  fetchAppointments,
+  insertAppointment,
+  updateAppointmentRow,
+  fetchFinanceEntries,
+  insertFinanceEntry,
+  deleteFinanceEntryRow,
+} from './lib/db';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { HojeScreen } from './screens/Hoje';
@@ -31,10 +54,45 @@ export default function App() {
   );
 }
 
+function deriveNameFromEmail(email: string) {
+  const local = email.split('@')[0] || '';
+  const cleaned = local.replace(/[._-]+/g, ' ').trim();
+  if (!cleaned) return 'Profissional';
+  return cleaned
+    .split(' ')
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
+      <style>{FONT_IMPORT}</style>
+      <div
+        style={{
+          width: 390,
+          height: 780,
+          maxHeight: '92vh',
+          background: T.bg,
+          borderRadius: 40,
+          overflow: 'hidden',
+          position: 'relative',
+          boxShadow: '0 30px 60px -20px rgba(27,23,18,0.35)',
+          border: `1px solid ${T.line}`,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function AppShell() {
   const { t, lang } = useLang();
-  const [authedName, setAuthedName] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [dataLoading, setDataLoading] = useState(false);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
@@ -51,8 +109,56 @@ function AppShell() {
   const [alertTimestamps, setAlertTimestamps] = useState<Record<string, number>>({});
   const seenAlertKeysRef = useRef<Set<string>>(new Set());
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => setSession(newSession));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setProfile(null);
+      setServices([]);
+      setAppointments([]);
+      setFinanceEntries([]);
+      setClients([]);
+      setProducts([]);
+      return;
+    }
+    let cancelled = false;
+    const userId = session.user.id;
+    (async () => {
+      setDataLoading(true);
+      try {
+        const p = await fetchProfile(userId);
+        if (cancelled) return;
+        setProfile(p);
+        if (p) {
+          const [svc, appts, fin, cli, prod] = await Promise.all([
+            fetchServices(userId),
+            fetchAppointments(userId),
+            fetchFinanceEntries(userId),
+            fetchClients(userId),
+            fetchProducts(userId),
+          ]);
+          if (cancelled) return;
+          setServices(svc);
+          setAppointments(appts);
+          setFinanceEntries(fin);
+          setClients(cli);
+          setProducts(prod);
+        }
+      } finally {
+        if (!cancelled) setDataLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
   const handleOnboardingComplete = (data: OnboardingResult) => {
-    setProfile({
+    const newProfile: Profile = {
       language: data.language,
       currency: data.currency,
       name: data.name,
@@ -69,20 +175,62 @@ function AppShell() {
       bufferMinutes: 0,
       cancellationNoticeHours: 24,
       rescheduleNoticeHours: 24,
-    });
+    };
+    setProfile(newProfile);
     setServices(data.services);
+    if (session) {
+      const userId = session.user.id;
+      insertProfile(userId, newProfile)
+        .then(() => insertServices(userId, data.services))
+        .catch(console.error);
+    }
   };
 
-  const addAppointment = (a: Appointment) => setAppointments((prev) => [...prev, a]);
-  const updateProfile = (patch: Partial<Profile>) => setProfile((p) => (p ? { ...p, ...patch } : p));
-  const addFinanceEntry = (e: FinanceEntry) => setFinanceEntries((prev) => [...prev, e]);
-  const removeFinanceEntry = (id: string) => setFinanceEntries((prev) => prev.filter((e) => e.id !== id));
-  const addClient = (c: Omit<Client, 'id'>) => setClients((prev) => [{ id: `c${Date.now()}`, ...c }, ...prev]);
-  const updateClient = (id: string, patch: Partial<Client>) => setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-  const setServicesUpdater = (updater: (prev: ServiceItem[]) => ServiceItem[]) => setServices(updater);
-  const addProduct = (p: Omit<Product, 'id'>) => setProducts((prev) => [{ id: `p${Date.now()}`, ...p }, ...prev]);
-  const updateProduct = (id: string, patch: Partial<Product>) => setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-  const removeProduct = (id: string) => setProducts((prev) => prev.filter((p) => p.id !== id));
+  const addAppointment = (a: Appointment) => {
+    setAppointments((prev) => [...prev, a]);
+    if (session) insertAppointment(session.user.id, a).catch(console.error);
+  };
+  const updateProfile = (patch: Partial<Profile>) => {
+    setProfile((p) => (p ? { ...p, ...patch } : p));
+    if (session) updateProfileRow(session.user.id, patch).catch(console.error);
+  };
+  const addFinanceEntry = (e: FinanceEntry) => {
+    setFinanceEntries((prev) => [...prev, e]);
+    if (session) insertFinanceEntry(session.user.id, e).catch(console.error);
+  };
+  const removeFinanceEntry = (id: string) => {
+    setFinanceEntries((prev) => prev.filter((e) => e.id !== id));
+    deleteFinanceEntryRow(id).catch(console.error);
+  };
+  const addClient = (c: Omit<Client, 'id'>) => {
+    const client: Client = { id: `c${Date.now()}`, ...c };
+    setClients((prev) => [client, ...prev]);
+    if (session) insertClient(session.user.id, client).catch(console.error);
+  };
+  const updateClient = (id: string, patch: Partial<Client>) => {
+    setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    updateClientRow(id, patch).catch(console.error);
+  };
+  const setServicesUpdater = (updater: (prev: ServiceItem[]) => ServiceItem[]) => {
+    setServices((prev) => {
+      const next = updater(prev);
+      if (session) replaceServices(session.user.id, next).catch(console.error);
+      return next;
+    });
+  };
+  const addProduct = (p: Omit<Product, 'id'>) => {
+    const product: Product = { id: `p${Date.now()}`, ...p };
+    setProducts((prev) => [product, ...prev]);
+    if (session) insertProduct(session.user.id, product).catch(console.error);
+  };
+  const updateProduct = (id: string, patch: Partial<Product>) => {
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+    updateProductRow(id, patch).catch(console.error);
+  };
+  const removeProduct = (id: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+    deleteProductRow(id).catch(console.error);
+  };
 
   const sendReminders = () => {
     setAppointments((prev) => prev.map((a) => (a.day === 'hoje' && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)));
@@ -115,13 +263,17 @@ function AppShell() {
 
     if (attended) {
       setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'Compareceu' } : a)));
+      updateAppointmentRow(appointmentId, { status: 'Compareceu' }).catch(console.error);
       const service = services.find((s) => s.name === appt.service);
       if (service?.consumables?.length) {
         const consumables = service.consumables;
         setProducts((prev) =>
           prev.map((p) => {
             const consumable = consumables.find((c) => c.productId === p.id);
-            return consumable ? { ...p, qty: Math.max(0, p.qty - consumable.qty) } : p;
+            if (!consumable) return p;
+            const nextQty = Math.max(0, p.qty - consumable.qty);
+            updateProductRow(p.id, { qty: nextQty }).catch(console.error);
+            return { ...p, qty: nextQty };
           }),
         );
       }
@@ -129,6 +281,7 @@ function AppShell() {
     }
 
     setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'NaoCompareceu' } : a)));
+    updateAppointmentRow(appointmentId, { status: 'NaoCompareceu' }).catch(console.error);
     const existingClient = findClientForAppointment(appt);
     if (existingClient) {
       updateClient(existingClient.id, { status: 'Perdido' });
@@ -144,6 +297,7 @@ function AppShell() {
       if (waLink) {
         window.open(waLink, '_blank', 'noopener,noreferrer');
         setAppointments((prev) => prev.map((a) => (a.id === appt.id ? { ...a, followUpSent: true } : a)));
+        updateAppointmentRow(appt.id, { followUpSent: true }).catch(console.error);
         return;
       }
     }
@@ -153,6 +307,11 @@ function AppShell() {
 
   const markFollowUpSent = (appointmentId: string) => {
     setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, followUpSent: true } : a)));
+    updateAppointmentRow(appointmentId, { followUpSent: true }).catch(console.error);
+  };
+
+  const signOut = () => {
+    supabase.auth.signOut().catch(console.error);
   };
 
   const currency: CurrencyCode = profile?.currency || 'BRL';
@@ -209,49 +368,29 @@ function AppShell() {
     setNotifPermission(result);
   };
 
-  if (!authedName) {
+  if (session === undefined || (session && dataLoading && !profile)) {
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
-        <style>{FONT_IMPORT}</style>
-        <div
-          style={{
-            width: 390,
-            height: 780,
-            maxHeight: '92vh',
-            background: T.bg,
-            borderRadius: 40,
-            overflow: 'hidden',
-            position: 'relative',
-            boxShadow: '0 30px 60px -20px rgba(27,23,18,0.35)',
-            border: `1px solid ${T.line}`,
-          }}
-        >
-          <Login onLogin={setAuthedName} />
+      <PhoneShell>
+        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted }}>…</div>
         </div>
-      </div>
+      </PhoneShell>
+    );
+  }
+
+  if (!session) {
+    return (
+      <PhoneShell>
+        <Login />
+      </PhoneShell>
     );
   }
 
   if (!profile) {
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
-        <style>{FONT_IMPORT}</style>
-        <div
-          style={{
-            width: 390,
-            height: 780,
-            maxHeight: '92vh',
-            background: T.bg,
-            borderRadius: 40,
-            overflow: 'hidden',
-            position: 'relative',
-            boxShadow: '0 30px 60px -20px rgba(27,23,18,0.35)',
-            border: `1px solid ${T.line}`,
-          }}
-        >
-          <Onboarding initialName={authedName} onComplete={handleOnboardingComplete} />
-        </div>
-      </div>
+      <PhoneShell>
+        <Onboarding initialName={deriveNameFromEmail(session.user.email || '')} onComplete={handleOnboardingComplete} />
+      </PhoneShell>
     );
   }
 
@@ -284,6 +423,7 @@ function AppShell() {
           onOpenServicos={() => setMoreScreen('servicos')}
           notifPermission={notifPermission}
           onRequestNotifPermission={requestNotifPermission}
+          onSignOut={signOut}
         />
       )}
       {moreScreen === 'servicos' && (

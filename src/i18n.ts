@@ -235,6 +235,8 @@ const pt = {
     enterCta: 'Entrar',
     orDivider: 'ou',
     createAccountCta: 'Criar conta',
+    authErrorGeneric: 'Não foi possível entrar. Verifique seus dados e tente novamente.',
+    signupCheckEmail: 'Conta criada! Verifique seu e-mail para confirmar antes de entrar.',
   },
   onboarding: {
     stepIdiomaTitle: 'Escolha o idioma',
@@ -523,6 +525,7 @@ const pt = {
     notifStatusUnsupported: 'Indisponível neste navegador',
     notifEnableCta: 'Ativar notificações',
     notifDeniedHint: 'Você bloqueou as notificações. Ative de novo nas configurações do navegador.',
+    signOutCta: 'Sair da conta',
   },
   notificacoes: {
     title: 'Notificações',
@@ -567,6 +570,8 @@ const en: typeof pt = {
     enterCta: 'Sign in',
     orDivider: 'or',
     createAccountCta: 'Create account',
+    authErrorGeneric: 'Could not sign in. Check your details and try again.',
+    signupCheckEmail: 'Account created! Check your email to confirm before signing in.',
   },
   onboarding: {
     stepIdiomaTitle: 'Choose your language',
@@ -855,6 +860,7 @@ const en: typeof pt = {
     notifStatusUnsupported: 'Unavailable in this browser',
     notifEnableCta: 'Enable notifications',
     notifDeniedHint: "You've blocked notifications. Re-enable them in your browser settings.",
+    signOutCta: 'Sign out',
   },
   notificacoes: {
     title: 'Notifications',
@@ -899,6 +905,8 @@ const es: typeof pt = {
     enterCta: 'Ingresar',
     orDivider: 'o',
     createAccountCta: 'Crear cuenta',
+    authErrorGeneric: 'No se pudo iniciar sesión. Verifica tus datos e intenta de nuevo.',
+    signupCheckEmail: '¡Cuenta creada! Revisa tu correo para confirmarla antes de ingresar.',
   },
   onboarding: {
     stepIdiomaTitle: 'Elige el idioma',
@@ -1187,6 +1195,7 @@ const es: typeof pt = {
     notifStatusUnsupported: 'No disponible en este navegador',
     notifEnableCta: 'Activar notificaciones',
     notifDeniedHint: 'Bloqueaste las notificaciones. Actívalas de nuevo en la configuración del navegador.',
+    signOutCta: 'Cerrar sesión',
   },
   notificacoes: {
     title: 'Notificaciones',
