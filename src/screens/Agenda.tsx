@@ -59,7 +59,7 @@ export function AgendaScreen({ appointments, services, profile, currency, addApp
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <PrimaryButton full onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="agenda-add-toggle">
+        <PrimaryButton full variant="accent" onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="agenda-add-toggle">
           {t.agenda.addApptCta}
         </PrimaryButton>
       </div>

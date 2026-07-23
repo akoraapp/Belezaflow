@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR, CURRENCIES } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
-import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle, StatBox } from '../components/primitives';
+import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle, StatBox, SelectInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { format, fmtMoney } from '../lib/helpers';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
@@ -72,7 +72,7 @@ export function ClientesScreen({ clients, services, appointments, currency, cont
     <div style={{ padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
         <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink }}>{t.clientes.title}</div>
-        <PrimaryButton onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="clientes-add-toggle">
+        <PrimaryButton variant="accent" onClick={() => setShowAdd((v) => !v)} icon={Plus} testId="clientes-add-toggle">
           {t.clientes.newClientCta}
         </PrimaryButton>
       </div>
@@ -97,22 +97,20 @@ export function ClientesScreen({ clients, services, appointments, currency, cont
           {services.length === 0 ? (
             <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 4 }}>{t.clientes.noServicesToSelect}</div>
           ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
-              {services.map((s) => (
-                <Chip key={s.id} active={service === s.name} onClick={() => setService(s.name)} testId={`clientes-service-${s.id}`}>
-                  {s.name}
-                </Chip>
-              ))}
+            <div style={{ marginBottom: 4 }}>
+              <SelectInput
+                options={services.map((s) => s.name)}
+                value={service}
+                onChange={setService}
+                placeholder={t.clientes.serviceSelectPlaceholder}
+                testId="clientes-service-select"
+              />
             </div>
           )}
 
           <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.originLabel}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-            {ORIGENS.map((o) => (
-              <Chip key={o} active={origem === o} onClick={() => setOrigem(o)}>
-                {ORIGEM_LABEL[lang][o]}
-              </Chip>
-            ))}
+          <div style={{ marginBottom: 12 }}>
+            <SelectInput options={ORIGENS} value={origem} onChange={setOrigem} labelFor={(o) => ORIGEM_LABEL[lang][o] || o} testId="clientes-origin-select" />
           </div>
           <PrimaryButton full onClick={submit} disabled={!name} testId="clientes-add-submit">
             {t.clientes.addClientCta}

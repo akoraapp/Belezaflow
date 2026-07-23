@@ -182,6 +182,55 @@ export function TextInput({
   );
 }
 
+export function SelectInput({
+  value,
+  onChange,
+  options,
+  labelFor,
+  placeholder,
+  testId,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  labelFor?: (v: string) => string;
+  placeholder?: string;
+  testId?: string;
+}) {
+  return (
+    <select
+      value={value}
+      data-testid={testId}
+      onChange={(e) => onChange(e.target.value)}
+      style={{
+        width: '100%',
+        padding: '13px 16px',
+        borderRadius: RADIUS.control,
+        border: `1.5px solid ${T.line}`,
+        fontFamily: 'Inter',
+        fontSize: 14,
+        fontWeight: 600,
+        color: value ? T.ink : T.muted,
+        outline: 'none',
+        boxSizing: 'border-box',
+        background: T.surface,
+        cursor: 'pointer',
+      }}
+    >
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {labelFor ? labelFor(o) : o}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 interface PhoneCountry {
   iso: string;
   dial: string;

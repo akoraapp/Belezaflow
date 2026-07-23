@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Check, ChevronDown, Copy, Inbox, Loader2, Sparkles } from 'lucide-react';
+import { Check, ChevronDown, Copy, Inbox, Loader2 } from 'lucide-react';
 import { T, RADIUS } from '../theme';
-import { Card, PrimaryButton, SectionTitle } from '../components/primitives';
+import { Card, PrimaryButton, SectionTitle, SelectInput } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
 import { useLang } from '../lib/LangContext';
 
@@ -48,6 +48,15 @@ function FieldGroup({ label, options, value, onChange, testId }: { label: string
           <GridOption key={o} label={o} active={value === o} onClick={() => onChange(o)} testId={testId ? `${testId}-${i}` : undefined} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function SelectGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <SectionTitle>{label}</SectionTitle>
+      <SelectInput options={options} value={value} onChange={onChange} testId={testId} />
     </div>
   );
 }
@@ -222,13 +231,13 @@ export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScree
           {t.maquina.modeAutoLabel}
         </div>
         <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.bg, lineHeight: 1.5, marginBottom: 16 }}>{t.maquina.autoIntro}</div>
-        <PrimaryButton full variant="champagne" onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : Sparkles} testId="maquina-generate-auto">
+        <PrimaryButton full variant="champagne" onClick={generateAuto} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate-auto">
           {loading ? t.maquina.generatingCta : t.maquina.autoGenerateCta}
         </PrimaryButton>
       </div>
 
-      <FieldGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
-      <FieldGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
+      <SelectGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
+      <SelectGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
       <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
       <div style={{ marginBottom: 26 }}>
         <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
