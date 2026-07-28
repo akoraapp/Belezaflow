@@ -5,7 +5,10 @@ import { MONTH_NAMES, MONTH_ABBR } from '../i18n';
 import { fmtCurrency, fmtMoney, format } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, PrimaryButton, StatBox, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, CurrencyCode, FinanceEntry, Profile } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useAppointments } from '../hooks/useAppointments';
+import { useFinance } from '../hooks/useFinance';
+import type { CurrencyCode } from '../types';
 
 function GoalGauge({ pct }: { pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
@@ -72,17 +75,11 @@ function BarChart({ data, currency }: { data: { label: string; value: number }[]
   );
 }
 
-interface FinanceiroScreenProps {
-  appointments: Appointment[];
-  profile: Profile;
-  currency: CurrencyCode;
-  entries: FinanceEntry[];
-  addEntry: (e: FinanceEntry) => void;
-  removeEntry: (id: string) => void;
-}
-
-export function FinanceiroScreen({ appointments, profile, currency, entries, addEntry, removeEntry }: FinanceiroScreenProps) {
+export function FinanceiroScreen() {
   const { t, lang } = useLang();
+  const { profile } = useProfile();
+  const { appointments } = useAppointments();
+  const { financeEntries: entries, addFinanceEntry: addEntry, removeFinanceEntry: removeEntry } = useFinance();
   const [showAdd, setShowAdd] = useState(false);
   const [tipo, setTipo] = useState<'receber' | 'pagar'>('receber');
   const [label, setLabel] = useState('');
@@ -94,6 +91,8 @@ export function FinanceiroScreen({ appointments, profile, currency, entries, add
   const currentMonth = now.getMonth();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  if (!profile) return null;
+  const currency = profile.currency;
   const isCurrentPeriod = selectedYear === currentYear && selectedMonth === currentMonth;
   const yearOptions = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
 

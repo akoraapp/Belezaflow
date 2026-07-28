@@ -4,24 +4,27 @@ import { T, CURRENCIES, RADIUS } from '../theme';
 import { Card, Chip, PrimaryButton, TextInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
+import { useProfile } from '../hooks/useProfile';
+import { useServices } from '../hooks/useServices';
+import { useAuth } from '../hooks/useAuth';
 import type { NotifPermission } from '../lib/notifications';
-import type { CurrencyCode, Lang, Profile, ServiceItem } from '../types';
+import type { CurrencyCode, Lang } from '../types';
 
 interface ConfigScreenProps {
-  profile: Profile;
-  services: ServiceItem[];
-  onUpdateProfile: (patch: Partial<Profile>) => void;
   onOpenServicos: () => void;
   notifPermission: NotifPermission;
   onRequestNotifPermission: () => void;
-  onSignOut: () => void;
 }
 
 type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | null;
 
-export function ConfigScreen({ profile, services, onUpdateProfile, onOpenServicos, notifPermission, onRequestNotifPermission, onSignOut }: ConfigScreenProps) {
+export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
+  const { profile, updateProfile: onUpdateProfile } = useProfile();
+  const { services } = useServices();
+  const { signOut: onSignOut } = useAuth();
   const { t, lang, setLang } = useLang();
   const [openRow, setOpenRow] = useState<OpenRow>(null);
+  if (!profile) return null;
 
   const notifStatusLabel =
     notifPermission === 'granted'

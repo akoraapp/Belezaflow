@@ -2,18 +2,21 @@ import { Plus, X } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { BackHeader, MiniField } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { CurrencyCode, Product, ServiceItem } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useServices } from '../hooks/useServices';
+import { useInventory } from '../hooks/useInventory';
 
 interface ServicosScreenProps {
-  services: ServiceItem[];
-  setServices: (updater: (prev: ServiceItem[]) => ServiceItem[]) => void;
-  products: Product[];
-  currency: CurrencyCode;
   onBack: () => void;
 }
 
-export function ServicosScreen({ services, setServices, products, currency, onBack }: ServicosScreenProps) {
+export function ServicosScreen({ onBack }: ServicosScreenProps) {
   const { t } = useLang();
+  const { profile } = useProfile();
+  const { services, setServices } = useServices();
+  const { products } = useInventory();
+  if (!profile) return null;
+  const currency = profile.currency;
   const updateService = (id: string, field: 'name' | 'price' | 'duration', val: string | number) =>
     setServices((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: val } : s)));
   const removeService = (id: string) => setServices((prev) => prev.filter((s) => s.id !== id));

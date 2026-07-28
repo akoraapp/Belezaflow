@@ -3,23 +3,11 @@ import { Plus, Trash2 } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { Card, TextInput, EmptyHint, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Product } from '../types';
+import { useInventory, productStatus } from '../hooks/useInventory';
 
-interface EstoqueScreenProps {
-  products: Product[];
-  addProduct: (p: Omit<Product, 'id'>) => void;
-  updateProduct: (id: string, patch: Partial<Product>) => void;
-  removeProduct: (id: string) => void;
-}
-
-function productStatus(p: Product): 'ok' | 'low' | 'out' {
-  if (p.qty <= 0) return 'out';
-  if (p.qty <= p.minQty) return 'low';
-  return 'ok';
-}
-
-export function EstoqueScreen({ products, addProduct, updateProduct, removeProduct }: EstoqueScreenProps) {
+export function EstoqueScreen() {
   const { t } = useLang();
+  const { products, addProduct, updateProduct, removeProduct } = useInventory();
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState('');
   const [qty, setQty] = useState('');
@@ -107,5 +95,3 @@ export function EstoqueScreen({ products, addProduct, updateProduct, removeProdu
     </div>
   );
 }
-
-export { productStatus };

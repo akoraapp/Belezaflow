@@ -1,32 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
-import type { Session } from '@supabase/supabase-js';
-import { T, FONT_IMPORT, ALL_SLOTS } from './theme';
+import { T, FONT_IMPORT } from './theme';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
 import { LangProvider, useLang } from './lib/LangContext';
-import { supabase } from './lib/supabaseClient';
-import {
-  fetchProfile,
-  insertProfile,
-  updateProfileRow,
-  fetchServices,
-  insertServices,
-  replaceServices,
-  fetchProducts,
-  insertProduct,
-  updateProductRow,
-  deleteProductRow,
-  fetchClients,
-  insertClient,
-  updateClientRow,
-  fetchAppointments,
-  insertAppointment,
-  updateAppointmentRow,
-  fetchFinanceEntries,
-  insertFinanceEntry,
-  deleteFinanceEntryRow,
-} from './lib/db';
+import { useAuth } from './hooks/useAuth';
+import { useProfile } from './hooks/useProfile';
+import { useAlerts } from './hooks/useAlerts';
+import { useInventory, productStatus } from './hooks/useInventory';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { HojeScreen } from './screens/Hoje';
@@ -39,20 +20,6 @@ import { ServicosScreen } from './screens/Servicos';
 import { EstoqueScreen } from './screens/Estoque';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
-import { getAvailability } from './lib/helpers';
-import { buildAlerts } from './lib/alerts';
-import { getNotificationPermission, requestNotificationPermission, fireNotification, type NotifPermission } from './lib/notifications';
-import { buildNoShowMessage, buildWhatsAppLink } from './lib/followup';
-import { productStatus } from './screens/Estoque';
-import type { Appointment, Client, CurrencyCode, FinanceEntry, OnboardingResult, Product, Profile, ServiceItem } from './types';
-
-export default function App() {
-  return (
-    <LangProvider>
-      <AppShell />
-    </LangProvider>
-  );
-}
 
 function deriveNameFromEmail(email: string) {
   const local = email.split('@')[0] || '';
@@ -88,153 +55,32 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+export default function App() {
+  return (
+    <LangProvider>
+      <AppShell />
+    </LangProvider>
+  );
+}
+
+// App.tsx owns exactly three things: authentication, the current profile
+// (including onboarding), and navigation state. Every module's data (clients,
+// appointments, services, finance, inventory, alerts) is fetched and mutated by
+// its own hook, called directly inside the screen that needs it — nothing here
+// holds business data or talks to Supabase.
 function AppShell() {
-  const { t, lang } = useLang();
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [dataLoading, setDataLoading] = useState(false);
-  const [services, setServices] = useState<ServiceItem[]>([]);
+  const { t } = useLang();
+  const { session } = useAuth();
+  const { profile, loading: profileLoading, completeOnboarding } = useProfile();
+  const { products } = useInventory();
+
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
   const [moreScreen, setMoreScreen] = useState<string | null>(null);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [financeEntries, setFinanceEntries] = useState<FinanceEntry[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [clientesFilter, setClientesFilter] = useState('Todos');
   const [clientesNonce, setClientesNonce] = useState(0);
   const [clientesInitialSelectedId, setClientesInitialSelectedId] = useState<string | null>(null);
-  const [notifPermission, setNotifPermission] = useState<NotifPermission>(() => getNotificationPermission());
-  const [alertTimestamps, setAlertTimestamps] = useState<Record<string, number>>({});
-  const seenAlertKeysRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => setSession(newSession));
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!session) {
-      setProfile(null);
-      setServices([]);
-      setAppointments([]);
-      setFinanceEntries([]);
-      setClients([]);
-      setProducts([]);
-      return;
-    }
-    let cancelled = false;
-    const userId = session.user.id;
-    (async () => {
-      setDataLoading(true);
-      try {
-        const p = await fetchProfile(userId);
-        if (cancelled) return;
-        setProfile(p);
-        if (p) {
-          const [svc, appts, fin, cli, prod] = await Promise.all([
-            fetchServices(userId),
-            fetchAppointments(userId),
-            fetchFinanceEntries(userId),
-            fetchClients(userId),
-            fetchProducts(userId),
-          ]);
-          if (cancelled) return;
-          setServices(svc);
-          setAppointments(appts);
-          setFinanceEntries(fin);
-          setClients(cli);
-          setProducts(prod);
-        }
-      } finally {
-        if (!cancelled) setDataLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [session]);
-
-  const handleOnboardingComplete = (data: OnboardingResult) => {
-    const newProfile: Profile = {
-      language: data.language,
-      currency: data.currency,
-      name: data.name,
-      publicName: data.publicName,
-      profession: data.profession,
-      goal: data.goal,
-      instagram: '',
-      whatsapp: '',
-      endereco: '',
-      mapsLink: '',
-      contactMethod: 'whatsapp',
-      workingDays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
-      availableSlots: [...ALL_SLOTS],
-      bufferMinutes: 0,
-      cancellationNoticeHours: 24,
-      rescheduleNoticeHours: 24,
-    };
-    setProfile(newProfile);
-    setServices(data.services);
-    if (session) {
-      const userId = session.user.id;
-      insertProfile(userId, newProfile)
-        .then(() => insertServices(userId, data.services))
-        .catch(console.error);
-    }
-  };
-
-  const addAppointment = (a: Appointment) => {
-    setAppointments((prev) => [...prev, a]);
-    if (session) insertAppointment(session.user.id, a).catch(console.error);
-  };
-  const updateProfile = (patch: Partial<Profile>) => {
-    setProfile((p) => (p ? { ...p, ...patch } : p));
-    if (session) updateProfileRow(session.user.id, patch).catch(console.error);
-  };
-  const addFinanceEntry = (e: FinanceEntry) => {
-    setFinanceEntries((prev) => [...prev, e]);
-    if (session) insertFinanceEntry(session.user.id, e).catch(console.error);
-  };
-  const removeFinanceEntry = (id: string) => {
-    setFinanceEntries((prev) => prev.filter((e) => e.id !== id));
-    deleteFinanceEntryRow(id).catch(console.error);
-  };
-  const addClient = (c: Omit<Client, 'id'>) => {
-    const client: Client = { id: `c${Date.now()}`, ...c };
-    setClients((prev) => [client, ...prev]);
-    if (session) insertClient(session.user.id, client).catch(console.error);
-  };
-  const updateClient = (id: string, patch: Partial<Client>) => {
-    setClients((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
-    updateClientRow(id, patch).catch(console.error);
-  };
-  const setServicesUpdater = (updater: (prev: ServiceItem[]) => ServiceItem[]) => {
-    setServices((prev) => {
-      const next = updater(prev);
-      if (session) replaceServices(session.user.id, next).catch(console.error);
-      return next;
-    });
-  };
-  const addProduct = (p: Omit<Product, 'id'>) => {
-    const product: Product = { id: `p${Date.now()}`, ...p };
-    setProducts((prev) => [product, ...prev]);
-    if (session) insertProduct(session.user.id, product).catch(console.error);
-  };
-  const updateProduct = (id: string, patch: Partial<Product>) => {
-    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
-    updateProductRow(id, patch).catch(console.error);
-  };
-  const removeProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
-    deleteProductRow(id).catch(console.error);
-  };
-
-  const sendReminders = () => {
-    setAppointments((prev) => prev.map((a) => (a.day === 'hoje' && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)));
-  };
 
   const openMore = (id: string) => {
     setMoreScreen(id);
@@ -255,120 +101,16 @@ function AppShell() {
     selectTab('clientes');
   };
 
-  const findClientForAppointment = (appt: Appointment) => clients.find((c) => (appt.clientPhone && c.phone === appt.clientPhone) || c.name === appt.clientName);
+  const { alerts, alertTimestamps, notifPermission, requestNotifPermission } = useAlerts(
+    {
+      onOpenAgenda: () => selectTab('agenda'),
+      onOpenEstoque: () => openMore('estoque'),
+      onOpenClientesFiltered: openClientesWithFilter,
+    },
+    profile?.currency || 'BRL',
+  );
 
-  const markAttendance = (appointmentId: string, attended: boolean) => {
-    const appt = appointments.find((a) => a.id === appointmentId);
-    if (!appt) return;
-
-    if (attended) {
-      setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'Compareceu' } : a)));
-      updateAppointmentRow(appointmentId, { status: 'Compareceu' }).catch(console.error);
-      const service = services.find((s) => s.name === appt.service);
-      if (service?.consumables?.length) {
-        const consumables = service.consumables;
-        setProducts((prev) =>
-          prev.map((p) => {
-            const consumable = consumables.find((c) => c.productId === p.id);
-            if (!consumable) return p;
-            const nextQty = Math.max(0, p.qty - consumable.qty);
-            updateProductRow(p.id, { qty: nextQty }).catch(console.error);
-            return { ...p, qty: nextQty };
-          }),
-        );
-      }
-      return;
-    }
-
-    setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, status: 'NaoCompareceu' } : a)));
-    updateAppointmentRow(appointmentId, { status: 'NaoCompareceu' }).catch(console.error);
-    const existingClient = findClientForAppointment(appt);
-    if (existingClient) {
-      updateClient(existingClient.id, { status: 'Perdido' });
-    } else {
-      addClient({ name: appt.clientName, phone: appt.clientPhone || '', service: appt.service, origem: 'Agenda', status: 'Perdido', birthday: '—' });
-    }
-  };
-
-  const handleFollowUpNoShow = (appt: Appointment) => {
-    if (appt.clientPhone) {
-      const message = buildNoShowMessage(appt.clientName, appt.service, lang);
-      const waLink = buildWhatsAppLink(appt.clientPhone, message);
-      if (waLink) {
-        window.open(waLink, '_blank', 'noopener,noreferrer');
-        setAppointments((prev) => prev.map((a) => (a.id === appt.id ? { ...a, followUpSent: true } : a)));
-        updateAppointmentRow(appt.id, { followUpSent: true }).catch(console.error);
-        return;
-      }
-    }
-    const client = findClientForAppointment(appt);
-    openClientesWithFilter('Perdido', client?.id ?? null);
-  };
-
-  const markFollowUpSent = (appointmentId: string) => {
-    setAppointments((prev) => prev.map((a) => (a.id === appointmentId ? { ...a, followUpSent: true } : a)));
-    updateAppointmentRow(appointmentId, { followUpSent: true }).catch(console.error);
-  };
-
-  const signOut = () => {
-    supabase.auth.signOut().catch(console.error);
-  };
-
-  const currency: CurrencyCode = profile?.currency || 'BRL';
-
-  const alerts = profile
-    ? buildAlerts({
-        profile,
-        appointments,
-        clients,
-        services,
-        products,
-        currency,
-        t,
-        callbacks: {
-          onOpenAgenda: () => selectTab('agenda'),
-          onOpenClientesLost: () => openClientesWithFilter('Perdido'),
-          onOpenEstoque: () => openMore('estoque'),
-          onOpenClientesLeads: () => openClientesWithFilter('Novo Lead'),
-          onSendReminders: sendReminders,
-          onFollowUpNoShow: handleFollowUpNoShow,
-        },
-      })
-    : [];
-  const alertKeysJoined = alerts.map((a) => a.key).join('|');
-
-  useEffect(() => {
-    const currentKeys = alerts.map((a) => a.key);
-    const currentKeySet = new Set(currentKeys);
-    // Keys that vanished (condition resolved) are dropped from the seen-set so the
-    // same alert notifies again if the condition becomes true a second time.
-    Array.from(seenAlertKeysRef.current).forEach((k) => {
-      if (!currentKeySet.has(k)) seenAlertKeysRef.current.delete(k);
-    });
-    const newlyAppeared = alerts.filter((a) => !seenAlertKeysRef.current.has(a.key));
-    newlyAppeared.forEach((a) => seenAlertKeysRef.current.add(a.key));
-
-    if (newlyAppeared.length > 0) {
-      setAlertTimestamps((prev) => {
-        const next = { ...prev };
-        newlyAppeared.forEach((a) => {
-          next[a.key] = Date.now();
-        });
-        return next;
-      });
-      if (notifPermission === 'granted') {
-        newlyAppeared.forEach((a) => fireNotification('BeautyFlow AI', a.title));
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertKeysJoined, notifPermission]);
-
-  const requestNotifPermission = async () => {
-    const result = await requestNotificationPermission();
-    setNotifPermission(result);
-  };
-
-  if (session === undefined || (session && dataLoading && !profile)) {
+  if (session === undefined || (session && profileLoading && !profile)) {
     return (
       <PhoneShell>
         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -389,93 +131,40 @@ function AppShell() {
   if (!profile) {
     return (
       <PhoneShell>
-        <Onboarding initialName={deriveNameFromEmail(session.user.email || '')} onComplete={handleOnboardingComplete} />
+        <Onboarding initialName={deriveNameFromEmail(session.user.email || '')} onComplete={completeOnboarding} />
       </PhoneShell>
     );
   }
 
-  const { availableSlots } = getAvailability(profile, appointments);
   const lowStockCount = products.filter((p) => productStatus(p) !== 'ok').length;
 
   const screenContent = (
     <>
-      {moreScreen === 'maquina' && <MaquinaScreen freeSlotsToday={availableSlots.length} lostClientsCount={clients.filter((c) => c.status === 'Perdido').length} />}
-      {moreScreen === 'ia' && (
-        <DiagnosticoScreen
-          profile={profile}
-          clients={clients}
-          appointments={appointments}
-          products={products}
-          currency={currency}
-          onOpenConteudo={() => openMore('maquina')}
-          onOpenClientes={() => selectTab('clientes')}
-        />
-      )}
-      {moreScreen === 'estoque' && <EstoqueScreen products={products} addProduct={addProduct} updateProduct={updateProduct} removeProduct={removeProduct} />}
+      {moreScreen === 'maquina' && <MaquinaScreen />}
+      {moreScreen === 'ia' && <DiagnosticoScreen onOpenConteudo={() => openMore('maquina')} onOpenClientes={() => selectTab('clientes')} />}
+      {moreScreen === 'estoque' && <EstoqueScreen />}
       {moreScreen === 'notificacoes' && (
         <NotificacoesScreen alerts={alerts} timestamps={alertTimestamps} permission={notifPermission} onRequestPermission={requestNotifPermission} />
       )}
       {moreScreen === 'config' && (
-        <ConfigScreen
-          profile={profile}
-          services={services}
-          onUpdateProfile={updateProfile}
-          onOpenServicos={() => setMoreScreen('servicos')}
-          notifPermission={notifPermission}
-          onRequestNotifPermission={requestNotifPermission}
-          onSignOut={signOut}
-        />
+        <ConfigScreen onOpenServicos={() => setMoreScreen('servicos')} notifPermission={notifPermission} onRequestNotifPermission={requestNotifPermission} />
       )}
-      {moreScreen === 'servicos' && (
-        <ServicosScreen services={services} setServices={setServicesUpdater} products={products} currency={currency} onBack={() => setMoreScreen(null)} />
-      )}
+      {moreScreen === 'servicos' && <ServicosScreen onBack={() => setMoreScreen(null)} />}
 
       {!moreScreen && activeTab === 'hoje' && (
         <HojeScreen
-          profile={profile}
-          appointments={appointments}
-          currency={currency}
           alerts={alerts}
           onOpenConteudo={() => openMore('maquina')}
           onOpenAgenda={() => selectTab('agenda')}
           onOpenFinanceiro={() => selectTab('financeiro')}
           onOpenClientes={() => selectTab('clientes')}
-          onMarkAttended={(id) => markAttendance(id, true)}
-          onMarkNoShow={(id) => markAttendance(id, false)}
         />
       )}
-      {!moreScreen && activeTab === 'agenda' && (
-        <AgendaTab
-          appointments={appointments}
-          services={services}
-          profile={profile}
-          currency={currency}
-          addAppointment={addAppointment}
-          onUpdateProfile={updateProfile}
-          addClient={addClient}
-          onOpenServicos={() => setMoreScreen('servicos')}
-          onMarkAttended={(id) => markAttendance(id, true)}
-          onMarkNoShow={(id) => markAttendance(id, false)}
-        />
-      )}
+      {!moreScreen && activeTab === 'agenda' && <AgendaTab onOpenServicos={() => setMoreScreen('servicos')} />}
       {!moreScreen && activeTab === 'clientes' && (
-        <ClientesScreen
-          key={clientesNonce}
-          clients={clients}
-          services={services}
-          appointments={appointments}
-          currency={currency}
-          contactMethod={profile.contactMethod}
-          addClient={addClient}
-          updateClient={updateClient}
-          initialFilter={clientesFilter}
-          initialSelectedId={clientesInitialSelectedId}
-          onFollowUpSent={markFollowUpSent}
-        />
+        <ClientesScreen key={clientesNonce} initialFilter={clientesFilter} initialSelectedId={clientesInitialSelectedId} />
       )}
-      {!moreScreen && activeTab === 'financeiro' && (
-        <FinanceiroScreen appointments={appointments} profile={profile} currency={currency} entries={financeEntries} addEntry={addFinanceEntry} removeEntry={removeFinanceEntry} />
-      )}
+      {!moreScreen && activeTab === 'financeiro' && <FinanceiroScreen />}
     </>
   );
 

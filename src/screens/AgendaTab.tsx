@@ -3,24 +3,14 @@ import { T } from '../theme';
 import { AgendaScreen } from './Agenda';
 import { AgendaOnlineScreen } from './AgendaOnline';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
 
 interface AgendaTabProps {
-  appointments: Appointment[];
-  services: ServiceItem[];
-  profile: Profile;
-  currency: CurrencyCode;
-  addAppointment: (a: Appointment) => void;
-  onUpdateProfile: (patch: Partial<Profile>) => void;
-  addClient: (c: Omit<Client, 'id'>) => void;
   onOpenServicos: () => void;
-  onMarkAttended: (appointmentId: string) => void;
-  onMarkNoShow: (appointmentId: string) => void;
 }
 
 type SubTab = 'interna' | 'online';
 
-export function AgendaTab({ appointments, services, profile, currency, addAppointment, onUpdateProfile, addClient, onOpenServicos, onMarkAttended, onMarkNoShow }: AgendaTabProps) {
+export function AgendaTab({ onOpenServicos }: AgendaTabProps) {
   const { t } = useLang();
   const [subTab, setSubTab] = useState<SubTab>('interna');
 
@@ -57,30 +47,7 @@ export function AgendaTab({ appointments, services, profile, currency, addAppoin
         ))}
       </div>
 
-      {subTab === 'interna' ? (
-        <AgendaScreen
-          embedded
-          appointments={appointments}
-          services={services}
-          profile={profile}
-          currency={currency}
-          addAppointment={addAppointment}
-          onMarkAttended={onMarkAttended}
-          onMarkNoShow={onMarkNoShow}
-        />
-      ) : (
-        <AgendaOnlineScreen
-          embedded
-          profile={profile}
-          services={services}
-          appointments={appointments}
-          currency={currency}
-          onUpdateProfile={onUpdateProfile}
-          addAppointment={addAppointment}
-          addClient={addClient}
-          onOpenServicos={onOpenServicos}
-        />
-      )}
+      {subTab === 'interna' ? <AgendaScreen embedded /> : <AgendaOnlineScreen embedded onOpenServicos={onOpenServicos} />}
     </div>
   );
 }

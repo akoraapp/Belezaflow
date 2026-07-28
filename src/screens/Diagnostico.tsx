@@ -1,17 +1,15 @@
 import { ArrowRight, BarChart3, Cake, Clock, Target, Users, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, todayIsBirthday } from '../lib/helpers';
-import { productStatus } from './Estoque';
+import { productStatus } from '../hooks/useInventory';
 import { Card, EmptyHint, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, Client, CurrencyCode, Product, Profile } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useClients } from '../hooks/useClients';
+import { useAppointments } from '../hooks/useAppointments';
+import { useInventory } from '../hooks/useInventory';
 
 interface DiagnosticoScreenProps {
-  profile: Profile;
-  clients: Client[];
-  appointments: Appointment[];
-  products: Product[];
-  currency: CurrencyCode;
   onOpenConteudo: () => void;
   onOpenClientes: () => void;
 }
@@ -32,8 +30,14 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
   );
 }
 
-export function DiagnosticoScreen({ profile, clients, appointments, products, currency, onOpenConteudo, onOpenClientes }: DiagnosticoScreenProps) {
+export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes }: DiagnosticoScreenProps) {
   const { t } = useLang();
+  const { profile } = useProfile();
+  const { clients } = useClients();
+  const { appointments } = useAppointments();
+  const { products } = useInventory();
+  if (!profile) return null;
+  const currency = profile.currency;
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
   const revenue = appointments.filter((a) => a.status === 'Compareceu').reduce((s, a) => s + a.price, 0);
   const gap = Math.max(0, (profile.goal || 0) - revenue);

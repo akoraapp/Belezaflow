@@ -1,6 +1,6 @@
 import { Calendar, Cake, MessageCircle, Package, Target, UserX, Users, type LucideIcon } from 'lucide-react';
 import { getAvailability, fmtCurrency, todayIsBirthday, format } from './helpers';
-import { productStatus } from '../screens/Estoque';
+import { productStatus } from '../hooks/useInventory';
 import type { Dict } from '../i18n';
 import type { Appointment, Client, CurrencyCode, Product, Profile, ServiceItem } from '../types';
 

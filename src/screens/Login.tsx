@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { T } from '../theme';
 import { TextInput, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import belezaflowLogo from '../assets/belezaflow-logo.webp';
 
 export function Login() {

@@ -6,23 +6,23 @@ import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, Secti
 import { useLang } from '../lib/LangContext';
 import { format, fmtMoney } from '../lib/helpers';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
-import type { Appointment, Client, ContactMethod, CurrencyCode, ServiceItem } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useClients } from '../hooks/useClients';
+import { useServices } from '../hooks/useServices';
+import { useAppointments } from '../hooks/useAppointments';
+import type { Appointment, Client, ContactMethod, CurrencyCode } from '../types';
 
 interface ClientesScreenProps {
-  clients: Client[];
-  services: ServiceItem[];
-  appointments: Appointment[];
-  currency: CurrencyCode;
-  contactMethod: ContactMethod;
-  addClient: (c: Omit<Client, 'id'>) => void;
-  updateClient: (id: string, patch: Partial<Client>) => void;
   initialFilter?: string;
   initialSelectedId?: string | null;
-  onFollowUpSent: (appointmentId: string) => void;
 }
 
-export function ClientesScreen({ clients, services, appointments, currency, contactMethod, addClient, updateClient, initialFilter, initialSelectedId, onFollowUpSent }: ClientesScreenProps) {
+export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScreenProps) {
   const { t, lang } = useLang();
+  const { profile } = useProfile();
+  const { clients, addClient, updateClient } = useClients();
+  const { services } = useServices();
+  const { appointments, markFollowUpSent: onFollowUpSent } = useAppointments();
   const [filter, setFilter] = useState(initialFilter ?? 'Todos');
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [showAdd, setShowAdd] = useState(false);
@@ -31,6 +31,9 @@ export function ClientesScreen({ clients, services, appointments, currency, cont
   const [service, setService] = useState('');
   const [birthday, setBirthday] = useState('');
   const [origem, setOrigem] = useState('Instagram');
+  if (!profile) return null;
+  const currency = profile.currency;
+  const contactMethod = profile.contactMethod;
   const filtered = filter === 'Todos' ? clients : clients.filter((c) => c.status === filter);
 
   const submit = () => {

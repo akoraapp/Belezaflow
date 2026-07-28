@@ -3,7 +3,11 @@ import { Check, ChevronDown, Copy, Inbox, Loader2 } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { Card, PrimaryButton, SectionTitle, SelectInput } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
+import { getAvailability } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
+import { useProfile } from '../hooks/useProfile';
+import { useAppointments } from '../hooks/useAppointments';
+import { useClients } from '../hooks/useClients';
 
 const OBJETIVOS = ['Atrair clientes', 'Preencher agenda', 'Reativar clientes', 'Autoridade', 'Quebra de objeção'];
 const FORMATOS = ['Reel', 'Story', 'Carrossel', 'Post'];
@@ -178,18 +182,18 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
   );
 }
 
-interface MaquinaScreenProps {
-  freeSlotsToday: number;
-  lostClientsCount: number;
-}
-
-export function MaquinaScreen({ freeSlotsToday, lostClientsCount }: MaquinaScreenProps) {
+export function MaquinaScreen() {
   const { t, lang } = useLang();
+  const { profile } = useProfile();
+  const { appointments } = useAppointments();
+  const { clients } = useClients();
   const [objetivo, setObjetivo] = useState('Preencher agenda');
   const [formato, setFormato] = useState('Reel');
   const [intensidade, setIntensidade] = useState('Estratégico');
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<GeneratedItem[]>([]);
+  const freeSlotsToday = profile ? getAvailability(profile, appointments).availableSlots.length : 0;
+  const lostClientsCount = clients.filter((c) => c.status === 'Perdido').length;
 
   const generate = async () => {
     setLoading(true);

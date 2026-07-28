@@ -4,25 +4,28 @@ import { T, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, CurrencyCode, Profile, ServiceItem } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useAppointments } from '../hooks/useAppointments';
+import { useServices } from '../hooks/useServices';
+import { useAttendance } from '../hooks/useAttendance';
+import type { ServiceItem } from '../types';
 
 interface AgendaScreenProps {
-  appointments: Appointment[];
-  services: ServiceItem[];
-  profile: Profile;
-  currency: CurrencyCode;
-  addAppointment: (a: Appointment) => void;
   embedded?: boolean;
-  onMarkAttended?: (appointmentId: string) => void;
-  onMarkNoShow?: (appointmentId: string) => void;
 }
 
-export function AgendaScreen({ appointments, services, profile, currency, addAppointment, embedded, onMarkAttended, onMarkNoShow }: AgendaScreenProps) {
+export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const { t, lang } = useLang();
+  const { profile } = useProfile();
+  const { appointments, addAppointment } = useAppointments();
+  const { services } = useServices();
+  const { markAttended: onMarkAttended, markNoShow: onMarkNoShow } = useAttendance();
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
   const [clientName, setClientName] = useState('');
   const [time, setTime] = useState<string | null>(null);
+  if (!profile) return null;
+  const currency = profile.currency;
 
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
 

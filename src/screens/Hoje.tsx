@@ -4,26 +4,28 @@ import { T, CURRENCIES, RADIUS, SHADOW } from '../theme';
 import { getAvailability, fmtMoney } from '../lib/helpers';
 import { Card, GoalRing, EmptyHint, AppointmentRow, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
+import { useProfile } from '../hooks/useProfile';
+import { useAppointments } from '../hooks/useAppointments';
+import { useAttendance } from '../hooks/useAttendance';
 import type { AlertItem } from '../lib/alerts';
-import type { Appointment, CurrencyCode, Profile } from '../types';
 
 interface HojeScreenProps {
-  profile: Profile;
-  appointments: Appointment[];
-  currency: CurrencyCode;
   alerts: AlertItem[];
   onOpenConteudo: () => void;
   onOpenAgenda: () => void;
   onOpenFinanceiro: () => void;
   onOpenClientes: () => void;
-  onMarkAttended: (appointmentId: string) => void;
-  onMarkNoShow: (appointmentId: string) => void;
 }
 
-export function HojeScreen({ profile, appointments, currency, alerts, onOpenConteudo, onOpenAgenda, onOpenFinanceiro, onOpenClientes, onMarkAttended, onMarkNoShow }: HojeScreenProps) {
+export function HojeScreen({ alerts, onOpenConteudo, onOpenAgenda, onOpenFinanceiro, onOpenClientes }: HojeScreenProps) {
   const { t } = useLang();
-  const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
+  const { profile } = useProfile();
+  const { appointments } = useAppointments();
+  const { markAttended, markNoShow } = useAttendance();
   const monthRevenue = useMemo(() => appointments.filter((a) => a.status === 'Compareceu').reduce((sum, a) => sum + a.price, 0), [appointments]);
+  if (!profile) return null;
+  const currency = profile.currency;
+  const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
   const progress = Math.min(1, monthRevenue / (profile.goal || 1));
   const hour = new Date().getHours();
   const greet = hour < 12 ? t.hoje.greetMorning : hour < 18 ? t.hoje.greetAfternoon : t.hoje.greetEvening;
@@ -98,8 +100,8 @@ export function HojeScreen({ profile, appointments, currency, alerts, onOpenCont
               a={a}
               currency={currency}
               testId={`appt-${a.id}`}
-              onMarkAttended={() => onMarkAttended(a.id)}
-              onMarkNoShow={() => onMarkNoShow(a.id)}
+              onMarkAttended={() => markAttended(a.id)}
+              onMarkNoShow={() => markNoShow(a.id)}
             />
           ))}
       </div>

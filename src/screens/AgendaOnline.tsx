@@ -5,30 +5,33 @@ import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
 import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
-import type { Appointment, Client, CurrencyCode, Profile, ServiceItem } from '../types';
+import { useProfile } from '../hooks/useProfile';
+import { useAppointments } from '../hooks/useAppointments';
+import { useServices } from '../hooks/useServices';
+import { useClients } from '../hooks/useClients';
+import type { ServiceItem } from '../types';
 
 const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 interface AgendaOnlineScreenProps {
-  profile: Profile;
-  services: ServiceItem[];
-  appointments: Appointment[];
-  currency: CurrencyCode;
-  onUpdateProfile: (patch: Partial<Profile>) => void;
-  addAppointment: (a: Appointment) => void;
-  addClient: (c: Omit<Client, 'id'>) => void;
   onOpenServicos: () => void;
   embedded?: boolean;
 }
 
-export function AgendaOnlineScreen({ profile, services, appointments, currency, onUpdateProfile, addAppointment, addClient, onOpenServicos, embedded }: AgendaOnlineScreenProps) {
+export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScreenProps) {
   const { t, lang } = useLang();
+  const { profile, updateProfile: onUpdateProfile } = useProfile();
+  const { appointments, addAppointment } = useAppointments();
+  const { services } = useServices();
+  const { addClient } = useClients();
   const [copied, setCopied] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
   const [bookName, setBookName] = useState('');
   const [bookPhone, setBookPhone] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  if (!profile) return null;
+  const currency = profile.currency;
 
   const slug = (profile.publicName || 'seunegocio').toLowerCase().replace(/[^a-z0-9]+/g, '');
   const link = `beautyflow.app/${slug}`;
