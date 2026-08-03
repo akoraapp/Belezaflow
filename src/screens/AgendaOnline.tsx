@@ -48,6 +48,10 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
 
   const { workingDays, chosenSlots } = getAvailability(profile, appointments);
   const availableSlotsForBookDate = bookDate ? getAvailableSlotsForDate(profile, appointments, bookDate) : [];
+  // The professional only needs to type an address — a Google Maps search link is
+  // generated from it automatically. The separate "Link do Google Maps" field is an
+  // optional override for a more precise pin.
+  const mapsHref = profile.mapsLink || (profile.endereco ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(profile.endereco)}` : null);
 
   const toggleDay = (d: string) => {
     const next = workingDays.includes(d) ? workingDays.filter((x) => x !== d) : [...workingDays, d];
@@ -272,9 +276,9 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                 {profile.contactMethod === 'sms' ? <MessageSquare size={12} /> : <MessageCircle size={12} />} {profile.whatsapp}
               </a>
             )}
-            {profile.endereco && profile.mapsLink && (
+            {mapsHref && (
               <a
-                href={profile.mapsLink}
+                href={mapsHref}
                 target="_blank"
                 rel="noreferrer"
                 style={{
