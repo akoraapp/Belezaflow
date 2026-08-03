@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
 import { T, FONT_IMPORT } from './theme';
 import { getTabs, BottomNav } from './components/BottomNav';
@@ -69,10 +69,19 @@ export default function App() {
 // its own hook, called directly inside the screen that needs it — nothing here
 // holds business data or talks to Supabase.
 function AppShell() {
-  const { t } = useLang();
+  const { t, lang, setLang } = useLang();
   const { session } = useAuth();
   const { profile, loading: profileLoading, completeOnboarding } = useProfile();
   const { products } = useInventory();
+
+  // A returning session may load on a different device/browser than the one
+  // that completed onboarding — once the account's saved profile arrives,
+  // it's the source of truth for which language to show, not localStorage
+  // or the browser's locale guess.
+  useEffect(() => {
+    if (profile && profile.language !== lang) setLang(profile.language);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.language]);
 
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);

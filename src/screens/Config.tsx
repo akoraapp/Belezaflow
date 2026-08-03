@@ -78,7 +78,10 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
             {LANG_OPTIONS.map((opt) => (
               <div
                 key={opt.code}
-                onClick={() => setLang(opt.code as Lang)}
+                onClick={() => {
+                  setLang(opt.code as Lang);
+                  onUpdateProfile({ language: opt.code as Lang });
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
