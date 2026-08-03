@@ -25,6 +25,7 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const [selService, setSelService] = useState<ServiceItem | null>(null);
   const [clientName, setClientName] = useState('');
   const [time, setTime] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState(false);
   if (!profile) return null;
   const currency = profile.currency;
 
@@ -40,9 +41,10 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       upcomingByDay.set(a.day, group);
     });
 
-  const submit = () => {
+  const submit = async () => {
     if (!selService || !clientName || !time) return;
-    addAppointment({
+    setSubmitError(false);
+    const result = await addAppointment({
       id: `a${Date.now()}`,
       clientName,
       service: selService.name,
@@ -53,6 +55,11 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       status: 'Agendado',
       createdAt: Date.now(),
     });
+    if (!result.ok) {
+      setSubmitError(true);
+      setTime(null);
+      return;
+    }
     setShowAdd(false);
     setSelService(null);
     setClientName('');
@@ -106,6 +113,7 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
               </Chip>
             ))}
           </div>
+          {submitError && <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger, marginBottom: 10 }}>{t.agendaOnline.slotTakenError}</div>}
           <PrimaryButton full onClick={submit} disabled={!selService || !clientName || !time} testId="agenda-add-submit">
             {t.agenda.confirmCta}
           </PrimaryButton>

@@ -1,16 +1,30 @@
 import { createListResource } from './createListResource';
-import { AppointmentService } from '../services/appointmentService';
+import { AppointmentService, isSlotConflictError } from '../services/appointmentService';
 import { todayDateStr } from '../lib/helpers';
 import type { Appointment } from '../types';
 
 const { useResource, store } = createListResource<Appointment>(AppointmentService.fetchAll);
 
+export type AddAppointmentResult = { ok: true } | { ok: false; conflict: boolean };
+
 export function useAppointments() {
   const { items, loading, error, userId } = useResource();
 
-  const addAppointment = (a: Appointment) => {
+  // Adds optimistically, then rolls the local add back if the write fails — most
+  // importantly on a slot conflict (see 0003_appointment_slot_lock.sql), so a caller
+  // can never end up believing a double-booked slot went through.
+  const addAppointment = async (a: Appointment): Promise<AddAppointmentResult> => {
     store.setState((s) => ({ ...s, items: [...s.items, a] }));
-    if (userId) AppointmentService.insert(userId, a).catch(console.error);
+    if (!userId) return { ok: true };
+    try {
+      await AppointmentService.insert(userId, a);
+      return { ok: true };
+    } catch (err) {
+      store.setState((s) => ({ ...s, items: s.items.filter((x) => x.id !== a.id) }));
+      const conflict = isSlotConflictError(err);
+      if (!conflict) console.error(err);
+      return { ok: false, conflict };
+    }
   };
 
   // Used by useAttendance to flip status (Compareceu/NaoCompareceu) as part of

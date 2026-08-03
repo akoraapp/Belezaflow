@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { AtSign, Check, Copy, MapPin, MessageCircle, QrCode, Share2 } from 'lucide-react';
+import { AtSign, Check, Copy, MapPin, MessageCircle, MessageSquare, QrCode, Share2 } from 'lucide-react';
 import { T, ALL_SLOTS, RADIUS, SHADOW } from '../theme';
 import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
 import { getAvailability, getAvailableSlotsForDate, getBookableDays, fmtMoney, formatTimeLabel } from '../lib/helpers';
-import { buildWhatsAppLink } from '../lib/followup';
+import { buildWhatsAppLink, digitsOnly } from '../lib/followup';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { useProfile } from '../hooks/useProfile';
@@ -32,6 +32,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   const [bookName, setBookName] = useState('');
   const [bookPhone, setBookPhone] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+  const [bookingError, setBookingError] = useState(false);
 
   const bookableDays = getBookableDays(profile, 14);
   useEffect(() => {
@@ -57,9 +58,10 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
     onUpdateProfile({ availableSlots: next });
   };
 
-  const confirmBooking = () => {
+  const confirmBooking = async () => {
     if (!bookService || !bookDate || !bookTime || !bookName || !bookPhone) return;
-    addAppointment({
+    setBookingError(false);
+    const result = await addAppointment({
       id: `a${Date.now()}`,
       clientName: bookName,
       clientPhone: bookPhone,
@@ -72,6 +74,11 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
       origin: 'online',
       createdAt: Date.now(),
     });
+    if (!result.ok) {
+      setBookingError(true);
+      setBookTime(null);
+      return;
+    }
     addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '' });
     setConfirmed(true);
     setTimeout(() => {
@@ -240,9 +247,13 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
             )}
             {profile.whatsapp && (
               <a
-                href={buildWhatsAppLink(profile.whatsapp, t.agendaOnline.whatsappGreeting) || '#'}
-                target="_blank"
-                rel="noreferrer"
+                href={
+                  profile.contactMethod === 'sms'
+                    ? `sms:${digitsOnly(profile.whatsapp)}`
+                    : buildWhatsAppLink(profile.whatsapp, t.agendaOnline.whatsappGreeting) || '#'
+                }
+                target={profile.contactMethod === 'sms' ? undefined : '_blank'}
+                rel={profile.contactMethod === 'sms' ? undefined : 'noreferrer'}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -258,7 +269,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                   textDecoration: 'none',
                 }}
               >
-                <MessageCircle size={12} /> {profile.whatsapp}
+                {profile.contactMethod === 'sms' ? <MessageSquare size={12} /> : <MessageCircle size={12} />} {profile.whatsapp}
               </a>
             )}
             {profile.endereco && profile.mapsLink && (
@@ -385,6 +396,9 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                 </div>
               )}
 
+              {bookingError && (
+                <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger, marginBottom: 12, textAlign: 'center' }}>{t.agendaOnline.slotTakenError}</div>
+              )}
               <PrimaryButton full onClick={confirmBooking} disabled={!bookService || !bookDate || !bookTime || !bookName || !bookPhone}>
                 {t.agendaOnline.confirmApptCta}
               </PrimaryButton>

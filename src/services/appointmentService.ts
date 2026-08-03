@@ -18,6 +18,10 @@ function rowToAppointment(row: Record<string, unknown>): Appointment {
   };
 }
 
+export function isSlotConflictError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === '23505';
+}
+
 export const AppointmentService = {
   async fetchAll(userId: string): Promise<Appointment[]> {
     const { data, error } = await supabase.from('appointments').select('*').eq('user_id', userId).order('created_at', { ascending: true });
