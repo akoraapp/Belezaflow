@@ -1,14 +1,68 @@
 import { ALL_SLOTS, CURRENCIES, WEEKDAY_LABELS } from '../theme';
 import type { Appointment, CurrencyCode, Lang, Profile } from '../types';
 
+function pad2(n: number) {
+  return String(n).padStart(2, '0');
+}
+
+export function todayDateStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function dateStrToLocalDate(dateStr: string) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function weekdayLabelForDate(dateStr: string) {
+  return WEEKDAY_LABELS[dateStrToLocalDate(dateStr).getDay()];
+}
+
 export function getAvailability(profile: Profile | null, appointments: Appointment[]) {
-  const today = (appointments || []).filter((a) => a.day === 'hoje');
-  const todayLabel = WEEKDAY_LABELS[new Date().getDay()];
+  const dateStr = todayDateStr();
+  const today = (appointments || []).filter((a) => a.day === dateStr);
   const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
-  const isWorkingToday = workingDays.includes(todayLabel);
+  const isWorkingToday = workingDays.includes(weekdayLabelForDate(dateStr));
   const chosenSlots = profile?.availableSlots?.length ? profile.availableSlots : ALL_SLOTS;
   const availableSlots = isWorkingToday ? chosenSlots.filter((t) => !today.some((a) => a.time === t)) : [];
   return { today, isWorkingToday, workingDays, chosenSlots, availableSlots };
+}
+
+// Used by the public booking preview: unlike getAvailability (always "today"), this computes
+// open slots for an arbitrary calendar date, so a client can book any upcoming working day,
+// not just today.
+export function getAvailableSlotsForDate(profile: Profile | null, appointments: Appointment[], dateStr: string) {
+  const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+  if (!workingDays.includes(weekdayLabelForDate(dateStr))) return [];
+  const chosenSlots = profile?.availableSlots?.length ? profile.availableSlots : ALL_SLOTS;
+  const bookedTimes = new Set((appointments || []).filter((a) => a.day === dateStr).map((a) => a.time));
+  return chosenSlots.filter((t) => !bookedTimes.has(t));
+}
+
+export interface BookableDay {
+  dateStr: string;
+  weekday: string;
+  dayOfMonth: number;
+  month: number;
+}
+
+// Enumerates the next `daysAhead` calendar days that fall on one of the professional's
+// working days, for the public booking day picker.
+export function getBookableDays(profile: Profile | null, daysAhead = 14): BookableDay[] {
+  const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
+  const base = new Date();
+  base.setHours(0, 0, 0, 0);
+  const result: BookableDay[] = [];
+  for (let i = 0; i < daysAhead; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const weekday = WEEKDAY_LABELS[d.getDay()];
+    if (workingDays.includes(weekday)) {
+      result.push({ dateStr: `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`, weekday, dayOfMonth: d.getDate(), month: d.getMonth() + 1 });
+    }
+  }
+  return result;
 }
 
 export function todayIsBirthday(dateStr?: string) {

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T, RADIUS } from '../theme';
-import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
+import { getAvailability, fmtMoney, formatTimeLabel, todayDateStr, weekdayLabelForDate } from '../lib/helpers';
+import { WEEKDAY_LABEL } from '../i18n';
 import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { useProfile } from '../hooks/useProfile';
@@ -28,6 +29,16 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const currency = profile.currency;
 
   const { today, isWorkingToday, availableSlots } = getAvailability(profile, appointments);
+  const todayStr = todayDateStr();
+  const upcomingByDay = new Map<string, typeof appointments>();
+  appointments
+    .filter((a) => a.day > todayStr)
+    .sort((a, b) => (a.day === b.day ? a.time.localeCompare(b.time) : a.day.localeCompare(b.day)))
+    .forEach((a) => {
+      const group = upcomingByDay.get(a.day) || [];
+      group.push(a);
+      upcomingByDay.set(a.day, group);
+    });
 
   const submit = () => {
     if (!selService || !clientName || !time) return;
@@ -38,7 +49,7 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       price: Number(selService.price),
       duration: selService.duration,
       time,
-      day: 'hoje',
+      day: todayDateStr(),
       status: 'Agendado',
       createdAt: Date.now(),
     });
@@ -128,6 +139,30 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
                 {formatTimeLabel(tm, lang)}
               </div>
             ))}
+          </div>
+        </>
+      )}
+
+      {upcomingByDay.size > 0 && (
+        <>
+          <div style={{ height: 24 }} />
+          <SectionTitle>{t.agenda.upcomingLabel}</SectionTitle>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {Array.from(upcomingByDay.entries()).map(([day, appts]) => {
+              const [, m, d] = day.split('-');
+              return (
+                <div key={day}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11.5, fontWeight: 700, color: T.ink, marginBottom: 8 }}>
+                    {WEEKDAY_LABEL[lang][weekdayLabelForDate(day)]} · {d}/{m}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {appts.map((a) => (
+                      <AppointmentRow key={a.id} a={a} currency={currency} testId={`appt-${a.id}`} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </>
       )}

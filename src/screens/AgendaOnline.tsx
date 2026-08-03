@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { AtSign, Check, Copy, MapPin, Phone, QrCode, Share2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AtSign, Check, Copy, MapPin, MessageCircle, QrCode, Share2 } from 'lucide-react';
 import { T, ALL_SLOTS, RADIUS, SHADOW } from '../theme';
 import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
-import { getAvailability, fmtMoney, formatTimeLabel } from '../lib/helpers';
+import { getAvailability, getAvailableSlotsForDate, getBookableDays, fmtMoney, formatTimeLabel } from '../lib/helpers';
+import { buildWhatsAppLink } from '../lib/followup';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { useProfile } from '../hooks/useProfile';
@@ -26,17 +27,26 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   const { addClient } = useClients();
   const [copied, setCopied] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
+  const [bookDate, setBookDate] = useState<string | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
   const [bookName, setBookName] = useState('');
   const [bookPhone, setBookPhone] = useState('');
   const [confirmed, setConfirmed] = useState(false);
+
+  const bookableDays = getBookableDays(profile, 14);
+  useEffect(() => {
+    if (!bookDate && bookableDays.length > 0) setBookDate(bookableDays[0].dateStr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookableDays.map((d) => d.dateStr).join(',')]);
+
   if (!profile) return null;
   const currency = profile.currency;
 
   const slug = (profile.publicName || 'seunegocio').toLowerCase().replace(/[^a-z0-9]+/g, '');
   const link = `beautyflow.app/${slug}`;
 
-  const { workingDays, chosenSlots, availableSlots } = getAvailability(profile, appointments);
+  const { workingDays, chosenSlots } = getAvailability(profile, appointments);
+  const availableSlotsForBookDate = bookDate ? getAvailableSlotsForDate(profile, appointments, bookDate) : [];
 
   const toggleDay = (d: string) => {
     const next = workingDays.includes(d) ? workingDays.filter((x) => x !== d) : [...workingDays, d];
@@ -48,7 +58,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   };
 
   const confirmBooking = () => {
-    if (!bookService || !bookTime || !bookName || !bookPhone) return;
+    if (!bookService || !bookDate || !bookTime || !bookName || !bookPhone) return;
     addAppointment({
       id: `a${Date.now()}`,
       clientName: bookName,
@@ -57,7 +67,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
       price: Number(bookService.price),
       duration: bookService.duration,
       time: bookTime,
-      day: 'hoje',
+      day: bookDate,
       status: 'Agendado',
       origin: 'online',
       createdAt: Date.now(),
@@ -165,7 +175,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
         <div
           style={{
             position: 'relative',
-            background: `radial-gradient(circle at 30% 20%, #3A3A3A, ${T.ink} 70%)`,
+            background: `radial-gradient(circle at 30% 20%, ${T.goldSoft}, ${T.bg} 70%)`,
             padding: '34px 20px 30px',
             textAlign: 'center',
             overflow: 'hidden',
@@ -176,7 +186,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               position: 'absolute',
               inset: 0,
               opacity: 0.5,
-              background: 'repeating-linear-gradient(115deg, rgba(201,162,75,0.08) 0px, rgba(201,162,75,0.08) 1px, transparent 1px, transparent 26px)',
+              background: 'repeating-linear-gradient(115deg, rgba(201,162,75,0.10) 0px, rgba(201,162,75,0.10) 1px, transparent 1px, transparent 26px)',
             }}
           />
           <div
@@ -194,13 +204,13 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               fontSize: 27,
               color: '#fff',
               fontWeight: 600,
-              boxShadow: '0 0 0 3px rgba(255,255,255,0.12), 0 8px 22px -6px rgba(0,0,0,0.5)',
+              boxShadow: '0 0 0 3px rgba(255,255,255,0.6), 0 8px 22px -6px rgba(26,26,26,0.25)',
             }}
           >
             {(profile.publicName || 'S').charAt(0)}
           </div>
-          <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: '#fff', fontWeight: 400 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
-          <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldLight, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
+          <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: T.ink, fontWeight: 400 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
+          <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldDeep, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
             {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
           <div style={{ position: 'relative', width: 28, height: 1.5, background: T.gold, margin: '12px auto 14px', opacity: 0.7 }} />
@@ -216,11 +226,12 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                   gap: 5,
                   padding: '6px 12px',
                   borderRadius: 999,
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(232,213,168,0.25)',
+                  background: T.surface,
+                  border: `1px solid ${T.line}`,
                   fontFamily: 'Inter',
+                  fontWeight: 600,
                   fontSize: 11,
-                  color: T.goldLight,
+                  color: T.goldDeep,
                   textDecoration: 'none',
                 }}
               >
@@ -229,22 +240,25 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
             )}
             {profile.whatsapp && (
               <a
-                href={`tel:${profile.whatsapp.replace(/\D/g, '')}`}
+                href={buildWhatsAppLink(profile.whatsapp, t.agendaOnline.whatsappGreeting) || '#'}
+                target="_blank"
+                rel="noreferrer"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: 5,
                   padding: '6px 12px',
                   borderRadius: 999,
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(232,213,168,0.25)',
+                  background: T.surface,
+                  border: `1px solid ${T.line}`,
                   fontFamily: 'Inter',
+                  fontWeight: 600,
                   fontSize: 11,
-                  color: T.goldLight,
+                  color: T.goldDeep,
                   textDecoration: 'none',
                 }}
               >
-                <Phone size={12} /> {profile.whatsapp}
+                <MessageCircle size={12} /> {profile.whatsapp}
               </a>
             )}
             {profile.endereco && profile.mapsLink && (
@@ -258,12 +272,12 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                   gap: 5,
                   padding: '6px 12px',
                   borderRadius: 999,
-                  background: 'rgba(232,213,168,0.16)',
+                  background: T.goldSoft,
                   border: `1px solid ${T.gold}`,
                   fontFamily: 'Inter',
                   fontWeight: 700,
                   fontSize: 11,
-                  color: T.goldLight,
+                  color: T.goldDeep,
                   textDecoration: 'none',
                 }}
               >
@@ -271,7 +285,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               </a>
             )}
             {!profile.instagram && !profile.whatsapp && !profile.endereco && (
-              <span style={{ fontFamily: 'Inter', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{t.agendaOnline.fillInfoHint}</span>
+              <span style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>{t.agendaOnline.fillInfoHint}</span>
             )}
           </div>
         </div>
@@ -296,28 +310,60 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               </div>
 
               <StepLabel n={2}>{t.agendaOnline.step2}</StepLabel>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                {availableSlots.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agendaOnline.noSlotsFree}</span>}
-                {availableSlots.map((tm) => (
-                  <button
-                    key={tm}
-                    onClick={() => setBookTime(tm)}
-                    style={{
-                      padding: '10px 16px',
-                      borderRadius: RADIUS.pill,
-                      fontFamily: 'Playfair Display',
-                      fontSize: 13.5,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      border: `1.5px solid ${bookTime === tm ? T.gold : T.line}`,
-                      background: bookTime === tm ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
-                      color: bookTime === tm ? '#fff' : T.ink,
-                    }}
-                  >
-                    {formatTimeLabel(tm, lang)}
-                  </button>
-                ))}
-              </div>
+              {bookableDays.length === 0 ? (
+                <div style={{ marginBottom: 20, fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agendaOnline.noBookableDays}</div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 10, overflowX: 'auto', paddingBottom: 4 }}>
+                    {bookableDays.map((d) => (
+                      <button
+                        key={d.dateStr}
+                        onClick={() => {
+                          setBookDate(d.dateStr);
+                          setBookTime(null);
+                        }}
+                        style={{
+                          flexShrink: 0,
+                          minWidth: 52,
+                          padding: '8px 10px',
+                          borderRadius: RADIUS.control,
+                          textAlign: 'center',
+                          cursor: 'pointer',
+                          border: `1.5px solid ${bookDate === d.dateStr ? T.gold : T.line}`,
+                          background: bookDate === d.dateStr ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
+                        }}
+                      >
+                        <div style={{ fontFamily: 'Inter', fontSize: 9.5, fontWeight: 700, textTransform: 'uppercase', color: bookDate === d.dateStr ? '#fff' : T.muted }}>
+                          {WEEKDAY_LABEL[lang][d.weekday]}
+                        </div>
+                        <div style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 700, color: bookDate === d.dateStr ? '#fff' : T.ink }}>{d.dayOfMonth}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+                    {availableSlotsForBookDate.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.agendaOnline.noSlotsFree}</span>}
+                    {availableSlotsForBookDate.map((tm) => (
+                      <button
+                        key={tm}
+                        onClick={() => setBookTime(tm)}
+                        style={{
+                          padding: '10px 16px',
+                          borderRadius: RADIUS.pill,
+                          fontFamily: 'Playfair Display',
+                          fontSize: 13.5,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          border: `1.5px solid ${bookTime === tm ? T.gold : T.line}`,
+                          background: bookTime === tm ? `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})` : T.surface,
+                          color: bookTime === tm ? '#fff' : T.ink,
+                        }}
+                      >
+                        {formatTimeLabel(tm, lang)}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <StepLabel n={3}>{t.agendaOnline.step3}</StepLabel>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
@@ -330,6 +376,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                   <div>
                     <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.ink }}>
                       {bookService.name}
+                      {bookDate ? ` · ${bookDate.split('-')[2]}/${bookDate.split('-')[1]}` : ''}
                       {bookTime ? ` · ${formatTimeLabel(bookTime, lang)}` : ''}
                     </div>
                     <div style={{ fontFamily: 'Inter', fontSize: 10.5, color: T.muted }}>{bookService.duration} min</div>
@@ -338,7 +385,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
                 </div>
               )}
 
-              <PrimaryButton full onClick={confirmBooking} disabled={!bookService || !bookTime || !bookName || !bookPhone}>
+              <PrimaryButton full onClick={confirmBooking} disabled={!bookService || !bookDate || !bookTime || !bookName || !bookPhone}>
                 {t.agendaOnline.confirmApptCta}
               </PrimaryButton>
               <div style={{ textAlign: 'center', fontFamily: 'Inter', fontSize: 10, color: T.muted, marginTop: 14, letterSpacing: 0.3 }}>{t.agendaOnline.secureBookingFooter}</div>

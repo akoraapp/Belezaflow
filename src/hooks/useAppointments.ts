@@ -1,5 +1,6 @@
 import { createListResource } from './createListResource';
 import { AppointmentService } from '../services/appointmentService';
+import { todayDateStr } from '../lib/helpers';
 import type { Appointment } from '../types';
 
 const { useResource, store } = createListResource<Appointment>(AppointmentService.fetchAll);
@@ -23,9 +24,10 @@ export function useAppointments() {
   const markFollowUpSent = (id: string) => updateStatus(id, { followUpSent: true });
 
   const sendReminders = () => {
+    const todayStr = todayDateStr();
     store.setState((s) => ({
       ...s,
-      items: s.items.map((a) => (a.day === 'hoje' && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)),
+      items: s.items.map((a) => (a.day === todayStr && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)),
     }));
     // Bulk local-only confirmation nudge (mirrors legacy behavior) — each
     // affected row's status is not persisted individually here because it's a

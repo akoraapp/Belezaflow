@@ -85,7 +85,7 @@ export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
         return next;
       });
       if (notifPermission === 'granted') {
-        newlyAppeared.forEach((a) => fireNotification('BeautyFlow AI', a.title));
+        newlyAppeared.forEach((a) => fireNotification('BelezaFlow', a.title));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
