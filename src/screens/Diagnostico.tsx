@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, Cake, Clock, Target, Users, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Cake, Clock, Target, Users, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, todayIsBirthday } from '../lib/helpers';
 import { productStatus } from '../hooks/useInventory';
@@ -61,8 +61,7 @@ export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes }: Diagnostic
 
   return (
     <div style={{ padding: '24px 20px 100px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-        <BarChart3 size={20} color={T.goldDeep} />
+      <div style={{ marginBottom: 5 }}>
         <div style={{ fontFamily: 'Playfair Display', fontSize: 25, fontWeight: 400, color: T.ink }}>{t.diagnostico.title}</div>
       </div>
       <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, marginBottom: 22 }}>{t.diagnostico.subtitle}</div>

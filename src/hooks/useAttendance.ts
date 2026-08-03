@@ -30,7 +30,7 @@ export function useAttendance() {
     if (existingClient) {
       updateClient(existingClient.id, { status: 'Perdido' });
     } else {
-      addClient({ name: appt.clientName, phone: appt.clientPhone || '', service: appt.service, origem: 'Agenda', status: 'Perdido', birthday: '—' });
+      addClient({ name: appt.clientName, phone: appt.clientPhone || '', service: appt.service, origem: 'Agenda', status: 'Perdido', birthday: '' });
     }
   };
 

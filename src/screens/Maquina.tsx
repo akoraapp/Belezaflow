@@ -20,42 +20,6 @@ interface GeneratedItem {
   content: ContentResult;
 }
 
-function GridOption({ label, active, onClick, testId }: { label: string; active: boolean; onClick: () => void; testId?: string }) {
-  return (
-    <button
-      onClick={onClick}
-      data-testid={testId}
-      style={{
-        padding: '16px 12px',
-        borderRadius: RADIUS.control,
-        textAlign: 'center',
-        cursor: 'pointer',
-        border: `1.5px solid ${active ? T.gold : T.line}`,
-        background: T.surface,
-        fontFamily: 'Inter',
-        fontWeight: 700,
-        fontSize: 13,
-        color: T.ink,
-      }}
-    >
-      {label}
-    </button>
-  );
-}
-
-function FieldGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <SectionTitle>{label}</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {options.map((o, i) => (
-          <GridOption key={o} label={o} active={value === o} onClick={() => onChange(o)} testId={testId ? `${testId}-${i}` : undefined} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function SelectGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
   return (
     <div style={{ marginBottom: 18 }}>
@@ -242,7 +206,7 @@ export function MaquinaScreen() {
 
       <SelectGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
       <SelectGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
-      <FieldGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
+      <SelectGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
       <div style={{ marginBottom: 26 }}>
         <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
           {loading ? t.maquina.generatingCta : t.maquina.generateCta}

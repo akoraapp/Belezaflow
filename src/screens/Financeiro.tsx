@@ -129,7 +129,7 @@ export function FinanceiroScreen() {
 
   const submit = () => {
     if (!label || !value) return;
-    addEntry({ id: `f${Date.now()}`, tipo, label, value: Number(value), data: data || '—', createdAt: Date.now() });
+    addEntry({ id: `f${Date.now()}`, tipo, label, value: Number(value), data, createdAt: Date.now() });
     setLabel('');
     setValue('');
     setData('');
@@ -250,9 +250,11 @@ export function FinanceiroScreen() {
           <Card key={e.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink }}>{e.label}</div>
-              <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
-                {t.financeiro.venceLabel} {e.data}
-              </div>
+              {e.data && (
+                <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
+                  {t.financeiro.venceLabel} {e.data}
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: e.tipo === 'receber' ? T.success : T.danger }}>

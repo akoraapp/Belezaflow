@@ -38,7 +38,7 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
 
   const submit = () => {
     if (!name) return;
-    addClient({ name, phone, service: service || '—', origem, status: 'Novo Lead', birthday: birthday || '—' });
+    addClient({ name, phone, service, origem, status: 'Novo Lead', birthday });
     setName('');
     setPhone('');
     setService('');
@@ -152,12 +152,40 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
               <div>
                 <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{c.name}</div>
                 <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted }}>
-                  {ORIGEM_LABEL[lang][c.origem] || c.origem} · {c.service}
+                  {ORIGEM_LABEL[lang][c.origem] || c.origem}
+                  {c.service ? ` · ${c.service}` : ''}
                 </div>
               </div>
             </div>
-            <div style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 700, color: STATUS_COLOR[c.status], padding: '3px 9px', borderRadius: 999, background: T.surfaceAlt }}>
-              {STATUS_LABEL[lang][c.status] || c.status}
+            <div onClick={(e) => e.stopPropagation()}>
+              <select
+                value={c.status}
+                data-testid={`cliente-row-${c.id}-status`}
+                onChange={(e) => updateClient(c.id, { status: e.target.value })}
+                style={{
+                  fontFamily: 'Inter',
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: STATUS_COLOR[c.status],
+                  padding: '3px 20px 3px 9px',
+                  borderRadius: 999,
+                  background: T.surfaceAlt,
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238A8A8A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 8px center',
+                }}
+              >
+                {STATUS_LIST.map((s) => (
+                  <option key={s} value={s}>
+                    {STATUS_LABEL[lang][s] || s}
+                  </option>
+                ))}
+              </select>
             </div>
           </Card>
         ))}
@@ -192,7 +220,7 @@ function ClienteDetail({
   const totalGasto = attendedAppointments.reduce((s, a) => s + a.price, 0);
   const visitas = attendedAppointments.length;
   const [msgType, setMsgType] = useState<string | null>(null);
-  const [bdayInput, setBdayInput] = useState(client.birthday === '—' ? '' : client.birthday || '');
+  const [bdayInput, setBdayInput] = useState(client.birthday || '');
   const [copied, setCopied] = useState(false);
   const [noShowCopied, setNoShowCopied] = useState(false);
 
@@ -210,21 +238,21 @@ function ClienteDetail({
       primeiroContato: `Olá ${client.name}! 😊 Vi seu interesse em ${client.service}. Posso te ajudar a encontrar o melhor horário?`,
       followUp: `Oi ${client.name}, tudo bem? Ainda está pensando em agendar seu ${client.service}? Tenho horários abrindo essa semana!`,
       quebraObjecao: `Entendo, ${client.name}! Se for sobre o valor, posso te mostrar as formas de pagamento que temos disponíveis 💛`,
-      fechamento: `${client.name}, consigo te encaixar para o ${client.service} — vamos confirmar seu horário?`,
+      fechamento: `${client.name}, consigo te encaixar para o ${client.service}. Vamos confirmar seu horário?`,
       reativacao: `Saudades por aqui, ${client.name}! Que tal renovar seu ${client.service}? Tenho uma condição especial essa semana.`,
     },
     en: {
       primeiroContato: `Hi ${client.name}! 😊 I saw you're interested in ${client.service}. Can I help you find the best time?`,
       followUp: `Hi ${client.name}, how are you? Still thinking about booking your ${client.service}? I have openings this week!`,
       quebraObjecao: `I understand, ${client.name}! If it's about the price, I can show you the payment options we have 💛`,
-      fechamento: `${client.name}, I can fit you in for your ${client.service} — shall we confirm your time?`,
+      fechamento: `${client.name}, I can fit you in for your ${client.service}. Shall we confirm your time?`,
       reativacao: `Missed you here, ${client.name}! How about renewing your ${client.service}? I have a special offer this week.`,
     },
     es: {
       primeiroContato: `¡Hola ${client.name}! 😊 Vi tu interés en ${client.service}. ¿Te ayudo a encontrar el mejor horario?`,
       followUp: `Hola ${client.name}, ¿todo bien? ¿Aún estás pensando en agendar tu ${client.service}? ¡Tengo horarios disponibles esta semana!`,
       quebraObjecao: `Entiendo, ${client.name}! Si es por el precio, puedo mostrarte las formas de pago que tenemos disponibles 💛`,
-      fechamento: `${client.name}, puedo agendarte para tu ${client.service} — ¿confirmamos tu horario?`,
+      fechamento: `${client.name}, puedo agendarte para tu ${client.service}. ¿Confirmamos tu horario?`,
       reativacao: `¡Te extrañamos por aquí, ${client.name}! ¿Qué tal renovar tu ${client.service}? Tengo una condición especial esta semana.`,
     },
   };
@@ -301,13 +329,13 @@ function ClienteDetail({
 
       <Card style={{ marginBottom: 20 }}>
         <Row label={t.clientes.originRowLabel} value={ORIGEM_LABEL[lang][client.origem] || client.origem} />
-        <Row label={t.clientes.serviceRowLabel} value={client.service} />
+        {client.service && <Row label={t.clientes.serviceRowLabel} value={client.service} />}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
           <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
           <input
             value={bdayInput}
             onChange={(e) => setBdayInput(e.target.value)}
-            onBlur={() => onChangeBirthday(bdayInput || '—')}
+            onBlur={() => onChangeBirthday(bdayInput)}
             placeholder={t.clientes.birthdayInputPlaceholder}
             style={{
               border: 'none',

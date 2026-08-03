@@ -62,7 +62,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
       origin: 'online',
       createdAt: Date.now(),
     });
-    addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '—' });
+    addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '' });
     setConfirmed(true);
     setTimeout(() => {
       setConfirmed(false);
