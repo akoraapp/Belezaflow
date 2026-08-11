@@ -1,6 +1,7 @@
 import { createListResource } from './createListResource';
 import { AppointmentService, isSlotConflictError } from '../services/appointmentService';
 import { todayDateStr } from '../lib/helpers';
+import { notifyPush } from '../lib/pushNotify';
 import type { Appointment } from '../types';
 
 const { useResource, store } = createListResource<Appointment>(AppointmentService.fetchAll);
@@ -18,6 +19,7 @@ export function useAppointments() {
     if (!userId) return { ok: true };
     try {
       await AppointmentService.insert(userId, a);
+      notifyPush(userId, 'Novo agendamento', `${a.clientName} às ${a.time}`);
       return { ok: true };
     } catch (err) {
       store.setState((s) => ({ ...s, items: s.items.filter((x) => x.id !== a.id) }));
@@ -37,6 +39,22 @@ export function useAppointments() {
 
   const markFollowUpSent = (id: string) => updateStatus(id, { followUpSent: true });
 
+  const cancelAppointment = (id: string) => {
+    const appt = store.getState().items.find((a) => a.id === id);
+    updateStatus(id, { status: 'Cancelado' });
+    if (userId && appt) {
+      notifyPush(userId, 'Agendamento alterado', `${appt.clientName} · ${appt.service} às ${appt.time} foi cancelado.`);
+    }
+  };
+
+  const rescheduleAppointment = (id: string, day: string, time: string) => {
+    const appt = store.getState().items.find((a) => a.id === id);
+    updateStatus(id, { day, time, status: 'Agendado' });
+    if (userId && appt) {
+      notifyPush(userId, 'Agendamento alterado', `${appt.clientName} · ${appt.service} remarcado para ${day} às ${time}.`);
+    }
+  };
+
   const sendReminders = () => {
     const todayStr = todayDateStr();
     store.setState((s) => ({
@@ -48,5 +66,5 @@ export function useAppointments() {
     // soft reminder state, not a real confirmation from the client.
   };
 
-  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, sendReminders };
+  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, cancelAppointment, rescheduleAppointment, sendReminders };
 }

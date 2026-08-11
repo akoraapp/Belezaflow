@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from './useAuth';
 import { useProfile } from './useProfile';
 import { useAppointments } from './useAppointments';
 import { useClients } from './useClients';
@@ -8,6 +9,8 @@ import { buildAlerts, type AlertItem } from '../lib/alerts';
 import { useLang } from '../lib/LangContext';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
 import { getNotificationPermission, requestNotificationPermission, fireNotification, type NotifPermission } from '../lib/notifications';
+import { subscribeToPush } from '../lib/push';
+import { PushService } from '../services/pushService';
 import type { Appointment, CurrencyCode } from '../types';
 
 interface AlertsNav {
@@ -21,6 +24,7 @@ interface AlertsNav {
 // allowed to depend on every other module's hook, precisely so no other screen has to.
 export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
   const { t, lang } = useLang();
+  const { userId } = useAuth();
   const { profile } = useProfile();
   const { appointments, sendReminders, markFollowUpSent } = useAppointments();
   const { clients } = useClients();
@@ -94,6 +98,14 @@ export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
   const requestNotifPermission = async () => {
     const result = await requestNotificationPermission();
     setNotifPermission(result);
+    if (result === 'granted' && userId) {
+      try {
+        const subscription = await subscribeToPush();
+        if (subscription) await PushService.saveSubscription(userId, subscription);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   return { alerts, alertTimestamps, notifPermission, requestNotifPermission };

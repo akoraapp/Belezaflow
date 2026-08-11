@@ -19,6 +19,7 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     bufferMinutes: Number(row.buffer_minutes),
     cancellationNoticeHours: Number(row.cancellation_notice_hours),
     rescheduleNoticeHours: Number(row.reschedule_notice_hours),
+    timezone: (row.timezone as string) || '',
   };
 }
 
@@ -40,6 +41,7 @@ function profileToRow(profile: Partial<Profile>): Record<string, unknown> {
   if (profile.bufferMinutes !== undefined) row.buffer_minutes = profile.bufferMinutes;
   if (profile.cancellationNoticeHours !== undefined) row.cancellation_notice_hours = profile.cancellationNoticeHours;
   if (profile.rescheduleNoticeHours !== undefined) row.reschedule_notice_hours = profile.rescheduleNoticeHours;
+  if (profile.timezone !== undefined) row.timezone = profile.timezone;
   return row;
 }
 

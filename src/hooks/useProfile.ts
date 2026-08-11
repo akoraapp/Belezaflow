@@ -64,6 +64,7 @@ export function useProfile() {
       bufferMinutes: 0,
       cancellationNoticeHours: 24,
       rescheduleNoticeHours: 24,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
     };
     profileStore.setState({ profile: newProfile, loading: false, userId });
     if (userId) {

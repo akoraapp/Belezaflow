@@ -51,6 +51,11 @@ export const AppointmentService = {
     const row: Record<string, unknown> = {};
     if (patch.status !== undefined) row.status = patch.status;
     if (patch.followUpSent !== undefined) row.follow_up_sent = patch.followUpSent;
+    if (patch.day !== undefined) row.day = patch.day;
+    if (patch.time !== undefined) row.time = patch.time;
+    // A reschedule moves the appointment to a new instant, so any reminder
+    // already sent for the old time no longer applies.
+    if (patch.day !== undefined || patch.time !== undefined) row.reminder_sent_at = null;
     const { error } = await supabase.from('appointments').update(row).eq('id', id);
     if (error) throw error;
   },

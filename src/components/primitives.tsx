@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Check, ChevronLeft, X, type LucideIcon } from 'lucide-react';
+import { Ban, Check, ChevronLeft, Clock, X, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, STATUS_COLOR, RADIUS, SHADOW } from '../theme';
 import { STATUS_LABEL } from '../i18n';
 import { fmtMoney, formatTimeLabel } from '../lib/helpers';
@@ -471,16 +471,21 @@ export function AppointmentRow({
   testId,
   onMarkAttended,
   onMarkNoShow,
+  onCancel,
+  onReschedule,
 }: {
   a: Appointment;
   currency: CurrencyCode;
   testId?: string;
   onMarkAttended?: () => void;
   onMarkNoShow?: () => void;
+  onCancel?: () => void;
+  onReschedule?: () => void;
 }) {
   const { t, lang } = useLang();
   const isPending = a.status === 'Agendado' || a.status === 'Confirmado';
   const showActions = isPending && (onMarkAttended || onMarkNoShow);
+  const showLifecycleActions = isPending && (onCancel || onReschedule);
 
   return (
     <Card testId={testId}>
@@ -557,6 +562,59 @@ export function AppointmentRow({
               }}
             >
               <X size={12} /> {t.attendance.markNoShowCta}
+            </button>
+          )}
+        </div>
+      )}
+
+      {showLifecycleActions && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          {onReschedule && (
+            <button
+              onClick={onReschedule}
+              data-testid={testId ? `${testId}-reschedule` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: `1px solid ${T.line}`,
+                background: 'transparent',
+                color: T.muted,
+                fontFamily: 'Inter',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: 'pointer',
+                padding: '7px 10px',
+                borderRadius: RADIUS.pill,
+              }}
+            >
+              <Clock size={12} /> {t.attendance.rescheduleCta}
+            </button>
+          )}
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              data-testid={testId ? `${testId}-cancel` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: `1px solid ${T.line}`,
+                background: 'transparent',
+                color: T.danger,
+                fontFamily: 'Inter',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: 'pointer',
+                padding: '7px 10px',
+                borderRadius: RADIUS.pill,
+              }}
+            >
+              <Ban size={12} /> {t.attendance.cancelCta}
             </button>
           )}
         </div>

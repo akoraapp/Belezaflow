@@ -18,7 +18,7 @@ interface AgendaScreenProps {
 export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const { t, lang } = useLang();
   const { profile } = useProfile();
-  const { appointments, addAppointment } = useAppointments();
+  const { appointments, addAppointment, cancelAppointment, rescheduleAppointment } = useAppointments();
   const { services } = useServices();
   const { markAttended: onMarkAttended, markNoShow: onMarkNoShow } = useAttendance();
   const [showAdd, setShowAdd] = useState(false);
@@ -26,6 +26,7 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const [clientName, setClientName] = useState('');
   const [time, setTime] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState(false);
+  const [reschedulingId, setReschedulingId] = useState<string | null>(null);
   if (!profile) return null;
   const currency = profile.currency;
 
@@ -126,14 +127,37 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
         {[...today]
           .sort((a, b) => a.time.localeCompare(b.time))
           .map((a) => (
-            <AppointmentRow
-              key={a.id}
-              a={a}
-              currency={currency}
-              testId={`appt-${a.id}`}
-              onMarkAttended={onMarkAttended ? () => onMarkAttended(a.id) : undefined}
-              onMarkNoShow={onMarkNoShow ? () => onMarkNoShow(a.id) : undefined}
-            />
+            <div key={a.id}>
+              <AppointmentRow
+                a={a}
+                currency={currency}
+                testId={`appt-${a.id}`}
+                onMarkAttended={onMarkAttended ? () => onMarkAttended(a.id) : undefined}
+                onMarkNoShow={onMarkNoShow ? () => onMarkNoShow(a.id) : undefined}
+                onCancel={() => cancelAppointment(a.id)}
+                onReschedule={() => setReschedulingId((cur) => (cur === a.id ? null : a.id))}
+              />
+              {reschedulingId === a.id && (
+                <Card style={{ marginTop: 8 }}>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.attendance.rescheduleSlotsLabel}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {availableSlots.length === 0 && <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.attendance.rescheduleNoSlots}</span>}
+                    {availableSlots.map((tm) => (
+                      <Chip
+                        key={tm}
+                        active={false}
+                        onClick={() => {
+                          rescheduleAppointment(a.id, todayDateStr(), tm);
+                          setReschedulingId(null);
+                        }}
+                      >
+                        {formatTimeLabel(tm, lang)}
+                      </Chip>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </div>
           ))}
       </div>
 

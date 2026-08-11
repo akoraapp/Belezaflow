@@ -39,6 +39,9 @@ export interface Profile {
   bufferMinutes: number;
   cancellationNoticeHours: number;
   rescheduleNoticeHours: number;
+  // IANA timezone (e.g. "America/Sao_Paulo"), captured from the browser at
+  // onboarding — used server-side to compute correct appointment-reminder times.
+  timezone: string;
 }
 
 export interface OnboardingResult {
