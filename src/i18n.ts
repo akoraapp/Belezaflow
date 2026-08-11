@@ -541,6 +541,13 @@ const pt = {
     permissionDenied: 'Notificações bloqueadas. Ative nas configurações do navegador para receber os alertas no dispositivo.',
     permissionUnsupported: 'Este navegador ou ambiente não aceita notificações push.',
   },
+  installPrompt: {
+    title: 'Instalar no iPhone',
+    subtitle: 'Adicione o BelezaFlow à tela de início para abrir como um app, direto do seu iPhone.',
+    step1: '1. Toque no ícone de compartilhar (□↑) na barra do Safari.',
+    step2: '2. Role para baixo e toque em "Adicionar à Tela de Início".',
+    step3: '3. Toque em "Adicionar" no canto superior direito.',
+  },
 };
 
 const en: typeof pt = {
@@ -881,6 +888,13 @@ const en: typeof pt = {
     permissionDenied: 'Notifications are blocked. Enable them in your browser settings to get alerts on your device.',
     permissionUnsupported: "This browser or environment doesn't support push notifications.",
   },
+  installPrompt: {
+    title: 'Install on iPhone',
+    subtitle: 'Add BelezaFlow to your Home Screen to open it like an app, right from your iPhone.',
+    step1: '1. Tap the share icon (□↑) in the Safari toolbar.',
+    step2: '2. Scroll down and tap "Add to Home Screen".',
+    step3: '3. Tap "Add" in the top-right corner.',
+  },
 };
 
 const es: typeof pt = {
@@ -1220,6 +1234,13 @@ const es: typeof pt = {
     permissionGranted: 'Notificaciones activadas en este dispositivo.',
     permissionDenied: 'Notificaciones bloqueadas. Actívalas en la configuración del navegador para recibir alertas en el dispositivo.',
     permissionUnsupported: 'Este navegador o entorno no admite notificaciones push.',
+  },
+  installPrompt: {
+    title: 'Instalar en iPhone',
+    subtitle: 'Agrega BelezaFlow a tu pantalla de inicio para abrirlo como una app, directo desde tu iPhone.',
+    step1: '1. Toca el ícono de compartir (□↑) en la barra de Safari.',
+    step2: '2. Desplázate hacia abajo y toca "Agregar a pantalla de inicio".',
+    step3: '3. Toca "Agregar" en la esquina superior derecha.',
   },
 };
 

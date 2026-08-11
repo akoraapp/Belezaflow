@@ -3,6 +3,7 @@ import { ChevronLeft, Grid3x3, Home } from 'lucide-react';
 import { T, FONT_IMPORT } from './theme';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
+import { InstallIOSPrompt } from './components/InstallIOSPrompt';
 import { LangProvider, useLang } from './lib/LangContext';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
@@ -59,6 +60,7 @@ export default function App() {
   return (
     <LangProvider>
       <AppShell />
+      <InstallIOSPrompt />
     </LangProvider>
   );
 }
