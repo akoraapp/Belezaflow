@@ -9,10 +9,11 @@ export function Login() {
   const { t } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState<'signin' | 'signup' | null>(null);
+  const [loading, setLoading] = useState<'signin' | 'signup' | 'reset' | null>(null);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
   const canSubmit = email.trim().length > 0 && password.trim().length > 0;
+  const canResetPassword = email.trim().length > 0;
 
   const signIn = async () => {
     if (!canSubmit || loading) return;
@@ -37,6 +38,20 @@ export function Login() {
     }
     if (data.session) return;
     setInfo(t.login.signupCheckEmail);
+  };
+
+  const forgotPassword = async () => {
+    if (!canResetPassword || loading) return;
+    setError('');
+    setInfo('');
+    setLoading('reset');
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+    setLoading(null);
+    if (resetError) {
+      setError(t.login.authErrorGeneric);
+      return;
+    }
+    setInfo(t.login.forgotPasswordCheckEmail);
   };
 
   return (
@@ -66,7 +81,24 @@ export function Login() {
         )}
 
         <div style={{ textAlign: 'right', marginTop: 12 }}>
-          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.goldDeep, fontWeight: 700 }}>{t.login.forgotPassword}</span>
+          <button
+            onClick={forgotPassword}
+            disabled={!canResetPassword || !!loading}
+            data-testid="login-forgot-password"
+            style={{
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              fontFamily: 'Inter',
+              fontSize: 12.5,
+              color: T.goldDeep,
+              fontWeight: 700,
+              cursor: !canResetPassword || !!loading ? 'default' : 'pointer',
+              opacity: !canResetPassword || !!loading ? 0.6 : 1,
+            }}
+          >
+            {loading === 'reset' ? '…' : t.login.forgotPassword}
+          </button>
         </div>
 
         <div style={{ flex: 1 }} />

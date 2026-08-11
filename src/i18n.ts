@@ -237,6 +237,7 @@ const pt = {
     createAccountCta: 'Criar conta',
     authErrorGeneric: 'Não foi possível entrar. Verifique seus dados e tente novamente.',
     signupCheckEmail: 'Conta criada! Verifique seu e-mail para confirmar antes de entrar.',
+    forgotPasswordCheckEmail: 'Enviamos um e-mail com um link para redefinir sua senha.',
   },
   onboarding: {
     stepIdiomaTitle: 'Escolha o idioma',
@@ -576,6 +577,7 @@ const en: typeof pt = {
     createAccountCta: 'Create account',
     authErrorGeneric: 'Could not sign in. Check your details and try again.',
     signupCheckEmail: 'Account created! Check your email to confirm before signing in.',
+    forgotPasswordCheckEmail: 'We sent you an email with a link to reset your password.',
   },
   onboarding: {
     stepIdiomaTitle: 'Choose your language',
@@ -915,6 +917,7 @@ const es: typeof pt = {
     createAccountCta: 'Crear cuenta',
     authErrorGeneric: 'No se pudo iniciar sesión. Verifica tus datos e intenta de nuevo.',
     signupCheckEmail: '¡Cuenta creada! Revisa tu correo para confirmarla antes de ingresar.',
+    forgotPasswordCheckEmail: 'Te enviamos un correo con un enlace para restablecer tu contraseña.',
   },
   onboarding: {
     stepIdiomaTitle: 'Elige el idioma',
