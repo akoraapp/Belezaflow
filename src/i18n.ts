@@ -224,8 +224,6 @@ const pt = {
     moreConfigLabel: 'Configurações',
     moreConfigSub: 'Preferências',
     greetingLoggedAs: 'Olá',
-    viewToggleMobile: 'Celular',
-    viewToggleDesktop: 'Computador',
   },
   login: {
     brandTagline: 'O ASSISTENTE QUE FAZ SEU NEGÓCIO DE BELEZA CRESCER',
@@ -575,8 +573,6 @@ const en: typeof pt = {
     moreConfigLabel: 'Settings',
     moreConfigSub: 'Preferences',
     greetingLoggedAs: 'Hi',
-    viewToggleMobile: 'Phone',
-    viewToggleDesktop: 'Desktop',
   },
   login: {
     brandTagline: 'THE ASSISTANT THAT GROWS YOUR BEAUTY BUSINESS',
@@ -926,8 +922,6 @@ const es: typeof pt = {
     moreConfigLabel: 'Configuración',
     moreConfigSub: 'Preferencias',
     greetingLoggedAs: 'Hola',
-    viewToggleMobile: 'Celular',
-    viewToggleDesktop: 'Computadora',
   },
   login: {
     brandTagline: 'EL ASISTENTE QUE HACE CRECER TU NEGOCIO DE BELLEZA',

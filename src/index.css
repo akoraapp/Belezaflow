@@ -17,6 +17,14 @@ body {
   min-height: 100dvh;
 }
 
+/* Real device full-screen shell for the mobile layout — no decorative frame,
+   fills the actual viewport (including mobile browser chrome via dvh). */
+.app-fullbleed {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+}
+
 a {
   color: #c9a227;
 }

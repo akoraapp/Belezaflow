@@ -42,7 +42,7 @@ export function BottomNav({
         backdropFilter: 'blur(8px)',
         borderTop: `1px solid ${T.line}`,
         display: 'flex',
-        padding: '8px 6px 10px',
+        padding: '8px 6px max(10px, env(safe-area-inset-bottom))',
         zIndex: 20,
       }}
     >
