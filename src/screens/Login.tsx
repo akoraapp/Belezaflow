@@ -5,7 +5,7 @@ import { useLang } from '../lib/LangContext';
 import { supabase } from '../services/supabaseClient';
 import belezaflowLogo from '../assets/belezaflow-logo.webp';
 
-export function Login() {
+export function Login({ isMobile = true }: { isMobile?: boolean }) {
   const { t } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,13 +56,33 @@ export function Login() {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: T.bg }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '44px 22px 28px', boxSizing: 'border-box', overflowY: 'auto' }}>
-        <div style={{ flex: 0.5 }} />
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
-          <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 220, height: 'auto', marginBottom: 4 }} />
-          <div style={{ fontFamily: 'Inter', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted, textAlign: 'center' }}>{t.login.brandTagline}</div>
-        </div>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: isMobile ? '44px 22px 28px' : 0,
+          justifyContent: isMobile ? undefined : 'center',
+          boxSizing: 'border-box',
+          overflowY: 'auto',
+        }}
+      >
+        {isMobile ? (
+          <>
+            <div style={{ flex: 0.5 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 26 }}>
+              <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 220, height: 'auto', marginBottom: 4 }} />
+              <div style={{ fontFamily: 'Inter', fontSize: 10.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted, textAlign: 'center' }}>
+                {t.login.brandTagline}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div style={{ marginBottom: 30 }}>
+            <div style={{ fontFamily: 'Playfair Display', fontSize: 34, fontWeight: 400, color: T.ink }}>{t.login.welcomeBackTitle}</div>
+            <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.goldDeep, marginTop: 6 }}>{t.login.welcomeBackSubtitle}</div>
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <TextInput type="email" value={email} onChange={setEmail} placeholder={t.login.emailPlaceholder} testId="login-email" />
@@ -101,9 +121,9 @@ export function Login() {
           </button>
         </div>
 
-        <div style={{ flex: 1 }} />
+        {isMobile && <div style={{ flex: 1 }} />}
 
-        <div style={{ marginTop: 22 }}>
+        <div style={{ marginTop: isMobile ? 22 : 26 }}>
           <PrimaryButton full onClick={signIn} disabled={!canSubmit || !!loading} testId="login-submit">
             {loading === 'signin' ? '…' : t.login.enterCta}
           </PrimaryButton>

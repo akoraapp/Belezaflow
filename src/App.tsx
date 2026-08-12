@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { T, FONT_IMPORT } from './theme';
 import type { Dict } from './i18n';
+import belezaflowLogo from './assets/belezaflow-logo.webp';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
 import { InstallIOSPrompt } from './components/InstallIOSPrompt';
@@ -36,53 +37,26 @@ function deriveNameFromEmail(email: string) {
 }
 
 // The brand panel that fills the left column of the desktop auth layout —
-// dark/gold to feel distinct from the light form beside it, with a faint
-// geometric texture so it isn't a flat block of color.
-function AuthHeroPanel({ t }: { t: Dict }) {
+// same light background as the form beside it (no color-blocking), just the
+// logo, a thin gold divider, and the tagline, centered.
+function AuthBrandPanel({ t }: { t: Dict }) {
   return (
     <div
       style={{
-        flex: '0 0 58%',
+        flex: '0 0 50%',
         height: '100%',
-        background: T.ink,
-        position: 'relative',
-        overflow: 'hidden',
+        background: T.bg,
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         boxSizing: 'border-box',
-        padding: '0 7%',
+        padding: '0 40px',
       }}
     >
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          backgroundImage: `radial-gradient(circle at 12% 18%, ${T.goldLight}26 0%, transparent 42%), radial-gradient(circle at 88% 82%, ${T.goldLight}1a 0%, transparent 45%), repeating-linear-gradient(135deg, ${T.goldLight}0c 0px, ${T.goldLight}0c 1px, transparent 1px, transparent 56px)`,
-        }}
-      />
-      <div style={{ position: 'relative', maxWidth: 420 }}>
-        <div style={{ fontFamily: 'Playfair Display', fontSize: 46, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.1, marginBottom: 16 }}>
-          Beleza<span style={{ color: T.goldLight }}>Flow</span>
-        </div>
-        <div
-          style={{
-            fontFamily: 'Inter',
-            fontSize: 12.5,
-            letterSpacing: 1.1,
-            textTransform: 'uppercase',
-            fontWeight: 700,
-            color: 'rgba(255,255,255,0.68)',
-            marginBottom: 44,
-          }}
-        >
-          {t.login.brandTagline}
-        </div>
-        <div style={{ width: 40, height: 2, background: T.goldLight, marginBottom: 22 }} />
-        <div style={{ fontFamily: 'Playfair Display', fontStyle: 'italic', fontWeight: 500, fontSize: 21, color: 'rgba(255,255,255,0.94)', lineHeight: 1.55 }}>
-          “{t.login.heroQuote}”
-        </div>
+      <div style={{ textAlign: 'center' }}>
+        <img src={belezaflowLogo} alt="BelezaFlow" style={{ width: 260, height: 'auto' }} />
+        <div style={{ width: 40, height: 2, background: T.gold, margin: '18px auto' }} />
+        <div style={{ fontFamily: 'Inter', fontSize: 11.5, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: 700, color: T.muted }}>{t.login.brandTagline}</div>
       </div>
     </div>
   );
@@ -90,8 +64,8 @@ function AuthHeroPanel({ t }: { t: Dict }) {
 
 // Wraps Login/Onboarding/the initial loading state. On a real phone this
 // renders full-bleed (no decorative frame), unchanged from before. On a wide
-// screen it's a two-column layout — a dark brand panel on the left, the form
-// on the right — filling the real window (100vw/100vh, no outer margins)
+// screen it's a two-column layout — the brand panel on the left, the form on
+// the right — filling the real window (100vw/100vh, no outer margins)
 // instead of a small card floating alone. Which one shows is decided purely
 // by the real viewport width (useIsMobile), never by a user-facing toggle.
 function AuthShell({ children, isMobile, t }: { children: React.ReactNode; isMobile: boolean; t: Dict }) {
@@ -106,7 +80,7 @@ function AuthShell({ children, isMobile, t }: { children: React.ReactNode; isMob
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', fontFamily: 'Inter', overflow: 'hidden' }}>
       <style>{FONT_IMPORT}</style>
-      <AuthHeroPanel t={t} />
+      <AuthBrandPanel t={t} />
       <div style={{ flex: '1 1 auto', height: '100%', background: T.bg, overflowY: 'auto', boxSizing: 'border-box' }}>
         <div style={{ width: '100%', maxWidth: 440, height: '100%', margin: '0 auto' }}>{children}</div>
       </div>
@@ -192,7 +166,7 @@ function AppShell() {
   if (!session) {
     return (
       <AuthShell isMobile={isMobile} t={t}>
-        <Login />
+        <Login isMobile={isMobile} />
       </AuthShell>
     );
   }
