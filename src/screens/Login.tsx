@@ -79,7 +79,7 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
           </>
         ) : (
           <div style={{ marginBottom: 30 }}>
-            <div style={{ fontFamily: 'Playfair Display', fontSize: 17, fontWeight: 500, color: T.goldDeep, marginBottom: 8 }}>{t.login.loginWelcomeBack}</div>
+            <div style={{ fontFamily: 'Playfair Display', fontSize: 34, fontWeight: 400, color: T.ink }}>{t.login.loginWelcomeBack}</div>
             <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.goldDeep, marginTop: 6 }}>{t.login.welcomeBackSubtitle}</div>
           </div>
         )}
