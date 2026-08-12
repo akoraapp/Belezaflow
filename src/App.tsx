@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { T, FONT_IMPORT } from './theme';
 import type { Dict } from './i18n';
@@ -6,7 +7,7 @@ import belezaflowLogo from './assets/belezaflow-logo.webp';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
 import { InstallIOSPrompt } from './components/InstallIOSPrompt';
-import { LangProvider, useLang } from './lib/LangContext';
+import { useLang } from './lib/LangContext';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { useAlerts } from './hooks/useAlerts';
@@ -14,6 +15,7 @@ import { useInventory, productStatus } from './hooks/useInventory';
 import { useIsMobile } from './hooks/useIsMobile';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
+import { EscolherPlanoScreen } from './screens/EscolherPlano';
 import { HojeScreen } from './screens/Hoje';
 import { AgendaTab } from './screens/AgendaTab';
 import { ClientesScreen } from './screens/Clientes';
@@ -90,10 +92,10 @@ function AuthShell({ children, isMobile, t }: { children: React.ReactNode; isMob
 
 export default function App() {
   return (
-    <LangProvider>
+    <>
       <AppShell />
       <InstallIOSPrompt />
-    </LangProvider>
+    </>
   );
 }
 
@@ -118,6 +120,8 @@ function AppShell() {
   }, [profile?.language]);
 
   const isMobile = useIsMobile();
+  const [searchParams] = useSearchParams();
+  const [planScreenDismissed, setPlanScreenDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
   const [moreScreen, setMoreScreen] = useState<string | null>(null);
@@ -175,6 +179,20 @@ function AppShell() {
     return (
       <AuthShell isMobile={isMobile} t={t}>
         <Onboarding initialName={deriveNameFromEmail(session.user.email || '')} onComplete={completeOnboarding} />
+      </AuthShell>
+    );
+  }
+
+  // A "plan" deep link from the landing page pricing section (see src/pages/Landing.tsx,
+  // /app?plan=monthly|annual) means the visitor already chose a plan before logging in —
+  // send them straight to plan selection the moment login/signup succeeds, pre-selected,
+  // instead of the normal dashboard (and never a "wait out the trial" gate).
+  const planParam = searchParams.get('plan');
+  const requestedPlan = planParam === 'monthly' || planParam === 'annual' ? planParam : null;
+  if (requestedPlan && !planScreenDismissed) {
+    return (
+      <AuthShell isMobile={isMobile} t={t}>
+        <EscolherPlanoScreen initialPlan={requestedPlan} onContinue={() => setPlanScreenDismissed(true)} onSkip={() => setPlanScreenDismissed(true)} />
       </AuthShell>
     );
   }
