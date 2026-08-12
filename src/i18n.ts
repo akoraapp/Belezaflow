@@ -236,6 +236,7 @@ const pt = {
     authErrorGeneric: 'Não foi possível entrar. Verifique seus dados e tente novamente.',
     signupCheckEmail: 'Conta criada! Verifique seu e-mail para confirmar antes de entrar.',
     forgotPasswordCheckEmail: 'Enviamos um e-mail com um link para redefinir sua senha.',
+    heroQuote: 'Cada agenda organizada é uma cliente que volta.',
   },
   onboarding: {
     stepIdiomaTitle: 'Escolha o idioma',
@@ -585,6 +586,7 @@ const en: typeof pt = {
     authErrorGeneric: 'Could not sign in. Check your details and try again.',
     signupCheckEmail: 'Account created! Check your email to confirm before signing in.',
     forgotPasswordCheckEmail: 'We sent you an email with a link to reset your password.',
+    heroQuote: 'Every organized schedule is a client who comes back.',
   },
   onboarding: {
     stepIdiomaTitle: 'Choose your language',
@@ -934,6 +936,7 @@ const es: typeof pt = {
     authErrorGeneric: 'No se pudo iniciar sesión. Verifica tus datos e intenta de nuevo.',
     signupCheckEmail: '¡Cuenta creada! Revisa tu correo para confirmarla antes de ingresar.',
     forgotPasswordCheckEmail: 'Te enviamos un correo con un enlace para restablecer tu contraseña.',
+    heroQuote: 'Cada agenda organizada es una clienta que vuelve.',
   },
   onboarding: {
     stepIdiomaTitle: 'Elige el idioma',
