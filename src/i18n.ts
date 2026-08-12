@@ -237,7 +237,6 @@ const pt = {
     signupCheckEmail: 'Conta criada! Verifique seu e-mail para confirmar antes de entrar.',
     forgotPasswordCheckEmail: 'Enviamos um e-mail com um link para redefinir sua senha.',
     loginWelcomeBack: 'Que bom te ver aqui',
-    welcomeBackTitle: 'Bem-vinda de volta',
     welcomeBackSubtitle: 'Entre para receber os alertas de hoje',
   },
   onboarding: {
@@ -589,7 +588,6 @@ const en: typeof pt = {
     signupCheckEmail: 'Account created! Check your email to confirm before signing in.',
     forgotPasswordCheckEmail: 'We sent you an email with a link to reset your password.',
     loginWelcomeBack: 'Great to have you here',
-    welcomeBackTitle: 'Welcome back',
     welcomeBackSubtitle: 'Sign in to get your alerts for today',
   },
   onboarding: {
@@ -941,7 +939,6 @@ const es: typeof pt = {
     signupCheckEmail: '¡Cuenta creada! Revisa tu correo para confirmarla antes de ingresar.',
     forgotPasswordCheckEmail: 'Te enviamos un correo con un enlace para restablecer tu contraseña.',
     loginWelcomeBack: 'Qué bueno tenerte aquí',
-    welcomeBackTitle: 'Bienvenida de nuevo',
     welcomeBackSubtitle: 'Inicia sesión para recibir las alertas de hoy',
   },
   onboarding: {
