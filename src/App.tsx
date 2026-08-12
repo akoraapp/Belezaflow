@@ -34,12 +34,13 @@ function deriveNameFromEmail(email: string) {
     .join(' ');
 }
 
-// On a real phone this renders full-bleed (no decorative frame) so the app
-// reads as a real app, not a preview widget. On a wide screen it keeps the
-// centered phone-card look, which is the only place that visual makes sense.
-// Which one shows is decided purely by the real viewport width (useIsMobile),
-// never by a user-facing toggle.
-function PhoneShell({ children, isMobile }: { children: React.ReactNode; isMobile: boolean }) {
+// Wraps Login/Onboarding/the initial loading state. On a real phone this
+// renders full-bleed (no decorative frame). On a wide screen it's a
+// comfortably wide, centered card — not the narrow phone-shaped frame the
+// rest of the app used to force on every screen size. Which one shows is
+// decided purely by the real viewport width (useIsMobile), never by a
+// user-facing toggle.
+function AuthShell({ children, isMobile }: { children: React.ReactNode; isMobile: boolean }) {
   if (isMobile) {
     return (
       <div className="app-fullbleed" style={{ background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
@@ -49,18 +50,17 @@ function PhoneShell({ children, isMobile }: { children: React.ReactNode; isMobil
     );
   }
   return (
-    <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px 0', fontFamily: 'Inter' }}>
+    <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: 'Inter', boxSizing: 'border-box' }}>
       <style>{FONT_IMPORT}</style>
       <div
         style={{
-          width: 390,
-          height: 780,
-          maxHeight: '92vh',
+          width: '100%',
+          maxWidth: 460,
+          height: 'min(760px, calc(100vh - 80px))',
           background: T.bg,
-          borderRadius: 40,
+          borderRadius: 24,
           overflow: 'hidden',
-          position: 'relative',
-          boxShadow: '0 30px 60px -20px rgba(27,23,18,0.35)',
+          boxShadow: '0 30px 60px -20px rgba(27,23,18,0.25)',
           border: `1px solid ${T.line}`,
         }}
       >
@@ -137,27 +137,27 @@ function AppShell() {
 
   if (session === undefined || (session && profileLoading && !profile)) {
     return (
-      <PhoneShell isMobile={isMobile}>
+      <AuthShell isMobile={isMobile}>
         <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted }}>…</div>
         </div>
-      </PhoneShell>
+      </AuthShell>
     );
   }
 
   if (!session) {
     return (
-      <PhoneShell isMobile={isMobile}>
+      <AuthShell isMobile={isMobile}>
         <Login />
-      </PhoneShell>
+      </AuthShell>
     );
   }
 
   if (!profile) {
     return (
-      <PhoneShell isMobile={isMobile}>
+      <AuthShell isMobile={isMobile}>
         <Onboarding initialName={deriveNameFromEmail(session.user.email || '')} onComplete={completeOnboarding} />
-      </PhoneShell>
+      </AuthShell>
     );
   }
 
@@ -196,78 +196,80 @@ function AppShell() {
   if (!isMobile) {
     const navItems = [...tabs, ...moreItems];
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: T.surfaceAlt, padding: '24px 0', fontFamily: 'Inter' }}>
+      // Fills the real browser window like an ordinary dashboard/site — no
+      // outer card, no fixed max width. Only the sidebar has a fixed width;
+      // the content pane flexes to whatever room is left and scrolls on its
+      // own real height (100vh, not a fixed pixel guess).
+      <div style={{ width: '100%', height: '100vh', background: T.surfaceAlt, fontFamily: 'Inter', display: 'flex', overflow: 'hidden' }}>
         <style>{FONT_IMPORT}</style>
         <div
           style={{
-            width: 1180,
-            maxWidth: '94vw',
-            margin: '0 auto',
-            background: T.bg,
-            borderRadius: 24,
-            overflow: 'hidden',
-            boxShadow: '0 30px 60px -20px rgba(27,23,18,0.25)',
-            border: `1px solid ${T.line}`,
+            width: 230,
+            flexShrink: 0,
+            height: '100%',
+            overflowY: 'auto',
+            boxSizing: 'border-box',
+            background: T.surface,
+            borderRight: `1px solid ${T.line}`,
+            padding: '26px 16px',
             display: 'flex',
-            minHeight: 720,
+            flexDirection: 'column',
           }}
         >
-          <div style={{ width: 230, background: T.surface, borderRight: `1px solid ${T.line}`, padding: '26px 16px', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
-              Beleza<span style={{ color: T.goldDeep }}>Flow</span>
-            </div>
-            <div style={{ padding: '0 10px 14px', fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
-              {t.nav.greetingLoggedAs}, {profile.name} 👋
-            </div>
-            {navItems.map((item) => {
-              const isActive = moreScreen ? moreScreen === item.id : activeTab === item.id;
-              const badge = item.id === 'estoque' ? (lowStockCount > 0 ? lowStockCount : null) : item.id === 'notificacoes' ? (alerts.length > 0 ? alerts.length : null) : null;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => goTo(item.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 12px',
-                    borderRadius: 12,
-                    border: 'none',
-                    background: isActive ? T.goldSoft : 'transparent',
-                    color: isActive ? T.goldDeep : T.ink,
-                    fontFamily: 'Inter',
-                    fontWeight: isActive ? 700 : 600,
-                    fontSize: 13.5,
-                    cursor: 'pointer',
-                    marginBottom: 3,
-                    textAlign: 'left',
-                    width: '100%',
-                  }}
-                >
-                  <item.icon size={16} />
-                  {item.label}
-                  {badge && (
-                    <span
-                      style={{
-                        marginLeft: 'auto',
-                        fontSize: 10.5,
-                        fontWeight: 700,
-                        color: '#fff',
-                        background: T.danger,
-                        borderRadius: 999,
-                        padding: '1px 6px',
-                      }}
-                    >
-                      {badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
+            Beleza<span style={{ color: T.goldDeep }}>Flow</span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', maxHeight: 780 }}>
-            <div style={{ maxWidth: 640, margin: '0 auto' }}>{screenContent}</div>
+          <div style={{ padding: '0 10px 14px', fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
+            {t.nav.greetingLoggedAs}, {profile.name} 👋
           </div>
+          {navItems.map((item) => {
+            const isActive = moreScreen ? moreScreen === item.id : activeTab === item.id;
+            const badge = item.id === 'estoque' ? (lowStockCount > 0 ? lowStockCount : null) : item.id === 'notificacoes' ? (alerts.length > 0 ? alerts.length : null) : null;
+            return (
+              <button
+                key={item.id}
+                onClick={() => goTo(item.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 12,
+                  border: 'none',
+                  background: isActive ? T.goldSoft : 'transparent',
+                  color: isActive ? T.goldDeep : T.ink,
+                  fontFamily: 'Inter',
+                  fontWeight: isActive ? 700 : 600,
+                  fontSize: 13.5,
+                  cursor: 'pointer',
+                  marginBottom: 3,
+                  textAlign: 'left',
+                  width: '100%',
+                }}
+              >
+                <item.icon size={16} />
+                {item.label}
+                {badge && (
+                  <span
+                    style={{
+                      marginLeft: 'auto',
+                      fontSize: 10.5,
+                      fontWeight: 700,
+                      color: '#fff',
+                      background: T.danger,
+                      borderRadius: 999,
+                      padding: '1px 6px',
+                    }}
+                  >
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ flex: 1, height: '100%', overflowY: 'auto', boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 760, margin: '0 auto' }}>{screenContent}</div>
         </div>
       </div>
     );
