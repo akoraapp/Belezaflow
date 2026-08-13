@@ -5,6 +5,8 @@ import { useLang } from '../lib/LangContext';
 import { supabase } from '../services/supabaseClient';
 import belezaflowLogo from '../assets/belezaflow-logo.webp';
 
+const TRIAL_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
 export function Login({ isMobile = true }: { isMobile?: boolean }) {
   const { t } = useLang();
   const [email, setEmail] = useState('');
@@ -31,12 +33,22 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
     setInfo('');
     setLoading('signup');
     const { data, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
-    setLoading(null);
     if (signUpError) {
+      setLoading(null);
       setError(t.login.authErrorGeneric);
       return;
     }
-    if (data.session) return;
+    if (data.session && data.user) {
+      // Email confirmation is off for this project, so signUp returns a live
+      // session immediately — this is the one place a new account exists with
+      // a session but no subscriptions row yet, so start the trial right here.
+      const trialEndsAt = new Date(Date.now() + TRIAL_DAYS_MS).toISOString();
+      const { error: subError } = await supabase.from('subscriptions').insert({ user_id: data.user.id, status: 'trialing', trial_ends_at: trialEndsAt });
+      if (subError) console.error(subError);
+      setLoading(null);
+      return;
+    }
+    setLoading(null);
     setInfo(t.login.signupCheckEmail);
   };
 

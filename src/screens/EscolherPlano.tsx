@@ -8,11 +8,39 @@ import { FUNNEL_PRICING } from '../lib/funnelTheme';
 
 type PlanId = 'monthly' | 'annual';
 
-export function EscolherPlanoScreen({ initialPlan, onContinue, onSkip }: { initialPlan: PlanId; onContinue: (plan: PlanId) => void; onSkip: () => void }) {
+export function EscolherPlanoScreen({
+  initialPlan,
+  onContinue,
+  onSkip,
+}: {
+  initialPlan: PlanId;
+  onContinue: (plan: PlanId) => Promise<void>;
+  // Absent entirely when this screen was reached via a direct-purchase ?plan=
+  // link from the landing page — there is no skipping a purchase already in
+  // progress. Only a future "still inside the free trial" entry point would
+  // pass a real onSkip.
+  onSkip?: (() => void) | null;
+}) {
   const { t, lang } = useLang();
   const l = t.landing;
   const pricing = FUNNEL_PRICING[lang];
   const [selected, setSelected] = useState<PlanId>(initialPlan);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleContinue = async () => {
+    setSubmitting(true);
+    setError('');
+    try {
+      await onContinue(selected);
+      // On success the caller redirects the browser to Mercado Pago, so this
+      // component is about to unmount — no need to clear `submitting`.
+    } catch (err) {
+      console.error(err);
+      setError(t.choosePlan.errorGeneric);
+      setSubmitting(false);
+    }
+  };
 
   const annualSavings = Math.max(0, pricing.monthlyPrice * 12 - pricing.annualTotalPrice);
   const savingsText = format(l.savingsTemplate, { symbol: pricing.currencySymbol, n: annualSavings });
@@ -70,16 +98,25 @@ export function EscolherPlanoScreen({ initialPlan, onContinue, onSkip }: { initi
 
       <div style={{ flex: 1 }} />
 
-      <PrimaryButton full onClick={() => onContinue(selected)} testId="choose-plan-continue">
-        {t.choosePlan.continueCta}
+      {error && (
+        <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.danger, marginBottom: 10, textAlign: 'center' }} data-testid="choose-plan-error">
+          {error}
+        </div>
+      )}
+
+      <PrimaryButton full onClick={handleContinue} disabled={submitting} testId="choose-plan-continue">
+        {submitting ? '…' : t.choosePlan.continueCta}
       </PrimaryButton>
-      <button
-        onClick={onSkip}
-        data-testid="choose-plan-skip"
-        style={{ border: 'none', background: 'transparent', padding: '14px 0 0', fontFamily: 'Inter', fontSize: 12.5, color: T.muted, fontWeight: 600, cursor: 'pointer', textAlign: 'center' }}
-      >
-        {t.choosePlan.skipCta}
-      </button>
+      {onSkip && (
+        <button
+          onClick={onSkip}
+          disabled={submitting}
+          data-testid="choose-plan-skip"
+          style={{ border: 'none', background: 'transparent', padding: '14px 0 0', fontFamily: 'Inter', fontSize: 12.5, color: T.muted, fontWeight: 600, cursor: submitting ? 'default' : 'pointer', textAlign: 'center' }}
+        >
+          {t.choosePlan.skipCta}
+        </button>
+      )}
     </div>
   );
 }

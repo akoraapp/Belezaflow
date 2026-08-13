@@ -13,9 +13,12 @@ import { useProfile } from './hooks/useProfile';
 import { useAlerts } from './hooks/useAlerts';
 import { useInventory, productStatus } from './hooks/useInventory';
 import { useIsMobile } from './hooks/useIsMobile';
+import { useSubscriptionGate } from './hooks/useSubscriptionGate';
+import { supabase } from './services/supabaseClient';
 import { Login } from './screens/Login';
 import { Onboarding } from './screens/Onboarding';
 import { EscolherPlanoScreen } from './screens/EscolherPlano';
+import { AguardandoPagamentoScreen } from './screens/AguardandoPagamento';
 import { HojeScreen } from './screens/Hoje';
 import { AgendaTab } from './screens/AgendaTab';
 import { ClientesScreen } from './screens/Clientes';
@@ -121,7 +124,8 @@ function AppShell() {
 
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
-  const [planScreenDismissed, setPlanScreenDismissed] = useState(false);
+  const { subscription, loading: subscriptionLoading } = useSubscriptionGate(session?.user.id ?? null);
+  const [organicPlanScreenDismissed, setOrganicPlanScreenDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
   const [moreScreen, setMoreScreen] = useState<string | null>(null);
@@ -183,16 +187,53 @@ function AppShell() {
     );
   }
 
-  // A "plan" deep link from the landing page pricing section (see src/pages/Landing.tsx,
-  // /app?plan=monthly|annual) means the visitor already chose a plan before logging in —
-  // send them straight to plan selection the moment login/signup succeeds, pre-selected,
-  // instead of the normal dashboard (and never a "wait out the trial" gate).
-  const planParam = searchParams.get('plan');
-  const requestedPlan = planParam === 'monthly' || planParam === 'annual' ? planParam : null;
-  if (requestedPlan && !planScreenDismissed) {
+  if (subscriptionLoading || !subscription) {
     return (
       <AuthShell isMobile={isMobile} t={t}>
-        <EscolherPlanoScreen initialPlan={requestedPlan} onContinue={() => setPlanScreenDismissed(true)} onSkip={() => setPlanScreenDismissed(true)} />
+        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.muted }}>…</div>
+        </div>
+      </AuthShell>
+    );
+  }
+
+  const startCheckout = async (plan: 'monthly' | 'annual') => {
+    const { data, error } = await supabase.functions.invoke('create-subscription', { body: { plan } });
+    if (error || !data?.init_point) throw error ?? new Error('create-subscription did not return an init_point');
+    window.location.href = data.init_point;
+  };
+
+  // A "plan" deep link from the landing page pricing section (see src/pages/Landing.tsx,
+  // /app?plan=monthly|annual) means the visitor already chose a plan before logging in —
+  // real payment is required here, never a local dismiss: unlock only once the
+  // subscription is genuinely active, show a polling wait screen while Mercado
+  // Pago's webhook is still catching up, and never offer a skip.
+  const planParam = searchParams.get('plan');
+  const requestedPlan = planParam === 'monthly' || planParam === 'annual' ? planParam : null;
+  if (requestedPlan && subscription.status !== 'active') {
+    if (subscription.status === 'pending_payment') {
+      return (
+        <AuthShell isMobile={isMobile} t={t}>
+          <AguardandoPagamentoScreen />
+        </AuthShell>
+      );
+    }
+    return (
+      <AuthShell isMobile={isMobile} t={t}>
+        <EscolherPlanoScreen initialPlan={requestedPlan} onContinue={startCheckout} onSkip={null} />
+      </AuthShell>
+    );
+  }
+
+  // Organic signup (no ?plan= link): free access during the trial, same as
+  // today. Once trial_ends_at passes, send to plan selection too — but this
+  // path can still be dismissed locally, since it's a soft nudge rather than
+  // a purchase already in progress.
+  const trialExpired = subscription.status === 'trialing' && !!subscription.trialEndsAt && new Date(subscription.trialEndsAt).getTime() < Date.now();
+  if (!requestedPlan && trialExpired && !organicPlanScreenDismissed) {
+    return (
+      <AuthShell isMobile={isMobile} t={t}>
+        <EscolherPlanoScreen initialPlan="monthly" onContinue={startCheckout} onSkip={() => setOrganicPlanScreenDismissed(true)} />
       </AuthShell>
     );
   }

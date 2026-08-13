@@ -660,6 +660,9 @@ const pt = {
     subtitle: 'Você está a um passo de organizar seu negócio de beleza.',
     continueCta: 'Confirmar plano',
     skipCta: 'Continuar sem assinar agora',
+    errorGeneric: 'Não foi possível iniciar o pagamento. Tente novamente.',
+    awaitingTitle: 'Aguardando confirmação do pagamento...',
+    awaitingSubtitle: 'Isso costuma levar só alguns segundos. Assim que o Mercado Pago confirmar, você entra automaticamente.',
   },
 };
 
@@ -1120,6 +1123,9 @@ const en: typeof pt = {
     subtitle: "You're one step away from organizing your beauty business.",
     continueCta: 'Confirm plan',
     skipCta: 'Continue without subscribing now',
+    errorGeneric: 'Could not start the payment. Please try again.',
+    awaitingTitle: 'Waiting for payment confirmation...',
+    awaitingSubtitle: "This usually takes just a few seconds. You'll be let in automatically once Mercado Pago confirms it.",
   },
 };
 
@@ -1580,6 +1586,9 @@ const es: typeof pt = {
     subtitle: 'Estás a un paso de organizar tu negocio de belleza.',
     continueCta: 'Confirmar plan',
     skipCta: 'Continuar sin suscribirme ahora',
+    errorGeneric: 'No se pudo iniciar el pago. Intenta de nuevo.',
+    awaitingTitle: 'Esperando la confirmación del pago...',
+    awaitingSubtitle: 'Esto suele tardar solo unos segundos. En cuanto Mercado Pago lo confirme, entrarás automáticamente.',
   },
 };
 

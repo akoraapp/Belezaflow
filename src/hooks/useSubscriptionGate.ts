@@ -1,0 +1,75 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '../services/supabaseClient';
+
+const TRIAL_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const PENDING_PAYMENT_POLL_MS = 4000;
+
+export type SubscriptionStatus = 'trialing' | 'pending_payment' | 'active' | 'past_due' | 'canceled';
+
+export interface SubscriptionRow {
+  plan: 'monthly' | 'annual' | null;
+  status: SubscriptionStatus;
+  trialEndsAt: string | null;
+}
+
+function rowFrom(data: Record<string, unknown>): SubscriptionRow {
+  return {
+    plan: (data.plan as SubscriptionRow['plan']) ?? null,
+    status: data.status as SubscriptionStatus,
+    trialEndsAt: (data.trial_ends_at as string) ?? null,
+  };
+}
+
+// Fetches (and, for accounts predating this feature, lazily creates) the
+// signed-in user's subscription row, and re-polls while a Mercado Pago
+// payment is in flight — the webhook that flips pending_payment -> active
+// can land a few seconds after checkout, so App.tsx's gate needs fresh data
+// without the user having to reload.
+export function useSubscriptionGate(userId: string | null) {
+  const [subscription, setSubscription] = useState<SubscriptionRow | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSubscription = useCallback(async () => {
+    if (!userId) {
+      setSubscription(null);
+      setLoading(false);
+      return;
+    }
+    const { data, error } = await supabase.from('subscriptions').select('plan, status, trial_ends_at').eq('user_id', userId).maybeSingle();
+    if (error) {
+      console.error(error);
+      setLoading(false);
+      return;
+    }
+    if (!data) {
+      const trialEndsAt = new Date(Date.now() + TRIAL_DAYS_MS).toISOString();
+      const { data: created, error: insertError } = await supabase
+        .from('subscriptions')
+        .insert({ user_id: userId, status: 'trialing', trial_ends_at: trialEndsAt })
+        .select('plan, status, trial_ends_at')
+        .single();
+      if (insertError) {
+        console.error(insertError);
+        setLoading(false);
+        return;
+      }
+      setSubscription(rowFrom(created));
+      setLoading(false);
+      return;
+    }
+    setSubscription(rowFrom(data));
+    setLoading(false);
+  }, [userId]);
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [fetchSubscription]);
+
+  useEffect(() => {
+    if (subscription?.status !== 'pending_payment') return;
+    const interval = setInterval(fetchSubscription, PENDING_PAYMENT_POLL_MS);
+    return () => clearInterval(interval);
+  }, [subscription?.status, fetchSubscription]);
+
+  return { subscription, loading, refetch: fetchSubscription };
+}
