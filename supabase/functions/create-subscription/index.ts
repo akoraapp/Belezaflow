@@ -1,28 +1,34 @@
-// Creates a Mercado Pago recurring subscription (preapproval) for the calling
-// user's chosen plan and returns the checkout URL (init_point) to redirect to.
+// Creates a recurring subscription for the calling user's chosen plan and
+// returns the checkout URL to redirect to. Which payment provider handles it
+// depends on the user's own profile.language (never anything the client
+// sends, so a tampered request can't switch providers or plans):
+//   - pt (Brazil)      -> Mercado Pago /preapproval, BRL, Pix/boleto/cards
+//   - en / es (intl)   -> Stripe Checkout, USD, cards
 //
 // Required secrets (Project Settings > Edge Functions > Secrets, or
-// `supabase secrets set`): MP_ACCESS_TOKEN. Optional: APP_BASE_URL (used for
-// Mercado Pago's back_url if the request has no Origin header to fall back on).
-// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically by
-// the Supabase runtime and do not need to be set manually.
+// `supabase secrets set`): MP_ACCESS_TOKEN, STRIPE_SECRET_KEY. Optional:
+// APP_BASE_URL (fallback for the post-checkout redirect URL if the request
+// has no Origin header). SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are
+// provided automatically by the Supabase runtime and do not need to be set
+// manually.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import Stripe from 'npm:stripe@17';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN') ?? '';
+const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, { httpClient: Stripe.createFetchHttpClient() }) : null;
 
 type Plan = 'monthly' | 'annual';
 type PricingLang = 'pt' | 'en' | 'es';
 
 // Mirrors src/lib/funnelTheme.ts's FUNNEL_PRICING — kept in sync manually
 // since the frontend constant isn't reachable from a Deno Edge Function.
-// Pricing is decided here from the user's own profile.language, not from
-// anything the client sends, so a tampered request can't buy the cheaper plan.
 const PRICING: Record<PricingLang, { currency: string; monthly: number; annual: number }> = {
   pt: { currency: 'BRL', monthly: 77, annual: 684 },
   en: { currency: 'USD', monthly: 47, annual: 397 },
@@ -33,12 +39,83 @@ interface CreateSubscriptionBody {
   plan: Plan;
 }
 
+async function createMercadoPagoCheckout(userId: string, email: string | undefined, plan: Plan, amount: number, currency: string, origin: string) {
+  if (!MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN is not configured');
+
+  const preapprovalPayload = {
+    reason: `BelezaFlow - ${plan === 'monthly' ? 'Plano Mensal' : 'Plano Anual'}`,
+    external_reference: userId,
+    payer_email: email,
+    back_url: `${origin}/app`,
+    status: 'pending',
+    auto_recurring: {
+      frequency: plan === 'monthly' ? 1 : 12,
+      frequency_type: 'months',
+      transaction_amount: amount,
+      currency_id: currency,
+    },
+  };
+
+  const mpResponse = await fetch('https://api.mercadopago.com/preapproval', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+    body: JSON.stringify(preapprovalPayload),
+  });
+  if (!mpResponse.ok) {
+    console.error('Mercado Pago preapproval error', mpResponse.status, await mpResponse.text());
+    throw new Error('Mercado Pago request failed');
+  }
+  const mpData = await mpResponse.json();
+
+  await supabaseAdmin
+    .from('subscriptions')
+    .update({ plan, status: 'pending_payment', provider: 'mercadopago', mp_preapproval_id: mpData.id, updated_at: new Date().toISOString() })
+    .eq('user_id', userId);
+
+  return mpData.init_point as string;
+}
+
+async function createStripeCheckout(userId: string, email: string | undefined, plan: Plan, amount: number, currency: string, origin: string) {
+  if (!stripe) throw new Error('STRIPE_SECRET_KEY is not configured');
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'subscription',
+    customer_email: email,
+    client_reference_id: userId,
+    success_url: `${origin}/app?checkout=success`,
+    cancel_url: `${origin}/app?checkout=cancelled`,
+    subscription_data: { metadata: { user_id: userId } },
+    line_items: [
+      {
+        price_data: {
+          currency: currency.toLowerCase(),
+          product_data: { name: `BelezaFlow - ${plan === 'monthly' ? 'Monthly Plan' : 'Annual Plan'}` },
+          unit_amount: Math.round(amount * 100),
+          recurring: { interval: plan === 'monthly' ? 'month' : 'year' },
+        },
+        quantity: 1,
+      },
+    ],
+  });
+
+  await supabaseAdmin
+    .from('subscriptions')
+    .update({
+      plan,
+      status: 'pending_payment',
+      provider: 'stripe',
+      stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (!session.url) throw new Error('Stripe did not return a checkout URL');
+  return session.url;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
-  }
-  if (!MP_ACCESS_TOKEN) {
-    return new Response(JSON.stringify({ error: 'MP_ACCESS_TOKEN is not configured' }), { status: 500 });
   }
 
   const authHeader = req.headers.get('Authorization');
@@ -75,46 +152,16 @@ Deno.serve(async (req) => {
   const lang: PricingLang = profile?.language === 'en' || profile?.language === 'es' ? profile.language : 'pt';
   const pricing = PRICING[lang];
   const amount = body.plan === 'monthly' ? pricing.monthly : pricing.annual;
-
   const origin = req.headers.get('origin') || Deno.env.get('APP_BASE_URL') || 'https://app.belezaflow.com';
 
-  const preapprovalPayload = {
-    reason: `BelezaFlow - ${body.plan === 'monthly' ? 'Plano Mensal' : 'Plano Anual'}`,
-    external_reference: user.id,
-    payer_email: user.email,
-    back_url: `${origin}/app`,
-    status: 'pending',
-    auto_recurring: {
-      frequency: body.plan === 'monthly' ? 1 : 12,
-      frequency_type: 'months',
-      transaction_amount: amount,
-      currency_id: pricing.currency,
-    },
-  };
-
-  const mpResponse = await fetch('https://api.mercadopago.com/preapproval', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-    body: JSON.stringify(preapprovalPayload),
-  });
-
-  if (!mpResponse.ok) {
-    const mpError = await mpResponse.text();
-    console.error('Mercado Pago preapproval error', mpResponse.status, mpError);
-    return new Response(JSON.stringify({ error: 'Mercado Pago request failed' }), { status: 502 });
+  try {
+    const initPoint =
+      lang === 'pt'
+        ? await createMercadoPagoCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin)
+        : await createStripeCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin);
+    return new Response(JSON.stringify({ init_point: initPoint }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: 'Could not start checkout' }), { status: 502 });
   }
-
-  const mpData = await mpResponse.json();
-
-  const { error: updateError } = await supabaseAdmin
-    .from('subscriptions')
-    .update({ plan: body.plan, status: 'pending_payment', mp_preapproval_id: mpData.id, updated_at: new Date().toISOString() })
-    .eq('user_id', user.id);
-
-  if (updateError) {
-    console.error(updateError);
-    return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
-  }
-
-  return new Response(JSON.stringify({ init_point: mpData.init_point }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 });
