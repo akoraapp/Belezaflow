@@ -60,7 +60,7 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
     setError('');
     setInfo('');
     setLoading('reset');
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/app` });
     setLoading(null);
     if (resetError) {
       setError(t.login.authErrorGeneric);

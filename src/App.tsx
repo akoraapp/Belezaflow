@@ -16,6 +16,7 @@ import { useIsMobile } from './hooks/useIsMobile';
 import { useSubscriptionGate } from './hooks/useSubscriptionGate';
 import { supabase } from './services/supabaseClient';
 import { Login } from './screens/Login';
+import { NovaSenhaScreen } from './screens/NovaSenha';
 import { Onboarding } from './screens/Onboarding';
 import { EscolherPlanoScreen } from './screens/EscolherPlano';
 import { AguardandoPagamentoScreen } from './screens/AguardandoPagamento';
@@ -109,7 +110,7 @@ export default function App() {
 // holds business data or talks to Supabase.
 function AppShell() {
   const { t, lang, setLang } = useLang();
-  const { session } = useAuth();
+  const { session, passwordRecovery, clearPasswordRecovery } = useAuth();
   const { profile, loading: profileLoading, completeOnboarding } = useProfile();
   const { products } = useInventory();
 
@@ -175,6 +176,18 @@ function AppShell() {
     return (
       <AuthShell isMobile={isMobile} t={t}>
         <Login isMobile={isMobile} />
+      </AuthShell>
+    );
+  }
+
+  // Supabase signs the visitor in automatically when they land here via a
+  // "reset your password" email link, firing PASSWORD_RECOVERY — that must
+  // take priority over onboarding/dashboard, or they'd land straight in the
+  // app on the temporary recovery session without ever setting a new password.
+  if (passwordRecovery) {
+    return (
+      <AuthShell isMobile={isMobile} t={t}>
+        <NovaSenhaScreen onDone={clearPasswordRecovery} />
       </AuthShell>
     );
   }
