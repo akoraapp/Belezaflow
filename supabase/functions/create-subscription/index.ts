@@ -24,6 +24,15 @@ const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY') ?? '';
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, { httpClient: Stripe.createFetchHttpClient() }) : null;
 
+// The frontend calls this function directly from the browser, so a preflight
+// OPTIONS request precedes the real POST — without these headers the browser
+// blocks the POST before it's ever sent, surfacing as a 405/CORS error.
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 type Plan = 'monthly' | 'annual';
 type PricingLang = 'pt' | 'en' | 'es';
 
@@ -114,13 +123,17 @@ async function createStripeCheckout(userId: string, email: string | undefined, p
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Missing Authorization header' }), { status: 401 });
+    return new Response(JSON.stringify({ error: 'Missing Authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   // Identifies the caller from their own JWT — the plan is chosen by the
@@ -131,23 +144,23 @@ Deno.serve(async (req) => {
     error: userError,
   } = await callerClient.auth.getUser();
   if (userError || !user) {
-    return new Response(JSON.stringify({ error: 'Invalid session' }), { status: 401 });
+    return new Response(JSON.stringify({ error: 'Invalid session' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   let body: CreateSubscriptionBody;
   try {
     body = await req.json();
   } catch {
-    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
   if (body.plan !== 'monthly' && body.plan !== 'annual') {
-    return new Response(JSON.stringify({ error: "plan must be 'monthly' or 'annual'" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "plan must be 'monthly' or 'annual'" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('language').eq('id', user.id).maybeSingle();
   if (profileError) {
     console.error(profileError);
-    return new Response(JSON.stringify({ error: profileError.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: profileError.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
   const lang: PricingLang = profile?.language === 'en' || profile?.language === 'es' ? profile.language : 'pt';
   const pricing = PRICING[lang];
@@ -159,9 +172,9 @@ Deno.serve(async (req) => {
       lang === 'pt'
         ? await createMercadoPagoCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin)
         : await createStripeCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin);
-    return new Response(JSON.stringify({ init_point: initPoint }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ init_point: initPoint }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: 'Could not start checkout' }), { status: 502 });
+    return new Response(JSON.stringify({ error: 'Could not start checkout' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
