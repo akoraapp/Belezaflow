@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   Check,
@@ -37,14 +37,22 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
 
 export function LandingPage() {
   const { t, lang } = useLang();
+  const navigate = useNavigate();
+  const isReturningUser = localStorage.getItem('belezaflow_returning_user') === '1';
   const l = t.landing;
   const pricing = FUNNEL_PRICING[lang];
   const [openFaq, setOpenFaq] = useState(-1);
+
+  useEffect(() => {
+    if (isReturningUser) navigate('/app', { replace: true });
+  }, [isReturningUser, navigate]);
 
   const annualSavings = Math.max(0, pricing.monthlyPrice * 12 - pricing.annualTotalPrice);
   const perDay = (pricing.annualTotalPrice / 365).toFixed(2);
   const savingsText = format(l.savingsTemplate, { symbol: pricing.currencySymbol, n: annualSavings });
   const perDayText = format(l.perDayTemplate, { symbol: pricing.currencySymbol, n: perDay });
+
+  if (isReturningUser) return null;
 
   return (
     <div style={{ background: F.bg, minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: F.ink, overflowX: 'hidden' }}>

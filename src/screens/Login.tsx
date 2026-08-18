@@ -38,6 +38,9 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
       setError(t.login.authErrorGeneric);
       return;
     }
+    // Marks this browser as belonging to a real customer so the landing page
+    // never shows again on it, even after the auth session itself expires.
+    localStorage.setItem('belezaflow_returning_user', '1');
     if (data.session && data.user) {
       // Email confirmation is off for this project, so signUp returns a live
       // session immediately — this is the one place a new account exists with
