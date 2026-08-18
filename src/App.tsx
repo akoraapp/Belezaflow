@@ -124,7 +124,7 @@ function AppShell() {
 
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
-  const { subscription, loading: subscriptionLoading } = useSubscriptionGate(session?.user.id ?? null);
+  const { subscription, loading: subscriptionLoading, resetPendingPayment } = useSubscriptionGate(session?.user.id ?? null);
   const [organicPlanScreenDismissed, setOrganicPlanScreenDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
@@ -214,7 +214,7 @@ function AppShell() {
     if (subscription.status === 'pending_payment') {
       return (
         <AuthShell isMobile={isMobile} t={t}>
-          <AguardandoPagamentoScreen />
+          <AguardandoPagamentoScreen onRetry={resetPendingPayment} />
         </AuthShell>
       );
     }

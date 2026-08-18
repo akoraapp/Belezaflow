@@ -71,5 +71,13 @@ export function useSubscriptionGate(userId: string | null) {
     return () => clearInterval(interval);
   }, [subscription?.status, fetchSubscription]);
 
-  return { subscription, loading, refetch: fetchSubscription };
+  // Lets a user stuck on "aguardando confirmação" bail out and pick a plan
+  // again instead of waiting forever for a payment that never completed.
+  const resetPendingPayment = useCallback(async () => {
+    const { error } = await supabase.functions.invoke('reset-subscription', { body: {} });
+    if (error) throw error;
+    await fetchSubscription();
+  }, [fetchSubscription]);
+
+  return { subscription, loading, refetch: fetchSubscription, resetPendingPayment };
 }

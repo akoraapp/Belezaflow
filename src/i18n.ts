@@ -663,6 +663,8 @@ const pt = {
     errorGeneric: 'Não foi possível iniciar o pagamento. Tente novamente.',
     awaitingTitle: 'Aguardando confirmação do pagamento...',
     awaitingSubtitle: 'Isso costuma levar só alguns segundos. Assim que o Mercado Pago confirmar, você entra automaticamente.',
+    retryCta: 'Cancelar e tentar de novo',
+    retryHint: 'Está demorando mais que o esperado?',
   },
 };
 
@@ -1126,6 +1128,8 @@ const en: typeof pt = {
     errorGeneric: 'Could not start the payment. Please try again.',
     awaitingTitle: 'Waiting for payment confirmation...',
     awaitingSubtitle: "This usually takes just a few seconds. You'll be let in automatically once Mercado Pago confirms it.",
+    retryCta: 'Cancel and try again',
+    retryHint: 'Taking longer than expected?',
   },
 };
 
@@ -1589,6 +1593,8 @@ const es: typeof pt = {
     errorGeneric: 'No se pudo iniciar el pago. Intenta de nuevo.',
     awaitingTitle: 'Esperando la confirmación del pago...',
     awaitingSubtitle: 'Esto suele tardar solo unos segundos. En cuanto Mercado Pago lo confirme, entrarás automáticamente.',
+    retryCta: 'Cancelar e intentar de nuevo',
+    retryHint: '¿Está tardando más de lo esperado?',
   },
 };
 
