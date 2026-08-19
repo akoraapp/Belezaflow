@@ -281,24 +281,72 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
   },
 };
 
-const FORMATO_ROTEIRO: Record<Lang, Record<string, string>> = {
+const FORMATO_ROTEIROS: Record<Lang, Record<string, string[]>> = {
   pt: {
-    Reel: 'Abra com o resultado pronto nos primeiros 2 segundos, corte para o processo em 3 a 4 cenas rápidas, feche com o rosto da cliente satisfeita e o CTA em texto na tela.',
-    Story: 'Use uma sequência de 3 stories: enquete ou pergunta no primeiro, bastidor real no segundo, link ou botão de agendar no terceiro.',
-    Carrossel: 'Capa com uma afirmação direta, 3 a 4 slides desenvolvendo o raciocínio com uma ideia por slide, último slide com o CTA isolado.',
-    Post: 'Uma imagem forte do resultado como âncora visual, legenda carregando o raciocínio completo do gancho ao CTA.',
+    Reel: [
+      'Abra com o resultado pronto nos primeiros 2 segundos, corte para o processo em 3 a 4 cenas rápidas, feche com o rosto da cliente satisfeita e o CTA em texto na tela.',
+      'Comece com uma pergunta ou afirmação polêmica em texto na tela, mostre 2-3 provas rápidas que a sustentam, termine com o resultado final e o CTA falado.',
+      'Grave em primeira pessoa explicando o "porquê" de uma decisão técnica enquanto trabalha, intercalando com cortes do processo, fechando com o resultado e o CTA em texto.',
+    ],
+    Story: [
+      'Use uma sequência de 3 stories: enquete ou pergunta no primeiro, bastidor real no segundo, link ou botão de agendar no terceiro.',
+      'Sequência de 3 stories: um "você sabia" ou fato curioso no primeiro, o processo em câmera rápida no segundo, contagem regressiva ou senso de urgência no terceiro com o link.',
+      'Sequência de 3 stories: pergunta direta pro público no primeiro (caixinha de resposta), resultado chocante no segundo, botão de agendar em destaque no terceiro.',
+    ],
+    Carrossel: [
+      'Capa com uma afirmação direta, 3 a 4 slides desenvolvendo o raciocínio com uma ideia por slide, último slide com o CTA isolado.',
+      'Capa em formato de pergunta, cada slide seguinte responde uma parte da pergunta com uma imagem ou frase curta, último slide fecha com o CTA e o contato.',
+      'Capa com um "antes" chamativo, slides do meio mostrando o processo passo a passo, penúltimo slide com o "depois", último slide só com o CTA.',
+    ],
+    Post: [
+      'Uma imagem forte do resultado como âncora visual, legenda carregando o raciocínio completo do gancho ao CTA.',
+      'Foto de bastidor (não do resultado final) como âncora, legenda contando a história por trás daquele atendimento até chegar no CTA.',
+      'Imagem de comparação lado a lado como âncora visual, legenda curta e direta reforçando o ponto principal, fechando com o CTA.',
+    ],
   },
   en: {
-    Reel: "Open with the finished result in the first 2 seconds, cut to the process in 3 to 4 quick shots, close on the client's happy face with the CTA in on-screen text.",
-    Story: 'Use a sequence of 3 stories: a poll or question in the first, real behind-the-scenes in the second, a booking link or button in the third.',
-    Carrossel: 'Cover slide with a direct statement, 3 to 4 slides building the argument with one idea per slide, last slide with the CTA alone.',
-    Post: 'A strong image of the result as the visual anchor, caption carrying the full argument from hook to CTA.',
+    Reel: [
+      "Open with the finished result in the first 2 seconds, cut to the process in 3 to 4 quick shots, close on the client's happy face with the CTA in on-screen text.",
+      'Start with a bold question or statement in on-screen text, show 2-3 quick proof points backing it up, end on the final result with a spoken CTA.',
+      'Film in first person explaining the "why" behind one technical choice while you work, cutting between process shots, closing on the result with the CTA in text.',
+    ],
+    Story: [
+      'Use a sequence of 3 stories: a poll or question in the first, real behind-the-scenes in the second, a booking link or button in the third.',
+      'Sequence of 3 stories: a "did you know" fact in the first, fast-motion process footage in the second, a countdown or urgency cue in the third with the link.',
+      'Sequence of 3 stories: a direct question to your audience in the first (reply sticker), a striking result reveal in the second, a prominent booking button in the third.',
+    ],
+    Carrossel: [
+      'Cover slide with a direct statement, 3 to 4 slides building the argument with one idea per slide, last slide with the CTA alone.',
+      'Cover slide phrased as a question, each following slide answers part of it with an image or short line, last slide closes with the CTA and contact info.',
+      'Cover slide with an eye-catching "before," middle slides walking through the process step by step, second-to-last slide with the "after," last slide with only the CTA.',
+    ],
+    Post: [
+      'A strong image of the result as the visual anchor, caption carrying the full argument from hook to CTA.',
+      'A behind-the-scenes photo (not the final result) as the anchor, caption telling the story behind that appointment leading up to the CTA.',
+      'A side-by-side comparison image as the visual anchor, short direct caption reinforcing the main point, closing with the CTA.',
+    ],
   },
   es: {
-    Reel: 'Abre con el resultado terminado en los primeros 2 segundos, corta al proceso en 3 a 4 escenas rápidas, cierra con el rostro satisfecho de la clienta y el CTA en texto en pantalla.',
-    Story: 'Usa una secuencia de 3 historias: encuesta o pregunta en la primera, detrás de cámaras real en la segunda, enlace o botón de agendar en la tercera.',
-    Carrossel: 'Portada con una afirmación directa, 3 a 4 slides desarrollando el razonamiento con una idea por slide, último slide con el CTA solo.',
-    Post: 'Una imagen fuerte del resultado como ancla visual, con la leyenda llevando todo el razonamiento del gancho al CTA.',
+    Reel: [
+      'Abre con el resultado terminado en los primeros 2 segundos, corta al proceso en 3 a 4 escenas rápidas, cierra con el rostro satisfecho de la clienta y el CTA en texto en pantalla.',
+      'Empieza con una pregunta o afirmación llamativa en texto en pantalla, muestra 2-3 pruebas rápidas que la respalden, termina con el resultado final y el CTA hablado.',
+      'Grábate en primera persona explicando el "por qué" de una decisión técnica mientras trabajas, intercalando con cortes del proceso, cerrando con el resultado y el CTA en texto.',
+    ],
+    Story: [
+      'Usa una secuencia de 3 historias: encuesta o pregunta en la primera, detrás de cámaras real en la segunda, enlace o botón de agendar en la tercera.',
+      'Secuencia de 3 historias: un dato curioso en la primera, el proceso en cámara rápida en la segunda, cuenta regresiva o urgencia en la tercera con el enlace.',
+      'Secuencia de 3 historias: pregunta directa al público en la primera (con caja de respuestas), resultado impactante en la segunda, botón de agendar destacado en la tercera.',
+    ],
+    Carrossel: [
+      'Portada con una afirmación directa, 3 a 4 slides desarrollando el razonamiento con una idea por slide, último slide con el CTA solo.',
+      'Portada en forma de pregunta, cada slide siguiente responde una parte con una imagen o frase corta, último slide cierra con el CTA y el contacto.',
+      'Portada con un "antes" llamativo, slides del medio mostrando el proceso paso a paso, penúltimo slide con el "después", último slide solo con el CTA.',
+    ],
+    Post: [
+      'Una imagen fuerte del resultado como ancla visual, con la leyenda llevando todo el razonamiento del gancho al CTA.',
+      'Una foto de detrás de cámaras (no el resultado final) como ancla, leyenda contando la historia detrás de esa cita hasta llegar al CTA.',
+      'Una imagen de comparación lado a lado como ancla visual, leyenda corta y directa reforzando el punto principal, cerrando con el CTA.',
+    ],
   },
 };
 
@@ -344,7 +392,8 @@ export async function generateContent(lang: Lang, objetivo: string, formato: str
 
   const angles = OBJETIVO_ANGLES[lang][objetivo] || OBJETIVO_ANGLES[lang]['Preencher agenda'];
   const angle = pickRandom(angles);
-  const roteiroBase = FORMATO_ROTEIRO[lang][formato] || FORMATO_ROTEIRO[lang].Post;
+  const roteiroOptions = FORMATO_ROTEIROS[lang][formato] || FORMATO_ROTEIROS[lang].Post;
+  const roteiroBase = pickRandom(roteiroOptions);
   const tom = INTENSIDADE_TOM[lang][intensidade] || INTENSIDADE_TOM[lang].Estratégico;
   const cta = intensidade === 'Agressivo' ? CTA[lang].agressivo : CTA[lang].default;
 
