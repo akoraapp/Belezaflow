@@ -3,7 +3,7 @@ import { T } from '../theme';
 import { PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 
-const RETRY_TIMEOUT_MS = 2 * 60 * 1000;
+const RETRY_TIMEOUT_MS = 45 * 1000;
 
 // Shown between "user finished checkout on Mercado Pago" and "our webhook
 // flipped the subscription to active" — useSubscriptionGate polls in the
