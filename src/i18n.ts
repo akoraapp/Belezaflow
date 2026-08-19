@@ -702,6 +702,9 @@ const pt = {
     awaitingSubtitle: 'Isso costuma levar só alguns segundos. Assim que o Mercado Pago confirmar, você entra automaticamente.',
     retryCta: 'Cancelar e tentar de novo',
     retryHint: 'Está demorando mais que o esperado?',
+    paymentMethodLabel: 'Forma de pagamento',
+    paymentMethodCardLabel: 'Cartão de crédito (recorrente)',
+    paymentMethodPixLabel: 'Pix (pagamento único)',
   },
 };
 
@@ -1202,6 +1205,9 @@ const en: typeof pt = {
     awaitingSubtitle: "This usually takes just a few seconds. You'll be let in automatically once Mercado Pago confirms it.",
     retryCta: 'Cancel and try again',
     retryHint: 'Taking longer than expected?',
+    paymentMethodLabel: 'Payment method',
+    paymentMethodCardLabel: 'Credit card (recurring)',
+    paymentMethodPixLabel: 'Pix (one-time payment)',
   },
 };
 
@@ -1702,6 +1708,9 @@ const es: typeof pt = {
     awaitingSubtitle: 'Esto suele tardar solo unos segundos. En cuanto Mercado Pago lo confirme, entrarás automáticamente.',
     retryCta: 'Cancelar e intentar de nuevo',
     retryHint: '¿Está tardando más de lo esperado?',
+    paymentMethodLabel: 'Forma de pago',
+    paymentMethodCardLabel: 'Tarjeta de crédito (recurrente)',
+    paymentMethodPixLabel: 'Pix (pago único)',
   },
 };
 

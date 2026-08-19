@@ -63,6 +63,11 @@ async function handlePreapproval(preapprovalId: string) {
   // 'pending' -> no-op, already pending_payment from create-subscription.
 }
 
+// Handles a "payment" event regardless of which Mercado Pago API created the
+// underlying charge — a recurring /preapproval installment and a one-time
+// checkout/preferences (Checkout Pro, e.g. annual-plan Pix) charge both
+// produce a payment resource with the same external_reference and status
+// fields once approved, so no separate branch is needed for either.
 async function handlePayment(paymentId: string) {
   const payment = await mpGet(`/v1/payments/${paymentId}`);
   if (!payment) return;

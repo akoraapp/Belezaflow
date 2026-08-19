@@ -7,6 +7,7 @@ import { format } from '../lib/helpers';
 import { FUNNEL_PRICING } from '../lib/funnelTheme';
 
 type PlanId = 'monthly' | 'annual';
+type PaymentMethod = 'card' | 'pix';
 
 export function EscolherPlanoScreen({
   initialPlan,
@@ -14,7 +15,7 @@ export function EscolherPlanoScreen({
   onSkip,
 }: {
   initialPlan: PlanId;
-  onContinue: (plan: PlanId) => Promise<void>;
+  onContinue: (plan: PlanId, paymentMethod?: PaymentMethod) => Promise<void>;
   // Absent entirely when this screen was reached via a direct-purchase ?plan=
   // link from the landing page — there is no skipping a purchase already in
   // progress. Only a future "still inside the free trial" entry point would
@@ -25,14 +26,20 @@ export function EscolherPlanoScreen({
   const l = t.landing;
   const pricing = FUNNEL_PRICING[lang];
   const [selected, setSelected] = useState<PlanId>(initialPlan);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Pix only exists for Brazil's annual plan — Mercado Pago's recurring
+  // /preapproval API is card-only, so a one-time Pix charge only makes sense
+  // for the plan that's already sold as a single upfront payment.
+  const showPixOption = lang === 'pt' && selected === 'annual';
 
   const handleContinue = async () => {
     setSubmitting(true);
     setError('');
     try {
-      await onContinue(selected);
+      await onContinue(selected, showPixOption ? paymentMethod : undefined);
       // On success the caller redirects the browser to Mercado Pago, so this
       // component is about to unmount — no need to clear `submitting`.
     } catch (err) {
@@ -95,6 +102,50 @@ export function EscolherPlanoScreen({
           );
         })}
       </div>
+
+      {showPixOption && (
+        <div style={{ marginBottom: 24 }} data-testid="choose-plan-payment-method">
+          <div style={{ fontFamily: 'Inter', fontSize: 12.5, fontWeight: 700, color: T.muted, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 10 }}>
+            {t.choosePlan.paymentMethodLabel}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {(
+              [
+                { id: 'card', label: t.choosePlan.paymentMethodCardLabel },
+                { id: 'pix', label: t.choosePlan.paymentMethodPixLabel },
+              ] as { id: PaymentMethod; label: string }[]
+            ).map((option) => {
+              const active = paymentMethod === option.id;
+              return (
+                <Card
+                  key={option.id}
+                  onClick={() => setPaymentMethod(option.id)}
+                  testId={`choose-plan-payment-${option.id}`}
+                  style={{ border: `2px solid ${active ? T.gold : T.line}`, cursor: 'pointer', padding: 14 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontFamily: 'Inter', fontSize: 13.5, fontWeight: 600, color: T.ink }}>{option.label}</span>
+                    <div
+                      style={{
+                        width: 22,
+                        height: 22,
+                        minWidth: 22,
+                        borderRadius: RADIUS.pill,
+                        background: active ? T.gold : T.surfaceAlt,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {active && <Check size={13} color={T.ink} strokeWidth={3} />}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div style={{ flex: 1 }} />
 

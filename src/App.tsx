@@ -210,8 +210,8 @@ function AppShell() {
     );
   }
 
-  const startCheckout = async (plan: 'monthly' | 'annual') => {
-    const { data, error } = await supabase.functions.invoke('create-subscription', { body: { plan } });
+  const startCheckout = async (plan: 'monthly' | 'annual', paymentMethod?: 'card' | 'pix') => {
+    const { data, error } = await supabase.functions.invoke('create-subscription', { body: { plan, paymentMethod } });
     if (error || !data?.init_point) throw error ?? new Error('create-subscription did not return an init_point');
     window.location.href = data.init_point;
   };

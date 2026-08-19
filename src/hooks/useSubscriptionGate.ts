@@ -10,14 +10,26 @@ export interface SubscriptionRow {
   plan: 'monthly' | 'annual' | null;
   status: SubscriptionStatus;
   trialEndsAt: string | null;
+  billingType: 'recurring' | 'one_time';
+  currentPeriodEnd: string | null;
 }
 
 function rowFrom(data: Record<string, unknown>): SubscriptionRow {
-  return {
+  const row: SubscriptionRow = {
     plan: (data.plan as SubscriptionRow['plan']) ?? null,
     status: data.status as SubscriptionStatus,
     trialEndsAt: (data.trial_ends_at as string) ?? null,
+    billingType: (data.billing_type as SubscriptionRow['billingType']) ?? 'recurring',
+    currentPeriodEnd: (data.current_period_end as string) ?? null,
   };
+  // A one-time charge (e.g. Pix on the annual plan) never renews itself, so
+  // once its paid-through date passes it must be treated as lapsed — same as
+  // a recurring subscription whose renewal failed — even though nothing ever
+  // wrote 'past_due' into the row itself.
+  if (row.billingType === 'one_time' && row.status === 'active' && row.currentPeriodEnd && new Date(row.currentPeriodEnd).getTime() < Date.now()) {
+    return { ...row, status: 'past_due' };
+  }
+  return row;
 }
 
 // Fetches (and, for accounts predating this feature, lazily creates) the
@@ -35,7 +47,7 @@ export function useSubscriptionGate(userId: string | null) {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase.from('subscriptions').select('plan, status, trial_ends_at').eq('user_id', userId).maybeSingle();
+    const { data, error } = await supabase.from('subscriptions').select('plan, status, trial_ends_at, billing_type, current_period_end').eq('user_id', userId).maybeSingle();
     if (error) {
       console.error(error);
       setLoading(false);
@@ -46,7 +58,7 @@ export function useSubscriptionGate(userId: string | null) {
       const { data: created, error: insertError } = await supabase
         .from('subscriptions')
         .insert({ user_id: userId, status: 'trialing', trial_ends_at: trialEndsAt })
-        .select('plan, status, trial_ends_at')
+        .select('plan, status, trial_ends_at, billing_type, current_period_end')
         .single();
       if (insertError) {
         console.error(insertError);

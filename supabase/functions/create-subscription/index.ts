@@ -1,9 +1,21 @@
-// Creates a recurring subscription for the calling user's chosen plan and
-// returns the checkout URL to redirect to. Which payment provider handles it
-// depends on the user's own profile.language (never anything the client
-// sends, so a tampered request can't switch providers or plans):
-//   - pt (Brazil)      -> Mercado Pago /preapproval, BRL, Pix/boleto/cards
-//   - en / es (intl)   -> Stripe Checkout, USD, cards
+// Creates a subscription for the calling user's chosen plan and returns the
+// checkout URL to redirect to. Which payment provider handles it depends on
+// the user's own profile.language (never anything the client sends, so a
+// tampered request can't switch providers or plans):
+//   - pt (Brazil)      -> Mercado Pago, BRL
+//   - en / es (intl)   -> Stripe Checkout, USD, cards (always recurring)
+//
+// For pt, the plan and the client-requested paymentMethod together decide
+// which Mercado Pago API is used:
+//   - monthly, or annual with paymentMethod !== 'pix' -> /preapproval
+//     (recurring, card-only — Mercado Pago's recurring-billing API doesn't
+//     support Pix at all).
+//   - annual with paymentMethod === 'pix' -> checkout/preferences (Checkout
+//     Pro), a one-time charge for the full annual amount. This only exists
+//     for the annual plan since it's already sold as a single upfront
+//     payment; billing_type is stamped 'one_time' so useSubscriptionGate
+//     knows this subscription won't renew itself once current_period_end
+//     passes.
 //
 // Required secrets (Project Settings > Edge Functions > Secrets, or
 // `supabase secrets set`): MP_ACCESS_TOKEN, STRIPE_SECRET_KEY. Optional:
@@ -46,6 +58,7 @@ const PRICING: Record<PricingLang, { currency: string; monthly: number; annual: 
 
 interface CreateSubscriptionBody {
   plan: Plan;
+  paymentMethod?: 'card' | 'pix';
 }
 
 async function createMercadoPagoCheckout(userId: string, email: string | undefined, plan: Plan, amount: number, currency: string, origin: string) {
@@ -78,7 +91,57 @@ async function createMercadoPagoCheckout(userId: string, email: string | undefin
 
   await supabaseAdmin
     .from('subscriptions')
-    .update({ plan, status: 'pending_payment', provider: 'mercadopago', mp_preapproval_id: mpData.id, updated_at: new Date().toISOString() })
+    .update({
+      plan,
+      status: 'pending_payment',
+      provider: 'mercadopago',
+      billing_type: 'recurring',
+      mp_preapproval_id: mpData.id,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  return mpData.init_point as string;
+}
+
+// Annual-only, pt-only: a single upfront Pix charge via Mercado Pago Checkout
+// Pro, since /preapproval (used above) is card-only and has no Pix support.
+async function createMercadoPagoOneTimeCheckout(userId: string, email: string | undefined, amount: number, currency: string, origin: string) {
+  if (!MP_ACCESS_TOKEN) throw new Error('MP_ACCESS_TOKEN is not configured');
+
+  const preferencePayload = {
+    items: [{ title: 'BelezaFlow - Plano Anual', quantity: 1, unit_price: amount, currency_id: currency }],
+    external_reference: userId,
+    payer: email ? { email } : undefined,
+    back_urls: {
+      success: `${origin}/app?checkout=success`,
+      failure: `${origin}/app?checkout=cancelled`,
+      pending: `${origin}/app?checkout=pending`,
+    },
+    auto_return: 'approved',
+  };
+
+  const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+    body: JSON.stringify(preferencePayload),
+  });
+  if (!mpResponse.ok) {
+    console.error('Mercado Pago preference error', mpResponse.status, await mpResponse.text());
+    throw new Error('Mercado Pago request failed');
+  }
+  const mpData = await mpResponse.json();
+
+  await supabaseAdmin
+    .from('subscriptions')
+    .update({
+      plan: 'annual',
+      status: 'pending_payment',
+      provider: 'mercadopago',
+      billing_type: 'one_time',
+      mp_preapproval_id: null,
+      updated_at: new Date().toISOString(),
+    })
     .eq('user_id', userId);
 
   return mpData.init_point as string;
@@ -113,6 +176,7 @@ async function createStripeCheckout(userId: string, email: string | undefined, p
       plan,
       status: 'pending_payment',
       provider: 'stripe',
+      billing_type: 'recurring',
       stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
       updated_at: new Date().toISOString(),
     })
@@ -156,6 +220,9 @@ Deno.serve(async (req) => {
   if (body.plan !== 'monthly' && body.plan !== 'annual') {
     return new Response(JSON.stringify({ error: "plan must be 'monthly' or 'annual'" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
+  if (body.paymentMethod !== undefined && body.paymentMethod !== 'card' && body.paymentMethod !== 'pix') {
+    return new Response(JSON.stringify({ error: "paymentMethod must be 'card' or 'pix'" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
 
   const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('language').eq('id', user.id).maybeSingle();
   if (profileError) {
@@ -175,9 +242,12 @@ Deno.serve(async (req) => {
   const amount = body.plan === 'monthly' ? pricing.monthly : pricing.annual;
   const origin = req.headers.get('origin') || Deno.env.get('APP_BASE_URL') || 'https://app.belezaflow.com';
 
+  const wantsPix = lang === 'pt' && body.plan === 'annual' && body.paymentMethod === 'pix';
+
   try {
-    const initPoint =
-      lang === 'pt'
+    const initPoint = wantsPix
+      ? await createMercadoPagoOneTimeCheckout(user.id, user.email, amount, pricing.currency, origin)
+      : lang === 'pt'
         ? await createMercadoPagoCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin)
         : await createStripeCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin);
     return new Response(JSON.stringify({ init_point: initPoint }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
