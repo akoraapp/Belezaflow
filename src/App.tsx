@@ -216,40 +216,63 @@ function AppShell() {
     window.location.href = data.init_point;
   };
 
-  // A "plan" deep link from the landing page pricing section (see src/pages/Landing.tsx,
-  // /app?plan=monthly|annual) means the visitor already chose a plan before logging in —
-  // real payment is required here, never a local dismiss: unlock only once the
-  // subscription is genuinely active, show a polling wait screen while Mercado
-  // Pago's webhook is still catching up, and never offer a skip.
   const planParam = searchParams.get('plan');
   const requestedPlan = planParam === 'monthly' || planParam === 'annual' ? planParam : null;
-  if (requestedPlan && subscription.status !== 'active') {
-    if (subscription.status === 'pending_payment') {
-      return (
-        <AuthShell isMobile={isMobile} t={t}>
-          <AguardandoPagamentoScreen onRetry={resetPendingPayment} />
-        </AuthShell>
-      );
-    }
+
+  // The gate is driven entirely by subscription.status from the database —
+  // never by the URL. Previously a pending_payment/past_due subscription only
+  // got blocked while ?plan= was still in the URL, so hitting the browser's
+  // back button after being sent to Mercado Pago (landing back on a plain
+  // /app with no ?plan=) fell through to the "still inside trial" branch and
+  // granted full dashboard access without a completed payment. Checking the
+  // real status first, before anything URL-derived, closes that hole.
+  if (subscription.status === 'pending_payment') {
     return (
       <AuthShell isMobile={isMobile} t={t}>
-        <EscolherPlanoScreen initialPlan={requestedPlan} onContinue={startCheckout} onSkip={null} />
+        <AguardandoPagamentoScreen onRetry={resetPendingPayment} />
       </AuthShell>
     );
   }
 
-  // Organic signup (no ?plan= link): free access during the trial, same as
-  // today. Once trial_ends_at passes, send to plan selection too — but this
-  // path can still be dismissed locally, since it's a soft nudge rather than
-  // a purchase already in progress.
-  const trialExpired = subscription.status === 'trialing' && !!subscription.trialEndsAt && new Date(subscription.trialEndsAt).getTime() < Date.now();
-  if (!requestedPlan && trialExpired && !organicPlanScreenDismissed) {
+  // past_due (payment failed after having been active) and canceled both mean
+  // there is no valid subscription right now — same as an expired trial, but
+  // never dismissible, since there's no free access left to fall back to.
+  if (subscription.status === 'past_due' || subscription.status === 'canceled') {
     return (
       <AuthShell isMobile={isMobile} t={t}>
-        <EscolherPlanoScreen initialPlan="monthly" onContinue={startCheckout} onSkip={() => setOrganicPlanScreenDismissed(true)} />
+        <EscolherPlanoScreen initialPlan={requestedPlan ?? 'monthly'} onContinue={startCheckout} onSkip={null} />
       </AuthShell>
     );
   }
+
+  if (subscription.status === 'trialing') {
+    // A "plan" deep link from the landing page pricing section (see
+    // src/pages/Landing.tsx, /app?plan=monthly|annual) means the visitor
+    // already chose a plan before logging in — real payment is required
+    // here, never a local dismiss.
+    if (requestedPlan) {
+      return (
+        <AuthShell isMobile={isMobile} t={t}>
+          <EscolherPlanoScreen initialPlan={requestedPlan} onContinue={startCheckout} onSkip={null} />
+        </AuthShell>
+      );
+    }
+    // Organic signup (no ?plan= link): free access during the trial. Once
+    // trial_ends_at passes, send to plan selection too — but this path can
+    // still be dismissed locally, since it's a soft nudge rather than a
+    // purchase already in progress.
+    const trialExpired = !!subscription.trialEndsAt && new Date(subscription.trialEndsAt).getTime() < Date.now();
+    if (trialExpired && !organicPlanScreenDismissed) {
+      return (
+        <AuthShell isMobile={isMobile} t={t}>
+          <EscolherPlanoScreen initialPlan="monthly" onContinue={startCheckout} onSkip={() => setOrganicPlanScreenDismissed(true)} />
+        </AuthShell>
+      );
+    }
+  }
+
+  // subscription.status === 'active' (or still-valid 'trialing') reaches here
+  // and gets the dashboard below.
 
   const lowStockCount = products.filter((p) => productStatus(p) !== 'ok').length;
 
