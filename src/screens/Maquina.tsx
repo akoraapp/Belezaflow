@@ -13,6 +13,20 @@ const OBJETIVOS = ['Atrair clientes', 'Preencher agenda', 'Reativar clientes', '
 const FORMATOS = ['Reel', 'Story', 'Carrossel', 'Post'];
 const INTENSIDADES = ['Rápido', 'Estratégico', 'Agressivo'];
 
+// These values are the lookup keys src/lib/contentGenerator.ts uses internally,
+// so they stay fixed in Portuguese regardless of the app's language — only the
+// label shown in the select is translated, via these maps into i18n's
+// maquina.*Options dictionaries (see SelectGroup's labelFor below).
+const OBJETIVO_I18N_KEY: Record<string, string> = {
+  'Atrair clientes': 'atrairClientes',
+  'Preencher agenda': 'preencherAgenda',
+  'Reativar clientes': 'reativarClientes',
+  Autoridade: 'autoridade',
+  'Quebra de objeção': 'quebraObjecao',
+};
+const FORMATO_I18N_KEY: Record<string, string> = { Reel: 'reel', Story: 'story', Carrossel: 'carrossel', Post: 'post' };
+const INTENSIDADE_I18N_KEY: Record<string, string> = { Rápido: 'rapido', Estratégico: 'estrategico', Agressivo: 'agressivo' };
+
 interface GeneratedItem {
   id: string;
   formato: string;
@@ -20,11 +34,25 @@ interface GeneratedItem {
   content: ContentResult;
 }
 
-function SelectGroup({ label, options, value, onChange, testId }: { label: string; options: string[]; value: string; onChange: (v: string) => void; testId?: string }) {
+function SelectGroup({
+  label,
+  options,
+  value,
+  onChange,
+  testId,
+  labelFor,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+  testId?: string;
+  labelFor?: (v: string) => string;
+}) {
   return (
     <div style={{ marginBottom: 18 }}>
       <SectionTitle>{label}</SectionTitle>
-      <SelectInput options={options} value={value} onChange={onChange} testId={testId} />
+      <SelectInput options={options} value={value} onChange={onChange} testId={testId} labelFor={labelFor} />
     </div>
   );
 }
@@ -159,6 +187,13 @@ export function MaquinaScreen() {
   const freeSlotsToday = profile ? getAvailability(profile, appointments).availableSlots.length : 0;
   const lostClientsCount = clients.filter((c) => c.status === 'Perdido').length;
 
+  const objetivoOptions = t.maquina.objetivoOptions as Record<string, string>;
+  const formatoOptions = t.maquina.formatoOptions as Record<string, string>;
+  const intensidadeOptions = t.maquina.intensidadeOptions as Record<string, string>;
+  const objetivoLabelFor = (v: string) => objetivoOptions[OBJETIVO_I18N_KEY[v]] ?? v;
+  const formatoLabelFor = (v: string) => formatoOptions[FORMATO_I18N_KEY[v]] ?? v;
+  const intensidadeLabelFor = (v: string) => intensidadeOptions[INTENSIDADE_I18N_KEY[v]] ?? v;
+
   const generate = async () => {
     setLoading(true);
     const content = await generateContent(lang, objetivo, formato, intensidade);
@@ -204,9 +239,16 @@ export function MaquinaScreen() {
         </PrimaryButton>
       </div>
 
-      <SelectGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" />
-      <SelectGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" />
-      <SelectGroup label={t.maquina.intensidadeLabel} options={INTENSIDADES} value={intensidade} onChange={setIntensidade} testId="maquina-intensidade" />
+      <SelectGroup label={t.maquina.objetivoLabel} options={OBJETIVOS} value={objetivo} onChange={setObjetivo} testId="maquina-objetivo" labelFor={objetivoLabelFor} />
+      <SelectGroup label={t.maquina.formatoLabel} options={FORMATOS} value={formato} onChange={setFormato} testId="maquina-formato" labelFor={formatoLabelFor} />
+      <SelectGroup
+        label={t.maquina.intensidadeLabel}
+        options={INTENSIDADES}
+        value={intensidade}
+        onChange={setIntensidade}
+        testId="maquina-intensidade"
+        labelFor={intensidadeLabelFor}
+      />
       <div style={{ marginBottom: 26 }}>
         <PrimaryButton full onClick={generate} disabled={loading} icon={loading ? Loader2 : undefined} testId="maquina-generate">
           {loading ? t.maquina.generatingCta : t.maquina.generateCta}

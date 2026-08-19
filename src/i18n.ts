@@ -474,6 +474,26 @@ const pt = {
     copiedCta: 'Copiado!',
     viewFullCta: 'Ver completo',
     viewLessCta: 'Ver menos',
+    // Display-only labels — the select's underlying value stays the Portuguese
+    // string src/lib/contentGenerator.ts uses as its lookup key, in every language.
+    objetivoOptions: {
+      atrairClientes: 'Atrair clientes',
+      preencherAgenda: 'Preencher agenda',
+      reativarClientes: 'Reativar clientes',
+      autoridade: 'Autoridade',
+      quebraObjecao: 'Quebra de objeção',
+    },
+    formatoOptions: {
+      reel: 'Reel',
+      story: 'Story',
+      carrossel: 'Carrossel',
+      post: 'Post',
+    },
+    intensidadeOptions: {
+      rapido: 'Rápido',
+      estrategico: 'Estratégico',
+      agressivo: 'Agressivo',
+    },
   },
   diagnostico: {
     title: 'Diagnóstico Rápido',
@@ -949,6 +969,24 @@ const en: typeof pt = {
     copiedCta: 'Copied!',
     viewFullCta: 'View full',
     viewLessCta: 'View less',
+    objetivoOptions: {
+      atrairClientes: 'Attract clients',
+      preencherAgenda: 'Fill your schedule',
+      reativarClientes: 'Reactivate clients',
+      autoridade: 'Authority',
+      quebraObjecao: 'Objection handling',
+    },
+    formatoOptions: {
+      reel: 'Reel',
+      story: 'Story',
+      carrossel: 'Carousel',
+      post: 'Post',
+    },
+    intensidadeOptions: {
+      rapido: 'Quick',
+      estrategico: 'Strategic',
+      agressivo: 'Aggressive',
+    },
   },
   diagnostico: {
     title: 'Quick Diagnostic',
@@ -1424,6 +1462,24 @@ const es: typeof pt = {
     copiedCta: '¡Copiado!',
     viewFullCta: 'Ver completo',
     viewLessCta: 'Ver menos',
+    objetivoOptions: {
+      atrairClientes: 'Atraer clientes',
+      preencherAgenda: 'Llenar la agenda',
+      reativarClientes: 'Reactivar clientes',
+      autoridade: 'Autoridad',
+      quebraObjecao: 'Manejo de objeciones',
+    },
+    formatoOptions: {
+      reel: 'Reel',
+      story: 'Story',
+      carrossel: 'Carrusel',
+      post: 'Publicación',
+    },
+    intensidadeOptions: {
+      rapido: 'Rápido',
+      estrategico: 'Estratégico',
+      agressivo: 'Agresivo',
+    },
   },
   diagnostico: {
     title: 'Diagnóstico Rápido',
