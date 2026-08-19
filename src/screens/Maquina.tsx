@@ -196,7 +196,7 @@ export function MaquinaScreen() {
 
   const generate = async () => {
     setLoading(true);
-    const content = await generateContent(lang, objetivo, formato, intensidade);
+    const content = await generateContent(lang, objetivo, formato, intensidade, profile?.profession);
     setItems((prev) => [{ id: `c${Date.now()}`, formato, basedOn: null, content }, ...prev]);
     setLoading(false);
   };
@@ -219,7 +219,7 @@ export function MaquinaScreen() {
     setFormato(autoFormato);
     setIntensidade(autoIntensidade);
     setLoading(true);
-    const content = await generateContent(lang, autoObjetivo, autoFormato, autoIntensidade);
+    const content = await generateContent(lang, autoObjetivo, autoFormato, autoIntensidade, profile?.profession);
     setItems((prev) => [{ id: `c${Date.now()}`, formato: autoFormato, basedOn: signal, content }, ...prev]);
     setLoading(false);
   };

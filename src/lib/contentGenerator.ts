@@ -387,7 +387,18 @@ function pickRandom<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-export async function generateContent(lang: Lang, objetivo: string, formato: string, intensidade: string): Promise<ContentResult> {
+// One extra sentence appended to "estrategia" when the person's profession/
+// niche is known (from profiles.profession, free text — works for any niche
+// they typed, no fixed list needed). Kept as a single appended clause rather
+// than rewritten inline sentences, so all 45 hand-written angle variations
+// stay untouched and easy to maintain.
+const NICHE_CLAUSE: Record<Lang, (profissao: string) => string> = {
+  pt: (profissao) => ` Lembre sempre que isso fala direto com quem busca ${profissao}.`,
+  en: (profissao) => ` Keep in mind this speaks directly to people looking for ${profissao}.`,
+  es: (profissao) => ` Recuerda que esto le habla directamente a quien busca ${profissao}.`,
+};
+
+export async function generateContent(lang: Lang, objetivo: string, formato: string, intensidade: string, profissao?: string): Promise<ContentResult> {
   await new Promise((resolve) => setTimeout(resolve, 700));
 
   const angles = OBJETIVO_ANGLES[lang][objetivo] || OBJETIVO_ANGLES[lang]['Preencher agenda'];
@@ -396,10 +407,11 @@ export async function generateContent(lang: Lang, objetivo: string, formato: str
   const roteiroBase = pickRandom(roteiroOptions);
   const tom = INTENSIDADE_TOM[lang][intensidade] || INTENSIDADE_TOM[lang].Estratégico;
   const cta = intensidade === 'Agressivo' ? CTA[lang].agressivo : CTA[lang].default;
+  const nicheClause = profissao?.trim() ? NICHE_CLAUSE[lang](profissao.trim()) : '';
 
   return {
     diagnostico: angle.diagnostico,
-    estrategia: `${angle.estrategia} ${tom}`,
+    estrategia: `${angle.estrategia} ${tom}${nicheClause}`,
     roteiro: `${formato}: ${roteiroBase}`,
     legenda: angle.legenda,
     cta,
