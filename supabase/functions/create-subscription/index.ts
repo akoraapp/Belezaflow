@@ -162,7 +162,15 @@ Deno.serve(async (req) => {
     console.error(profileError);
     return new Response(JSON.stringify({ error: profileError.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
-  const lang: PricingLang = profile?.language === 'en' || profile?.language === 'es' ? profile.language : 'pt';
+  // profiles.language (set once onboarding completes) is the source of truth
+  // once it exists. If checkout happens before that — or onboarding is ever
+  // skipped for a direct-purchase flow — fall back to the language recorded
+  // in auth metadata at signup time (see Login.tsx's signUp), so a visitor who
+  // picked English/Spanish on the landing page never silently gets routed to
+  // Mercado Pago/BRL just because their profile row doesn't exist yet.
+  const metadataLang = (user.user_metadata as Record<string, unknown> | undefined)?.language;
+  const fallbackLang: PricingLang = metadataLang === 'en' || metadataLang === 'es' ? metadataLang : 'pt';
+  const lang: PricingLang = profile?.language === 'en' || profile?.language === 'es' || profile?.language === 'pt' ? profile.language : fallbackLang;
   const pricing = PRICING[lang];
   const amount = body.plan === 'monthly' ? pricing.monthly : pricing.annual;
   const origin = req.headers.get('origin') || Deno.env.get('APP_BASE_URL') || 'https://app.belezaflow.com';

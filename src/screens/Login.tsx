@@ -8,7 +8,7 @@ import belezaflowLogo from '../assets/belezaflow-logo.webp';
 const TRIAL_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function Login({ isMobile = true }: { isMobile?: boolean }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState<'signin' | 'signup' | 'reset' | null>(null);
@@ -32,7 +32,12 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
     setError('');
     setInfo('');
     setLoading('signup');
-    const { data, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
+    // Records the language the visitor was using on the landing/quiz right at
+    // signup, in auth.users.raw_user_meta_data — profiles.language (set later,
+    // when onboarding completes) is still the source of truth once it exists,
+    // but create-subscription falls back to this metadata for the checkout
+    // language when a profile row isn't there yet (see create-subscription).
+    const { data, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password, options: { data: { language: lang } } });
     if (signUpError) {
       setLoading(null);
       setError(t.login.authErrorGeneric);

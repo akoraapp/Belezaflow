@@ -279,7 +279,13 @@ function AppShell() {
   const screenContent = (
     <>
       {moreScreen === 'maquina' && <MaquinaScreen />}
-      {moreScreen === 'ia' && <DiagnosticoScreen onOpenConteudo={() => openMore('maquina')} onOpenClientes={() => selectTab('clientes')} />}
+      {moreScreen === 'ia' && (
+        <DiagnosticoScreen
+          onOpenConteudo={() => openMore('maquina')}
+          onOpenClientes={(clientId) => openClientesWithFilter('Todos', clientId ?? null)}
+          onOpenFinanceiro={() => selectTab('financeiro')}
+        />
+      )}
       {moreScreen === 'estoque' && <EstoqueScreen />}
       {moreScreen === 'notificacoes' && (
         <NotificacoesScreen alerts={alerts} timestamps={alertTimestamps} permission={notifPermission} onRequestPermission={requestNotifPermission} />

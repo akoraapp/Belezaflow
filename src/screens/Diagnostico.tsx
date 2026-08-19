@@ -1,6 +1,6 @@
-import { ArrowRight, Cake, Clock, Target, Users, type LucideIcon } from 'lucide-react';
-import { T, CURRENCIES, RADIUS } from '../theme';
-import { getAvailability, fmtMoney, todayIsBirthday } from '../lib/helpers';
+import { ArrowRight, Cake, Clock, Target, TrendingUp, Users, type LucideIcon } from 'lucide-react';
+import { T, CURRENCIES, RADIUS, ALL_SLOTS } from '../theme';
+import { getAvailability, getAvailableSlotsForDate, getBookableDays, fmtMoney, format, todayIsBirthday } from '../lib/helpers';
 import { productStatus } from '../hooks/useInventory';
 import { Card, EmptyHint, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -9,9 +9,17 @@ import { useClients } from '../hooks/useClients';
 import { useAppointments } from '../hooks/useAppointments';
 import { useInventory } from '../hooks/useInventory';
 
+// Looking ahead this many working days decides whether the agenda counts as
+// "full" for the raise-prices insight below — long enough to smooth out a
+// single quiet day, short enough to still feel actionable.
+const UPCOMING_DAYS_WINDOW = 7;
+const AGENDA_FULL_FREE_RATIO = 0.2;
+const GOAL_NEAR_OR_ABOVE_RATIO = 0.9;
+
 interface DiagnosticoScreenProps {
   onOpenConteudo: () => void;
-  onOpenClientes: () => void;
+  onOpenClientes: (clientId?: string) => void;
+  onOpenFinanceiro: () => void;
 }
 
 interface Insight {
@@ -30,7 +38,7 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
   );
 }
 
-export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes }: DiagnosticoScreenProps) {
+export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes, onOpenFinanceiro }: DiagnosticoScreenProps) {
   const { t } = useLang();
   const { profile } = useProfile();
   const { clients } = useClients();
@@ -49,14 +57,42 @@ export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes }: Diagnostic
 
   const insights: Insight[] = [];
   if (isWorkingToday && availableSlots.length > 0) {
-    insights.push({ icon: Clock, title: `${availableSlots.length} ${t.agenda.slotsCountSuffix}`, cta: t.diagnostico.ctaCriarConteudo, onClick: onOpenConteudo });
+    const title = availableSlots.length === 1 ? t.diagnostico.freeSlotInsightOne : format(t.diagnostico.freeSlotInsightOther, { n: availableSlots.length });
+    insights.push({ icon: Clock, title, cta: t.diagnostico.ctaCriarConteudo, onClick: onOpenConteudo });
   }
   if (leads > 0) {
-    insights.push({ icon: Users, title: `${leads}`, cta: t.diagnostico.ctaVerClientes, onClick: onOpenClientes });
+    const title = leads === 1 ? t.diagnostico.leadsInsightOne : format(t.diagnostico.leadsInsightOther, { n: leads });
+    insights.push({ icon: Users, title, cta: t.diagnostico.ctaVerClientes, onClick: () => onOpenClientes() });
   }
-  birthdayClients.forEach((c) => insights.push({ icon: Cake, title: c.name, cta: t.diagnostico.ctaMensagem, onClick: onOpenClientes }));
+  birthdayClients.forEach((c) =>
+    insights.push({
+      icon: Cake,
+      title: format(t.diagnostico.birthdayInsightTemplate, { name: c.name }),
+      cta: t.diagnostico.ctaMensagem,
+      onClick: () => onOpenClientes(c.id),
+    }),
+  );
   if ((profile.goal || 0) > 0 && gap > 0) {
-    insights.push({ icon: Target, title: `${CURRENCIES[currency].symbol}${fmtMoney(gap, currency)}`, cta: t.diagnostico.ctaPlano, onClick: onOpenConteudo });
+    insights.push({
+      icon: Target,
+      title: format(t.diagnostico.goalGapInsightTemplate, { amount: `${CURRENCIES[currency].symbol}${fmtMoney(gap, currency)}` }),
+      cta: t.diagnostico.ctaPlano,
+      onClick: onOpenFinanceiro,
+    });
+  }
+
+  // The flip side of the goal-gap insight above: agenda is nearly full for the
+  // upcoming week AND the goal is basically met, so the bottleneck isn't more
+  // clients, it's capacity/pricing — nudge toward raising prices or opening
+  // more slots instead of just "keep filling the calendar."
+  const upcomingDays = getBookableDays(profile, UPCOMING_DAYS_WINDOW);
+  const daySlotCapacity = profile.availableSlots?.length ? profile.availableSlots.length : ALL_SLOTS.length;
+  const upcomingCapacity = upcomingDays.length * daySlotCapacity;
+  const upcomingFreeSlots = upcomingDays.reduce((sum, d) => sum + getAvailableSlotsForDate(profile, appointments, d.dateStr).length, 0);
+  const agendaIsFull = upcomingCapacity > 0 && upcomingFreeSlots / upcomingCapacity <= AGENDA_FULL_FREE_RATIO;
+  const goalNearOrAbove = (profile.goal || 0) > 0 && revenue / profile.goal >= GOAL_NEAR_OR_ABOVE_RATIO;
+  if (agendaIsFull && goalNearOrAbove) {
+    insights.push({ icon: TrendingUp, title: t.diagnostico.raisePricesInsightTitle, cta: t.diagnostico.ctaPlano, onClick: onOpenFinanceiro });
   }
 
   return (
