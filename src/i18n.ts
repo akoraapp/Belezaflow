@@ -1360,7 +1360,7 @@ const es: typeof pt = {
     mapsLinkLabel: 'Enlace de Google Maps',
     mapsPlaceholder: 'https://maps.app.goo.gl/...',
     mapsHint: 'Opcional. Sin esto, "Cómo llegar" ya abre la dirección de arriba en Google Maps.',
-    slotsTitle: 'Agenda Auto-Lote',
+    slotsTitle: 'Agenda en Lote',
     slotsSubtitle: 'Marca de una vez todos los días y horarios en que atiendes. Tu clienta solo ve lo que está abierto aquí.',
     workingDaysLabel: 'Días de atención',
     openSlotsLabel: 'Horarios abiertos para reservar',

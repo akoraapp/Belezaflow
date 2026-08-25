@@ -25,7 +25,10 @@ export function getAvailability(profile: Profile | null, appointments: Appointme
   const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   const isWorkingToday = workingDays.includes(weekdayLabelForDate(dateStr));
   const chosenSlots = profile?.availableSlots?.length ? profile.availableSlots : ALL_SLOTS;
-  const availableSlots = isWorkingToday ? chosenSlots.filter((t) => !today.some((a) => a.time === t)) : [];
+  // A cancelled appointment no longer occupies its slot — mirrors the DB's
+  // appointments_unique_active_slot partial index, which excludes 'Cancelado'
+  // so the same time can be rebooked.
+  const availableSlots = isWorkingToday ? chosenSlots.filter((t) => !today.some((a) => a.time === t && a.status !== 'Cancelado')) : [];
   return { today, isWorkingToday, workingDays, chosenSlots, availableSlots };
 }
 
@@ -36,7 +39,7 @@ export function getAvailableSlotsForDate(profile: Profile | null, appointments: 
   const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   if (!workingDays.includes(weekdayLabelForDate(dateStr))) return [];
   const chosenSlots = profile?.availableSlots?.length ? profile.availableSlots : ALL_SLOTS;
-  const bookedTimes = new Set((appointments || []).filter((a) => a.day === dateStr).map((a) => a.time));
+  const bookedTimes = new Set((appointments || []).filter((a) => a.day === dateStr && a.status !== 'Cancelado').map((a) => a.time));
   return chosenSlots.filter((t) => !bookedTimes.has(t));
 }
 
