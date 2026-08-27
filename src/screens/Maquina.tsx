@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Check, ChevronDown, Copy, Inbox, Loader2 } from 'lucide-react';
-import { T, RADIUS } from '../theme';
+import { T, RADIUS, CURRENCIES } from '../theme';
 import { Card, PrimaryButton, SectionTitle, SelectInput } from '../components/primitives';
 import { generateContent, type ContentResult } from '../lib/contentGenerator';
-import { getAvailability } from '../lib/helpers';
+import { getAvailability, fmtMoney, format } from '../lib/helpers';
 import { useLang } from '../lib/LangContext';
 import { useProfile } from '../hooks/useProfile';
 import { useAppointments } from '../hooks/useAppointments';
@@ -186,6 +186,8 @@ export function MaquinaScreen() {
   const [items, setItems] = useState<GeneratedItem[]>([]);
   const freeSlotsToday = profile ? getAvailability(profile, appointments).availableSlots.length : 0;
   const lostClientsCount = clients.filter((c) => c.status === 'Perdido').length;
+  const revenue = appointments.filter((a) => a.status === 'Compareceu').reduce((s, a) => s + a.price, 0);
+  const goalGap = profile ? Math.max(0, (profile.goal || 0) - revenue) : 0;
 
   const objetivoOptions = t.maquina.objetivoOptions as Record<string, string>;
   const formatoOptions = t.maquina.formatoOptions as Record<string, string>;
@@ -201,17 +203,29 @@ export function MaquinaScreen() {
     setLoading(false);
   };
 
+  // Maps the business's actual signals to a clear strategic objetivo instead
+  // of defaulting to "attract clients" whenever nothing else applies. Priority
+  // order reflects which move is the highest-leverage one right now:
+  //   1. Clients who already trusted this business once are the cheapest win
+  //      — reactivating them beats acquiring someone new from scratch.
+  //   2. Revenue behind the monthly goal means the real objective is
+  //      sales/conversion — bring in the clients needed to close that gap.
+  //   3. Only once the goal itself isn't at risk does "empty slots today" become
+  //      the priority (a healthy business optimizing its calendar).
+  //   4. Goal met and agenda full: growth mode — build authority/premium
+  //      positioning instead of chasing more volume.
   const generateAuto = async () => {
-    let autoObjetivo = 'Atrair clientes';
-    let signal = '';
-    if (freeSlotsToday > 0) {
-      autoObjetivo = 'Preencher agenda';
-      signal = `${freeSlotsToday} ${t.agenda.slotsCountSuffix}`;
-    } else if (lostClientsCount > 0) {
+    let autoObjetivo = 'Autoridade';
+    let signal = t.maquina.autoIntro;
+    if (lostClientsCount > 0) {
       autoObjetivo = 'Reativar clientes';
       signal = `${lostClientsCount} ${t.diagnostico.metricLostClients.toLowerCase()}`;
-    } else {
-      signal = t.maquina.autoIntro;
+    } else if (goalGap > 0) {
+      autoObjetivo = 'Atrair clientes';
+      signal = format(t.diagnostico.goalGapInsightTemplate, { amount: `${CURRENCIES[profile?.currency || 'BRL'].symbol}${fmtMoney(goalGap, profile?.currency || 'BRL')}` });
+    } else if (freeSlotsToday > 0) {
+      autoObjetivo = 'Preencher agenda';
+      signal = `${freeSlotsToday} ${t.agenda.slotsCountSuffix}`;
     }
     const autoFormato = 'Reel';
     const autoIntensidade = 'Estratégico';

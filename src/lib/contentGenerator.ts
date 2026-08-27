@@ -35,6 +35,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Mostre o rosto e a reação real da cliente no momento em que ela vê o resultado — isso vale mais do que qualquer legenda bem escrita.',
         legenda: 'Esse foi o momento em que ela viu o espelho pela primeira vez. Reações assim são o motivo de eu fazer o que faço.',
       },
+      {
+        diagnostico: 'Conteúdo genérico de beleza compete com o feed inteiro; conteúdo que fala com uma pessoa específica da sua região não compete com ninguém.',
+        estrategia: 'Nomeie o bairro, a ocasião ou o tipo de pele/cabelo exato que você atende melhor. Quanto mais específico o recorte, mais a pessoa certa se sente "isso é pra mim".',
+        legenda: 'Não é pra todo mundo. É pra quem mora aqui perto e já cansou de sair insatisfeita de salão genérico. Se é você, continua lendo.',
+      },
+      {
+        diagnostico: 'Ninguém confia mais rápido em você do que em alguém que já é cliente — mas a maioria das profissionais nunca pede pra essa confiança circular.',
+        estrategia: 'Peça abertamente pra clientes satisfeitas marcarem uma amiga nos comentários, e ofereça um motivo real pra fazer isso agora, não só um "compartilhe aí".',
+        legenda: 'Se essa foto te lembrou de alguém que precisa se cuidar mais, marca ela aqui embaixo. Ela vai agradecer (e você também).',
+      },
     ],
     'Preencher agenda': [
       {
@@ -51,6 +61,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: 'Agenda com buraco no meio da semana é dinheiro parado, mas gritar "vagas disponíveis" sem contexto não convence ninguém.',
         estrategia: 'Conecte a vaga livre a um benefício concreto pra quem agendar rápido: menos espera, horário melhor, atenção mais tranquila.',
         legenda: 'Quinta livre por aqui — sem correria, sem fila, só eu e você com tempo de sobra pra fazer bonito.',
+      },
+      {
+        diagnostico: 'Um cancelamento de última hora normalmente é tratado como perda — mas pra quem está de olho, é a vaga mais rápida de conseguir da semana.',
+        estrategia: 'Anuncie a vaga que abriu por cancelamento como uma oportunidade exclusiva e com prazo curtíssimo, não como um post de rotina.',
+        legenda: 'Acabou de abrir uma vaga de última hora por cancelamento. Quem responder primeiro leva — sem fila de espera dessa vez.',
+      },
+      {
+        diagnostico: 'Muita gente não agenda por falta de vontade, agenda por falta de decisão — e decisão trava quando não tem uma data óbvia pra bater o olho.',
+        estrategia: 'Sugira o próprio ritmo ideal de manutenção da cliente (ex: a cada X semanas) e conecte a vaga de hoje a esse ciclo, não a uma promoção qualquer.',
+        legenda: 'Se sua última vez foi há um tempinho, hoje é um ótimo dia pra voltar ao seu ritmo. Ainda tenho horário livre.',
       },
     ],
     'Reativar clientes': [
@@ -69,6 +89,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Reduza o atrito de voltar: ofereça remarcar direto pelo mesmo canal de sempre, sem burocracia nem sensação de "recomeçar do zero".',
         legenda: 'Sem cerimônia: se quiser voltar, me manda uma mensagem que eu já encaixo você. Nada mudou por aqui, só o tempo passou.',
       },
+      {
+        diagnostico: 'Boa parte de quem sumiu não decidiu parar — só perdeu a noção de quanto tempo passou desde o último cuidado.',
+        estrategia: 'Calcule (mesmo que por estimativa) há quanto tempo a maioria das suas clientes inativas não vem, e use esse número como gatilho direto, não como culpa.',
+        legenda: 'Faz uns bons meses que várias de vocês não passam por aqui. Sem cobrança, só um lembrete: seu horário de sempre ainda existe.',
+      },
+      {
+        diagnostico: 'Desconto pra reativar cliente sumida ensina ela a esperar desconto pra sempre — o que traz de volta é atenção genuína, não preço baixo.',
+        estrategia: 'Ofereça algo de valor que não seja dinheiro: prioridade de horário, um mimo no atendimento, uma conversa rápida sobre o que mudou desde a última vez.',
+        legenda: 'Não vou te oferecer desconto pra voltar. Vou te oferecer o de sempre: atenção de verdade, no seu tempo. Bora marcar?',
+      },
     ],
     Autoridade: [
       {
@@ -86,6 +116,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Ensine algo real e específico sobre o seu ofício — um cuidado, um erro comum que você evita, um motivo técnico por trás de uma escolha.',
         legenda: 'Poucas pessoas sabem por que eu faço essa etapa antes de qualquer outra. Hoje eu conto.',
       },
+      {
+        diagnostico: 'Autoridade genérica ("sou apaixonada pelo que faço") não convence ninguém — número específico e resultado real convencem.',
+        estrategia: 'Conte um caso real (sem expor a cliente) com um dado concreto: quanto tempo levou, quantas sessões, o que mudou de fato — números geram confiança que adjetivos não geram.',
+        legenda: '3 sessões, 6 semanas, um resultado que a própria cliente não esperava. Autoridade não é discurso, é histórico.',
+      },
+      {
+        diagnostico: 'Cliente não sabe diferenciar técnica boa de técnica ruim — mas sabe reconhecer quando alguém investe em aprender de verdade.',
+        estrategia: 'Mostre bastidores de formação, curso ou estudo contínuo seu. Isso comunica seriedade profissional sem precisar dizer "eu sou boa no que faço".',
+        legenda: 'Enquanto você dormia, eu tava estudando essa técnica de novo. Não é modéstia, é o motivo do resultado ficar cada vez melhor.',
+      },
     ],
     'Quebra de objeção': [
       {
@@ -102,6 +142,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: 'A dúvida mais silenciosa nem sempre é sobre o resultado — muitas vezes é sobre se vai doer, quanto tempo leva, ou se vale a pena pro momento de vida da pessoa.',
         estrategia: 'Escolha UMA dúvida prática (dor, tempo, manutenção) e responda com detalhe real, não com uma frase vaga de tranquilização.',
         legenda: 'A pergunta que mais recebo no direct não é sobre preço. Hoje eu respondo ela de vez, sem rodeio.',
+      },
+      {
+        diagnostico: 'Muita gente que hesita já teve uma experiência ruim em outro lugar — e a objeção real não é sobre você, é sobre um trauma anterior.',
+        estrategia: 'Reconheça publicamente que experiências ruins existem no mercado, e mostre o que você faz diferente logo na avaliação inicial pra evitar o mesmo erro.',
+        legenda: 'Se você já saiu de algum lugar arrependida, entendo a desconfiança. Por isso minha avaliação antes do procedimento não é rápida — é o contrário.',
+      },
+      {
+        diagnostico: 'Quem compara 5 perfis diferentes antes de decidir não está indecisa sobre gostar do seu trabalho — está sobrecarregada de opções parecidas.',
+        estrategia: 'Facilite a decisão dando um critério claro e simples pra escolher (não "eu sou a melhor", mas "é assim que você sabe se é a pessoa certa pra você").',
+        legenda: 'Não preciso ser a única opção que você olhou. Preciso ser a que te deixa mais segura pra decidir. Aqui vai o que eu acho que você deveria perguntar antes de escolher.',
       },
     ],
   },
@@ -122,6 +172,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: "Show the client's real face and reaction the moment she sees the result — that's worth more than any clever caption.",
         legenda: 'This was the exact moment she saw the mirror for the first time. Reactions like this are why I do this work.',
       },
+      {
+        diagnostico: 'Generic beauty content competes with the entire feed; content that speaks to one specific person in your area competes with no one.',
+        estrategia: "Name the neighborhood, the occasion, or the exact skin/hair type you serve best. The sharper the focus, the more the right person feels 'this is for me.'",
+        legenda: "Not for everyone. For whoever's nearby and done leaving unsatisfied from a generic salon. If that's you, keep reading.",
+      },
+      {
+        diagnostico: "Nobody builds trust in you faster than someone who's already a client — but most pros never actually ask that trust to spread.",
+        estrategia: "Openly ask happy clients to tag a friend in the comments, and give them a real reason to do it now, not just a generic 'share this.'",
+        legenda: "If this photo reminded you of someone who needs to treat themselves better, tag her below. She'll thank you (and so will I).",
+      },
     ],
     'Preencher agenda': [
       {
@@ -138,6 +198,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: "A gap in the middle of the week is money sitting idle, but shouting \"slots available\" with no context convinces no one.",
         estrategia: 'Tie the open slot to a concrete benefit for whoever books fast: less waiting, a better time slot, more relaxed attention.',
         legenda: "Thursday's wide open here — no rush, no line, just you and me with plenty of time to get it right.",
+      },
+      {
+        diagnostico: "A last-minute cancellation usually gets treated as a loss — but for whoever's paying attention, it's the fastest open slot of the week.",
+        estrategia: 'Announce the cancellation slot as an exclusive, very-short-window opportunity, not a routine post.',
+        legenda: "A last-minute slot just opened from a cancellation. First to reply gets it — no waitlist this time.",
+      },
+      {
+        diagnostico: "A lot of people don't book out of low motivation — they book out of no clear reason to decide today, and indecision stalls without an obvious date.",
+        estrategia: "Suggest the client's own ideal maintenance rhythm (e.g. every X weeks) and tie today's slot to that cycle, not to a random promo.",
+        legenda: "If it's been a while since your last visit, today's a great day to get back on your rhythm. I still have room.",
       },
     ],
     'Reativar clientes': [
@@ -156,6 +226,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Lower the friction of coming back: offer to rebook through the same channel as always, with no red tape or "starting from scratch" feeling.',
         legenda: "No fuss: if you want to come back, just message me and I'll fit you in. Nothing's changed here, only time has passed.",
       },
+      {
+        diagnostico: "Most people who disappeared didn't decide to stop — they just lost track of how much time has actually passed since their last visit.",
+        estrategia: "Estimate how long most of your inactive clients have really been gone, and use that number as the direct trigger — not guilt.",
+        legenda: "It's been a good while since several of you stopped by. No pressure, just a reminder: your usual spot is still here.",
+      },
+      {
+        diagnostico: "A discount to win back a lost client teaches her to wait for discounts forever — what actually brings people back is genuine attention, not a lower price.",
+        estrategia: "Offer something valuable that isn't money: priority scheduling, extra care during the appointment, a real check-in on what's changed since last time.",
+        legenda: "I'm not going to offer you a discount to come back. I'll offer you the usual: real attention, on your time. Want to book?",
+      },
     ],
     Autoridade: [
       {
@@ -173,6 +253,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Teach something real and specific about your craft — a precaution, a common mistake you avoid, a technical reason behind a choice.',
         legenda: "Barely anyone knows why I do this step before anything else. Today I'm explaining it.",
       },
+      {
+        diagnostico: "Generic authority ('I'm passionate about what I do') convinces no one — a specific number and a real result do.",
+        estrategia: 'Tell a real case (without exposing the client) with a concrete detail: how long it took, how many sessions, what actually changed — numbers build trust that adjectives don\'t.',
+        legenda: "3 sessions, 6 weeks, a result the client herself didn't expect. Authority isn't a pitch, it's a track record.",
+      },
+      {
+        diagnostico: "Clients can't tell good technique from bad technique — but they can tell when someone actually invests in real training.",
+        estrategia: "Show behind-the-scenes of a course, certification, or ongoing study. That communicates professionalism without ever saying 'I'm good at what I do.'",
+        legenda: "While you were asleep, I was studying this technique again. Not modesty — it's exactly why the results keep getting better.",
+      },
     ],
     'Quebra de objeção': [
       {
@@ -189,6 +279,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: "The quietest doubt isn't always about the result — often it's about pain, time, or whether it's worth it right now in someone's life.",
         estrategia: 'Pick ONE practical concern (pain, time, upkeep) and answer it with real detail, not a vague reassurance.',
         legenda: "The question I get most in DMs isn't about price. Today I'm finally answering it, no dancing around it.",
+      },
+      {
+        diagnostico: "A lot of people who hesitate already had a bad experience somewhere else — the real objection isn't about you, it's about an old scar.",
+        estrategia: 'Publicly acknowledge that bad experiences exist in the market, and show what you do differently right from the initial consultation to avoid the same mistake.',
+        legenda: "If you've walked away disappointed somewhere before, I get the hesitation. That's exactly why my consultation before any procedure isn't quick — it's the opposite.",
+      },
+      {
+        diagnostico: "Someone comparing 5 different profiles before deciding isn't unsure if they like your work — they're overwhelmed by too many similar options.",
+        estrategia: "Make the decision easier by giving a clear, simple criterion to choose by (not 'I'm the best,' but 'here's how you know if I'm the right fit for you').",
+        legenda: "I don't need to be the only option you looked at. I need to be the one that makes you feel most confident deciding. Here's what I think you should ask before choosing.",
       },
     ],
   },
@@ -209,6 +309,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Muestra el rostro y la reacción real de la clienta en el momento en que ve el resultado — eso vale más que cualquier leyenda bien escrita.',
         legenda: 'Este fue el momento en que ella vio el espejo por primera vez. Reacciones así son la razón por la que hago lo que hago.',
       },
+      {
+        diagnostico: 'El contenido genérico de belleza compite con todo el feed; el contenido que le habla a una persona específica de tu zona no compite con nadie.',
+        estrategia: 'Nombra el barrio, la ocasión o el tipo exacto de piel/cabello que mejor atiendes. Cuanto más específico el recorte, más la persona correcta siente que "esto es para mí".',
+        legenda: 'No es para todo el mundo. Es para quien vive cerca y ya se cansó de salir insatisfecha de un salón genérico. Si eres tú, sigue leyendo.',
+      },
+      {
+        diagnostico: 'Nadie confía más rápido en ti que alguien que ya es tu clienta — pero la mayoría de las profesionales nunca le pide a esa confianza que se propague.',
+        estrategia: 'Pide abiertamente a tus clientas satisfechas que etiqueten a una amiga en los comentarios, y dales un motivo real para hacerlo ahora, no solo un "comparte esto".',
+        legenda: 'Si esta foto te hizo pensar en alguien que necesita cuidarse más, etiquétala aquí abajo. Te lo va a agradecer (y yo también).',
+      },
     ],
     'Preencher agenda': [
       {
@@ -225,6 +335,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: 'Un hueco en medio de la semana es dinero parado, pero gritar "cupos disponibles" sin contexto no convence a nadie.',
         estrategia: 'Conecta el cupo libre con un beneficio concreto para quien agende rápido: menos espera, mejor horario, atención más tranquila.',
         legenda: 'Jueves libre por aquí — sin apuro, sin fila, solo tú y yo con tiempo de sobra para que quede perfecto.',
+      },
+      {
+        diagnostico: 'Una cancelación de último momento normalmente se trata como una pérdida — pero para quien está atenta, es el cupo más rápido de conseguir en toda la semana.',
+        estrategia: 'Anuncia el cupo que se liberó por cancelación como una oportunidad exclusiva y con un plazo muy corto, no como un post de rutina.',
+        legenda: 'Se acaba de liberar un cupo de último momento por cancelación. Quien responda primero se lo lleva — esta vez sin lista de espera.',
+      },
+      {
+        diagnostico: 'Mucha gente no agenda por falta de ganas — agenda por falta de una razón clara para decidir hoy, y la indecisión se frena sin una fecha obvia.',
+        estrategia: 'Sugiere el ritmo ideal de mantenimiento de la clienta (por ejemplo, cada X semanas) y conecta el cupo de hoy con ese ciclo, no con una promoción cualquiera.',
+        legenda: 'Si hace un tiempo que no vienes, hoy es un buen día para retomar tu ritmo. Todavía tengo horario libre.',
       },
     ],
     'Reativar clientes': [
@@ -243,6 +363,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Reduce la fricción de volver: ofrece reagendar por el mismo canal de siempre, sin trámites ni sensación de "empezar de cero".',
         legenda: 'Sin protocolo: si quieres volver, mándame un mensaje y te acomodo. Nada cambió por aquí, solo pasó el tiempo.',
       },
+      {
+        diagnostico: 'La mayoría de quienes desaparecieron no decidieron dejar de venir — solo perdieron la noción de cuánto tiempo pasó desde su última visita.',
+        estrategia: 'Calcula (aunque sea aproximado) hace cuánto tiempo no viene la mayoría de tus clientas inactivas, y usa ese número como gatillo directo, sin culpa.',
+        legenda: 'Ya hace varios meses que muchas de ustedes no pasan por aquí. Sin presión, solo un recordatorio: tu horario de siempre sigue existiendo.',
+      },
+      {
+        diagnostico: 'Un descuento para reactivar a una clienta que desapareció le enseña a esperar descuentos para siempre — lo que realmente hace volver es atención genuina, no precio bajo.',
+        estrategia: 'Ofrece algo de valor que no sea dinero: prioridad de horario, un detalle especial durante la cita, una charla real sobre qué cambió desde la última vez.',
+        legenda: 'No te voy a ofrecer un descuento para volver. Te voy a ofrecer lo de siempre: atención de verdad, a tu tiempo. ¿Agendamos?',
+      },
     ],
     Autoridade: [
       {
@@ -260,6 +390,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         estrategia: 'Enseña algo real y específico de tu oficio — un cuidado, un error común que evitas, una razón técnica detrás de una elección.',
         legenda: 'Casi nadie sabe por qué hago este paso antes que cualquier otro. Hoy te lo cuento.',
       },
+      {
+        diagnostico: 'La autoridad genérica ("me apasiona lo que hago") no convence a nadie — un número específico y un resultado real sí.',
+        estrategia: 'Cuenta un caso real (sin exponer a la clienta) con un dato concreto: cuánto tiempo tomó, cuántas sesiones, qué cambió de verdad — los números generan confianza que los adjetivos no generan.',
+        legenda: '3 sesiones, 6 semanas, un resultado que ni la propia clienta esperaba. La autoridad no es discurso, es historial.',
+      },
+      {
+        diagnostico: 'La clienta no sabe distinguir una técnica buena de una mala — pero sí reconoce cuando alguien invierte de verdad en seguir aprendiendo.',
+        estrategia: 'Muestra el detrás de cámaras de un curso, formación o estudio continuo tuyo. Eso comunica seriedad profesional sin tener que decir "soy buena en lo que hago".',
+        legenda: 'Mientras tú dormías, yo estaba estudiando esta técnica otra vez. No es modestia, es la razón por la que el resultado sigue mejorando.',
+      },
     ],
     'Quebra de objeção': [
       {
@@ -276,6 +416,16 @@ const OBJETIVO_ANGLES: Record<Lang, Record<string, Angle[]>> = {
         diagnostico: 'La duda más silenciosa no siempre es sobre el resultado — muchas veces es sobre si duele, cuánto tiempo toma, o si vale la pena en este momento de su vida.',
         estrategia: 'Elige UNA duda práctica (dolor, tiempo, mantenimiento) y respóndela con detalle real, no con una frase vaga de tranquilidad.',
         legenda: 'La pregunta que más recibo por DM no es sobre el precio. Hoy la respondo de una vez, sin rodeos.',
+      },
+      {
+        diagnostico: 'Mucha gente que duda ya tuvo una mala experiencia en otro lugar — la objeción real no es sobre ti, es sobre una herida anterior.',
+        estrategia: 'Reconoce públicamente que existen malas experiencias en el mercado, y muestra qué haces diferente desde la evaluación inicial para evitar el mismo error.',
+        legenda: 'Si alguna vez saliste decepcionada de algún lugar, entiendo la desconfianza. Por eso mi evaluación antes del procedimiento no es rápida — todo lo contrario.',
+      },
+      {
+        diagnostico: 'Quien compara 5 perfiles distintos antes de decidir no está indecisa sobre si le gusta tu trabajo — está saturada de opciones parecidas.',
+        estrategia: 'Facilita la decisión dando un criterio claro y simple para elegir (no "soy la mejor", sino "así sabes si soy la persona correcta para ti").',
+        legenda: 'No necesito ser la única opción que viste. Necesito ser la que te da más seguridad para decidir. Aquí va lo que creo que deberías preguntar antes de elegir.',
       },
     ],
   },
