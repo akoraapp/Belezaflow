@@ -4,6 +4,7 @@ import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
 import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
 import { LangSwitcher } from '../components/LangSwitcher';
+import wordmark from '../assets/belezaflow-wordmark.png';
 
 type Screen = 'quiz' | 'analyzing' | 'diagnosis';
 
@@ -83,7 +84,7 @@ export function QuizPage() {
       {screen === 'quiz' && (
         <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '24px 24px 40px', animation: 'bfFadeIn 0.5s ease' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontWeight: 700, fontSize: 20, color: F.ink, letterSpacing: 0.5 }}>BelezaFlow</div>
+            <img src={wordmark} alt="BelezaFlow" style={{ height: 22, width: 'auto', display: 'block' }} />
             <LangSwitcher />
           </div>
           <div style={{ height: 6, background: F.line, borderRadius: 999, overflow: 'hidden', marginBottom: 40 }}>
