@@ -1,10 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import { LangProvider } from './lib/LangContext'
 import App from './App.tsx'
-import { LandingPage } from './pages/Landing'
 import { QuizPage } from './pages/Quiz'
 
 createRoot(document.getElementById('root')!).render(
@@ -12,8 +11,11 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <LangProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/quiz" element={<QuizPage />} />
+          {/* Quiz -> diagnosis -> landing is one single page/flow (QuizPage
+              owns local state for all of it, matching the original design) —
+              "/" is the whole funnel, not just the landing content. */}
+          <Route path="/" element={<QuizPage />} />
+          <Route path="/quiz" element={<Navigate to="/" replace />} />
           <Route path="/app/*" element={<App />} />
         </Routes>
       </LangProvider>

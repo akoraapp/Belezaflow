@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
 import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
 import { LangSwitcher } from '../components/LangSwitcher';
+import { LandingPage } from './Landing';
 import wordmark from '../assets/belezaflow-wordmark.png';
 
-type Screen = 'quiz' | 'analyzing' | 'diagnosis';
+// Quiz, diagnosis, and landing are one single page/flow (matching the
+// original Claude Design source, which modeled all four as sc-if branches of
+// one component) — not separate routes. The URL never changes between them;
+// "Ver solução" just moves this local screen state to 'landing'.
+type Screen = 'quiz' | 'analyzing' | 'diagnosis' | 'landing';
 
 const RISK_PERCENTAGE = 78;
 const MARKETING_BLOCK_IDX = 3;
@@ -15,9 +19,12 @@ const PAPER_IDX = 0;
 const NEVER_REACTIVATE_IDX = 0;
 
 export function QuizPage() {
-  const navigate = useNavigate();
   const { t } = useLang();
   const q = t.quiz;
+  // A returning customer (already completed signup once on this browser)
+  // must never be forced through the quiz again — skip straight to
+  // LandingPage, whose own effect redirects them to /app.
+  const isReturningUser = localStorage.getItem('belezaflow_returning_user') === '1';
 
   const [screen, setScreen] = useState<Screen>('quiz');
   const [quizStep, setQuizStep] = useState(0);
@@ -76,6 +83,10 @@ export function QuizPage() {
 
   const p1Text = q.questions[0].options[answers[0]] ?? '';
   const conclusionText = p1Text ? `${q.conclusionPrefix}${p1Text}.` : '';
+
+  if (isReturningUser) return <LandingPage />;
+
+  if (screen === 'landing') return <LandingPage />;
 
   return (
     <div style={{ background: F.bg, minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: F.ink }}>
@@ -167,7 +178,7 @@ export function QuizPage() {
           )}
 
           <button
-            onClick={() => navigate('/')}
+            onClick={() => setScreen('landing')}
             data-testid="quiz-see-solution"
             style={{
               width: '100%',
