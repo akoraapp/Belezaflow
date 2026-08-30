@@ -24,7 +24,7 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   const { profile, updateProfile: onUpdateProfile } = useProfile();
   const { appointments, addAppointment } = useAppointments();
   const { services } = useServices();
-  const { addClient } = useClients();
+  const { addClient, updateClient, findClientForAppointment } = useClients();
   const [copied, setCopied] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookDate, setBookDate] = useState<string | null>(null);
@@ -83,7 +83,16 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
       setBookTime(null);
       return;
     }
-    addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '' });
+    // A returning client booking again through the public link must never
+    // create a second CRM record for the same person — match by phone/name
+    // first, same as the rest of the app does when linking an appointment
+    // back to a client (see useAttendance.ts).
+    const existingClient = findClientForAppointment({ clientName: bookName, clientPhone: bookPhone });
+    if (existingClient) {
+      if (existingClient.status !== 'Cliente') updateClient(existingClient.id, { status: 'Agendado' });
+    } else {
+      addClient({ name: bookName, phone: bookPhone, service: bookService.name, origem: 'Agenda Online', status: 'Agendado', birthday: '' });
+    }
     setConfirmed(true);
     setTimeout(() => {
       setConfirmed(false);

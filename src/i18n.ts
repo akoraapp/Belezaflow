@@ -333,6 +333,9 @@ const pt = {
     noApptsToday: 'Nenhum agendamento hoje.',
     freeSlotsToday: 'Horários livres hoje',
     upcomingLabel: 'Próximos agendamentos',
+    selectClientLabel: 'Cliente',
+    selectClientPlaceholder: 'Selecione um cliente',
+    newClientOption: '+ Cliente novo',
   },
   agendaOnline: {
     title: 'Agenda Online',
@@ -838,6 +841,9 @@ const en: typeof pt = {
     noApptsToday: 'No appointments today.',
     freeSlotsToday: 'Free slots today',
     upcomingLabel: 'Upcoming appointments',
+    selectClientLabel: 'Client',
+    selectClientPlaceholder: 'Select a client',
+    newClientOption: '+ New client',
   },
   agendaOnline: {
     title: 'Online Booking',
@@ -1341,6 +1347,9 @@ const es: typeof pt = {
     noApptsToday: 'No hay citas hoy.',
     freeSlotsToday: 'Horarios libres hoy',
     upcomingLabel: 'Próximos turnos',
+    selectClientLabel: 'Clienta',
+    selectClientPlaceholder: 'Selecciona una clienta',
+    newClientOption: '+ Clienta nueva',
   },
   agendaOnline: {
     title: 'Agenda Online',

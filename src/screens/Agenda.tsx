@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, formatTimeLabel, todayDateStr, weekdayLabelForDate } from '../lib/helpers';
-import { WEEKDAY_LABEL } from '../i18n';
-import { Card, Chip, TextInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
+import { WEEKDAY_LABEL, STATUS_LABEL } from '../i18n';
+import { Card, Chip, TextInput, PhoneInput, SelectInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { useProfile } from '../hooks/useProfile';
 import { useAppointments } from '../hooks/useAppointments';
 import { useServices } from '../hooks/useServices';
+import { useClients } from '../hooks/useClients';
 import { useAttendance } from '../hooks/useAttendance';
 import type { ServiceItem } from '../types';
+
+// Sentinel value for "this isn't an existing CRM client" in the client
+// picker below — never a real client id (those are generated as `c${Date.now()}`).
+const NEW_CLIENT_VALUE = '__new__';
 
 interface AgendaScreenProps {
   embedded?: boolean;
@@ -20,10 +25,13 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const { profile } = useProfile();
   const { appointments, addAppointment, cancelAppointment, rescheduleAppointment } = useAppointments();
   const { services } = useServices();
+  const { clients, addClient, updateClient } = useClients();
   const { markAttended: onMarkAttended, markNoShow: onMarkNoShow } = useAttendance();
   const [showAdd, setShowAdd] = useState(false);
   const [selService, setSelService] = useState<ServiceItem | null>(null);
-  const [clientName, setClientName] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [newClientName, setNewClientName] = useState('');
+  const [newClientPhone, setNewClientPhone] = useState('');
   const [time, setTime] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState(false);
   const [reschedulingId, setReschedulingId] = useState<string | null>(null);
@@ -42,12 +50,26 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       upcomingByDay.set(a.day, group);
     });
 
+  const isNewClient = selectedClientId === NEW_CLIENT_VALUE;
+  const selectedClient = !isNewClient ? clients.find((c) => c.id === selectedClientId) : undefined;
+  const finalClientName = isNewClient ? newClientName.trim() : (selectedClient?.name ?? '');
+  const finalClientPhone = isNewClient ? newClientPhone.trim() : (selectedClient?.phone ?? '');
+  const canSubmit = !!selService && !!time && !!selectedClientId && !!finalClientName;
+
+  const clientSelectOptions = [NEW_CLIENT_VALUE, ...clients.map((c) => c.id)];
+  const clientLabelFor = (id: string) => {
+    if (id === NEW_CLIENT_VALUE) return t.agenda.newClientOption;
+    const c = clients.find((x) => x.id === id);
+    return c ? `${c.name} · ${STATUS_LABEL[lang][c.status] ?? c.status}` : id;
+  };
+
   const submit = async () => {
-    if (!selService || !clientName || !time) return;
+    if (!selService || !time || !canSubmit) return;
     setSubmitError(false);
     const result = await addAppointment({
       id: `a${Date.now()}`,
-      clientName,
+      clientName: finalClientName,
+      clientPhone: finalClientPhone || undefined,
       service: selService.name,
       price: Number(selService.price),
       duration: selService.duration,
@@ -61,9 +83,19 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       setTime(null);
       return;
     }
+    // Booking is the moment a lead/inactive client becomes an active one —
+    // mirrors what Agenda Online already does for public bookings. A client
+    // already marked 'Cliente' is left as-is (never downgraded).
+    if (selectedClient) {
+      if (selectedClient.status !== 'Cliente') updateClient(selectedClient.id, { status: 'Agendado' });
+    } else {
+      addClient({ name: finalClientName, phone: finalClientPhone, service: selService.name, origem: 'Agenda', status: 'Agendado', birthday: '' });
+    }
     setShowAdd(false);
     setSelService(null);
-    setClientName('');
+    setSelectedClientId('');
+    setNewClientName('');
+    setNewClientPhone('');
     setTime(null);
   };
 
@@ -89,7 +121,21 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
       {showAdd && (
         <Card style={{ marginBottom: 16 }}>
           <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, marginBottom: 10 }}>{t.agenda.newApptFormTitle}</div>
-          <TextInput value={clientName} onChange={setClientName} placeholder={t.agenda.clientNamePlaceholder} testId="agenda-client-name" />
+          <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.selectClientLabel}</div>
+          <SelectInput
+            options={clientSelectOptions}
+            value={selectedClientId}
+            onChange={setSelectedClientId}
+            labelFor={clientLabelFor}
+            placeholder={t.agenda.selectClientPlaceholder}
+            testId="agenda-client-select"
+          />
+          {isNewClient && (
+            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <TextInput value={newClientName} onChange={setNewClientName} placeholder={t.agenda.clientNamePlaceholder} testId="agenda-new-client-name" />
+              <PhoneInput value={newClientPhone} onChange={setNewClientPhone} placeholder={t.agendaOnline.phoneContactPlaceholder} testId="agenda-new-client-phone" />
+            </div>
+          )}
           <div style={{ height: 8 }} />
           <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.agenda.selectServiceLabel}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
@@ -115,7 +161,7 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
             ))}
           </div>
           {submitError && <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger, marginBottom: 10 }}>{t.agendaOnline.slotTakenError}</div>}
-          <PrimaryButton full onClick={submit} disabled={!selService || !clientName || !time} testId="agenda-add-submit">
+          <PrimaryButton full onClick={submit} disabled={!canSubmit} testId="agenda-add-submit">
             {t.agenda.confirmCta}
           </PrimaryButton>
         </Card>
