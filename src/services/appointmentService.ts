@@ -15,6 +15,11 @@ function rowToAppointment(row: Record<string, unknown>): Appointment {
     origin: (row.origin as Appointment['origin']) || undefined,
     createdAt: new Date(row.created_at as string).getTime(),
     followUpSent: Boolean(row.follow_up_sent),
+    confirmationStatus: (row.confirmation_status as Appointment['confirmationStatus']) || 'nao_enviado',
+    confirmationChannel: (row.confirmation_channel as Appointment['confirmationChannel']) || undefined,
+    confirmationSentAt: (row.confirmation_sent_at as string) || undefined,
+    confirmationSentBy: (row.confirmation_sent_by as string) || undefined,
+    confirmadoPeloCliente: (row.confirmado_pelo_cliente as boolean | null) ?? null,
   };
 }
 
@@ -53,6 +58,10 @@ export const AppointmentService = {
     if (patch.followUpSent !== undefined) row.follow_up_sent = patch.followUpSent;
     if (patch.day !== undefined) row.day = patch.day;
     if (patch.time !== undefined) row.time = patch.time;
+    if (patch.confirmationStatus !== undefined) row.confirmation_status = patch.confirmationStatus;
+    if (patch.confirmationChannel !== undefined) row.confirmation_channel = patch.confirmationChannel;
+    if (patch.confirmationSentAt !== undefined) row.confirmation_sent_at = patch.confirmationSentAt;
+    if (patch.confirmationSentBy !== undefined) row.confirmation_sent_by = patch.confirmationSentBy;
     // A reschedule moves the appointment to a new instant, so any reminder
     // already sent for the old time no longer applies.
     if (patch.day !== undefined || patch.time !== undefined) row.reminder_sent_at = null;

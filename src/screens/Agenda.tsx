@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { getAvailability, fmtMoney, formatTimeLabel, todayDateStr, weekdayLabelForDate } from '../lib/helpers';
+import { buildWhatsAppLink, buildSmsLink, buildConfirmationMessage } from '../lib/followup';
 import { WEEKDAY_LABEL, STATUS_LABEL } from '../i18n';
 import { Card, Chip, TextInput, PhoneInput, SelectInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -10,7 +11,7 @@ import { useAppointments } from '../hooks/useAppointments';
 import { useServices } from '../hooks/useServices';
 import { useClients } from '../hooks/useClients';
 import { useAttendance } from '../hooks/useAttendance';
-import type { ServiceItem } from '../types';
+import type { Appointment, ServiceItem } from '../types';
 
 // Sentinel value for "this isn't an existing CRM client" in the client
 // picker below — never a real client id (those are generated as `c${Date.now()}`).
@@ -23,7 +24,7 @@ interface AgendaScreenProps {
 export function AgendaScreen({ embedded }: AgendaScreenProps) {
   const { t, lang } = useLang();
   const { profile } = useProfile();
-  const { appointments, addAppointment, cancelAppointment, rescheduleAppointment } = useAppointments();
+  const { appointments, addAppointment, cancelAppointment, rescheduleAppointment, confirmAppointment } = useAppointments();
   const { services } = useServices();
   const { clients, addClient, updateClient } = useClients();
   const { markAttended: onMarkAttended, markNoShow: onMarkNoShow } = useAttendance();
@@ -97,6 +98,26 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
     setNewClientName('');
     setNewClientPhone('');
     setTime(null);
+  };
+
+  // Opens WhatsApp/SMS with the confirmation message pre-filled and, once the
+  // professional's own app takes over, records that the send flow was opened
+  // (see useAppointments.confirmAppointment — this can't detect an actual
+  // send or delivery, only that the link was launched).
+  const sendConfirmation = (appt: Appointment, channel: 'whatsapp' | 'sms') => {
+    if (!appt.clientPhone) return;
+    const [, m, d] = appt.day.split('-');
+    const message = buildConfirmationMessage(profile.confirmationMessageTemplate, lang, {
+      nome_cliente: appt.clientName,
+      data: `${d}/${m}`,
+      hora: formatTimeLabel(appt.time, lang),
+      servico: appt.service,
+      nome_profissional: profile.publicName || profile.name,
+    });
+    const link = channel === 'whatsapp' ? buildWhatsAppLink(appt.clientPhone, message) : buildSmsLink(appt.clientPhone, message);
+    if (!link) return;
+    window.open(link, '_blank', 'noopener,noreferrer');
+    confirmAppointment(appt.id, channel);
   };
 
   return (
@@ -182,6 +203,8 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
                 onMarkNoShow={onMarkNoShow ? () => onMarkNoShow(a.id) : undefined}
                 onCancel={() => cancelAppointment(a.id)}
                 onReschedule={() => setReschedulingId((cur) => (cur === a.id ? null : a.id))}
+                onConfirmWhatsApp={() => sendConfirmation(a, 'whatsapp')}
+                onConfirmSms={() => sendConfirmation(a, 'sms')}
               />
               {reschedulingId === a.id && (
                 <Card style={{ marginTop: 8 }}>
@@ -235,7 +258,14 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {appts.map((a) => (
-                      <AppointmentRow key={a.id} a={a} currency={currency} testId={`appt-${a.id}`} />
+                      <AppointmentRow
+                        key={a.id}
+                        a={a}
+                        currency={currency}
+                        testId={`appt-${a.id}`}
+                        onConfirmWhatsApp={() => sendConfirmation(a, 'whatsapp')}
+                        onConfirmSms={() => sendConfirmation(a, 'sms')}
+                      />
                     ))}
                   </div>
                 </div>

@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Ban, Check, ChevronLeft, Clock, X, type LucideIcon } from 'lucide-react';
+import { Ban, Check, CheckCircle2, ChevronLeft, Clock, MessageCircle, Smartphone, X, type LucideIcon } from 'lucide-react';
 import { T, CURRENCIES, STATUS_COLOR, RADIUS, SHADOW } from '../theme';
 import { STATUS_LABEL } from '../i18n';
 import { fmtMoney, formatTimeLabel } from '../lib/helpers';
@@ -177,6 +177,45 @@ export function TextInput({
         outline: 'none',
         boxSizing: 'border-box',
         background: T.surface,
+      }}
+    />
+  );
+}
+
+export function TextareaInput({
+  value,
+  onChange,
+  placeholder,
+  testId,
+  rows = 4,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  testId?: string;
+  rows?: number;
+}) {
+  return (
+    <textarea
+      value={value}
+      data-testid={testId}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={rows}
+      style={{
+        width: '100%',
+        padding: '13px 16px',
+        borderRadius: RADIUS.control,
+        border: `1.5px solid ${T.line}`,
+        fontFamily: 'Inter',
+        fontSize: 13.5,
+        fontWeight: 500,
+        color: T.ink,
+        outline: 'none',
+        boxSizing: 'border-box',
+        background: T.surface,
+        resize: 'vertical',
+        lineHeight: 1.5,
       }}
     />
   );
@@ -473,6 +512,8 @@ export function AppointmentRow({
   onMarkNoShow,
   onCancel,
   onReschedule,
+  onConfirmWhatsApp,
+  onConfirmSms,
 }: {
   a: Appointment;
   currency: CurrencyCode;
@@ -481,11 +522,16 @@ export function AppointmentRow({
   onMarkNoShow?: () => void;
   onCancel?: () => void;
   onReschedule?: () => void;
+  onConfirmWhatsApp?: () => void;
+  onConfirmSms?: () => void;
 }) {
   const { t, lang } = useLang();
   const isPending = a.status === 'Agendado' || a.status === 'Confirmado';
   const showActions = isPending && (onMarkAttended || onMarkNoShow);
   const showLifecycleActions = isPending && (onCancel || onReschedule);
+  const showConfirmActions = isPending && (onConfirmWhatsApp || onConfirmSms);
+  const confirmationSent = a.confirmationStatus === 'enviado';
+  const hasPhone = !!a.clientPhone;
 
   return (
     <Card testId={testId}>
@@ -495,7 +541,18 @@ export function AppointmentRow({
             <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: T.ink }}>{formatTimeLabel(a.time, lang)}</div>
           </div>
           <div>
-            <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink }}>{a.clientName}</div>
+              {showConfirmActions && (
+                <CheckCircle2
+                  size={13}
+                  color={confirmationSent ? T.success : T.line}
+                  aria-label={confirmationSent ? t.agenda.confirmationSentTooltip : t.agenda.confirmationNotSentTooltip}
+                >
+                  <title>{confirmationSent ? t.agenda.confirmationSentTooltip : t.agenda.confirmationNotSentTooltip}</title>
+                </CheckCircle2>
+              )}
+            </div>
             <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
               {a.service}
               {a.clientPhone ? ` · ${a.clientPhone}` : ''}
@@ -615,6 +672,65 @@ export function AppointmentRow({
               }}
             >
               <Ban size={12} /> {t.attendance.cancelCta}
+            </button>
+          )}
+        </div>
+      )}
+
+      {showConfirmActions && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          {onConfirmWhatsApp && (
+            <button
+              onClick={onConfirmWhatsApp}
+              disabled={!hasPhone}
+              title={hasPhone ? undefined : t.agenda.confirmationNoPhoneTooltip}
+              data-testid={testId ? `${testId}-confirm-whatsapp` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: `1px solid ${T.line}`,
+                background: 'transparent',
+                color: hasPhone ? T.success : T.muted,
+                opacity: hasPhone ? 1 : 0.5,
+                fontFamily: 'Inter',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: hasPhone ? 'pointer' : 'not-allowed',
+                padding: '7px 10px',
+                borderRadius: RADIUS.pill,
+              }}
+            >
+              <MessageCircle size={12} /> {t.agenda.confirmationWhatsAppCta}
+            </button>
+          )}
+          {onConfirmSms && (
+            <button
+              onClick={onConfirmSms}
+              disabled={!hasPhone}
+              title={hasPhone ? undefined : t.agenda.confirmationNoPhoneTooltip}
+              data-testid={testId ? `${testId}-confirm-sms` : undefined}
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                border: `1px solid ${T.line}`,
+                background: 'transparent',
+                color: hasPhone ? T.ink : T.muted,
+                opacity: hasPhone ? 1 : 0.5,
+                fontFamily: 'Inter',
+                fontWeight: 700,
+                fontSize: 11.5,
+                cursor: hasPhone ? 'pointer' : 'not-allowed',
+                padding: '7px 10px',
+                borderRadius: RADIUS.pill,
+              }}
+            >
+              <Smartphone size={12} /> {t.agenda.confirmationSmsCta}
             </button>
           )}
         </div>

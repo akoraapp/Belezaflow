@@ -20,6 +20,7 @@ function rowToProfile(row: Record<string, unknown>): Profile {
     cancellationNoticeHours: Number(row.cancellation_notice_hours),
     rescheduleNoticeHours: Number(row.reschedule_notice_hours),
     timezone: (row.timezone as string) || '',
+    confirmationMessageTemplate: (row.confirmation_message_template as string) || '',
   };
 }
 
@@ -42,6 +43,7 @@ function profileToRow(profile: Partial<Profile>): Record<string, unknown> {
   if (profile.cancellationNoticeHours !== undefined) row.cancellation_notice_hours = profile.cancellationNoticeHours;
   if (profile.rescheduleNoticeHours !== undefined) row.reschedule_notice_hours = profile.rescheduleNoticeHours;
   if (profile.timezone !== undefined) row.timezone = profile.timezone;
+  if (profile.confirmationMessageTemplate !== undefined) row.confirmation_message_template = profile.confirmationMessageTemplate;
   return row;
 }
 

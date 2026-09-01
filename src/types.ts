@@ -42,6 +42,9 @@ export interface Profile {
   // IANA timezone (e.g. "America/Sao_Paulo"), captured from the browser at
   // onboarding — used server-side to compute correct appointment-reminder times.
   timezone: string;
+  // Custom appointment-confirmation message template (see src/lib/followup.ts) —
+  // empty means "use the built-in default for the current language".
+  confirmationMessageTemplate: string;
 }
 
 export interface OnboardingResult {
@@ -67,6 +70,16 @@ export interface Appointment {
   origin?: 'online';
   createdAt: number;
   followUpSent?: boolean;
+  // Opção 1 confirmation flow: the professional taps a WhatsApp/SMS deep
+  // link, the app just records that the send flow was opened — see
+  // src/lib/followup.ts and AppointmentRow. confirmadoPeloCliente stays
+  // null/unused until a future paid-provider integration can flip it from
+  // an actual client reply instead.
+  confirmationStatus?: 'nao_enviado' | 'enviado';
+  confirmationChannel?: 'whatsapp' | 'sms';
+  confirmationSentAt?: string;
+  confirmationSentBy?: string;
+  confirmadoPeloCliente?: boolean | null;
 }
 
 export interface Client {

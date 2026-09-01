@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
-import { Card, Chip, PrimaryButton, TextInput, PhoneInput, SectionTitle } from '../components/primitives';
+import { Card, Chip, PrimaryButton, TextInput, TextareaInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
 import { useProfile } from '../hooks/useProfile';
@@ -65,6 +65,17 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
             SMS
           </Chip>
         </div>
+      </Card>
+
+      <SectionTitle>{t.config.confirmationTemplateTitle}</SectionTitle>
+      <Card style={{ marginBottom: 22 }}>
+        <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 10 }}>{t.config.confirmationTemplateHint}</div>
+        <TextareaInput
+          value={profile.confirmationMessageTemplate}
+          onChange={(v) => onUpdateProfile({ confirmationMessageTemplate: v })}
+          placeholder={t.config.confirmationTemplatePlaceholder}
+          testId="config-confirmation-template"
+        />
       </Card>
 
       <SectionTitle>{t.config.generalTitle}</SectionTitle>

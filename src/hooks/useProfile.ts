@@ -65,6 +65,7 @@ export function useProfile() {
       cancellationNoticeHours: 24,
       rescheduleNoticeHours: 24,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      confirmationMessageTemplate: '',
     };
     profileStore.setState({ profile: newProfile, loading: false, userId });
     if (userId) {

@@ -39,6 +39,13 @@ export function useAppointments() {
 
   const markFollowUpSent = (id: string) => updateStatus(id, { followUpSent: true });
 
+  // Records that the professional opened the WhatsApp/SMS confirmation link
+  // for this appointment (see src/lib/followup.ts) — not that the client
+  // actually received or read it, which this app has no way to know yet.
+  const confirmAppointment = (id: string, channel: 'whatsapp' | 'sms') => {
+    updateStatus(id, { confirmationStatus: 'enviado', confirmationChannel: channel, confirmationSentAt: new Date().toISOString(), confirmationSentBy: userId ?? undefined });
+  };
+
   const cancelAppointment = (id: string) => {
     const appt = store.getState().items.find((a) => a.id === id);
     updateStatus(id, { status: 'Cancelado' });
@@ -66,5 +73,5 @@ export function useAppointments() {
     // soft reminder state, not a real confirmation from the client.
   };
 
-  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, cancelAppointment, rescheduleAppointment, sendReminders };
+  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, confirmAppointment, cancelAppointment, rescheduleAppointment, sendReminders };
 }
