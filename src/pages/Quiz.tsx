@@ -13,10 +13,12 @@ import wordmark from '../assets/belezaflow-wordmark.png';
 type Screen = 'quiz' | 'analyzing' | 'diagnosis' | 'landing';
 
 const RISK_PERCENTAGE = 78;
-const MARKETING_BLOCK_IDX = 3;
-const INSTAGRAM_FREEZE_IDX = 0;
-const PAPER_IDX = 0;
-const NEVER_REACTIVATE_IDX = 0;
+const MARKETING_BLOCK_IDX = 3; // Q1 "Bloqueio no Marketing"
+const INSTAGRAM_FREEZE_IDX = 0; // Q4 "Travo total"
+const INSTAGRAM_NO_SALES_IDX = 2; // Q4 "Posto mas não vendo" — posting without converting is the same underlying problem
+const PAPER_IDX = 0; // Q2 "Papel ou Caderno"
+const NEVER_REACTIVATE_IDX = 0; // Q3 "Nunca faço"
+const WANTS_TO_REACTIVATE_IDX = 2; // Q3 "Quero mas não sei como" — the leak already exists, just no mechanism to act on it
 
 export function QuizPage() {
   const { t } = useLang();
@@ -76,9 +78,9 @@ export function QuizPage() {
   const current = q.questions[quizStep];
 
   const dynamicCards = [];
-  if (answers[0] === MARKETING_BLOCK_IDX || answers[3] === INSTAGRAM_FREEZE_IDX) dynamicCards.push(q.alertCardMarketing);
+  if (answers[0] === MARKETING_BLOCK_IDX || answers[3] === INSTAGRAM_FREEZE_IDX || answers[3] === INSTAGRAM_NO_SALES_IDX) dynamicCards.push(q.alertCardMarketing);
   if (answers[1] === PAPER_IDX) dynamicCards.push(q.alertCardPaper);
-  if (answers[2] === NEVER_REACTIVATE_IDX) dynamicCards.push(q.alertCardReactivation);
+  if (answers[2] === NEVER_REACTIVATE_IDX || answers[2] === WANTS_TO_REACTIVATE_IDX) dynamicCards.push(q.alertCardReactivation);
   if (dynamicCards.length === 0) dynamicCards.push(q.fallbackCard);
 
   const p1Text = q.questions[0].options[answers[0]] ?? '';

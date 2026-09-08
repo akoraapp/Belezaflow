@@ -618,7 +618,7 @@ const pt = {
     alertCardReactivation: { title: 'VAZAMENTO DE RECEITA: Perda por Abandono', desc: 'Você está deixando dinheiro na mesa por não reativar clientes.' },
     fallbackCard: { title: 'Agenda com Buracos', desc: 'Horários vazios e faltas estão drenando sua agenda em silêncio.' },
     conclusionPrefix: 'Detectamos que o seu maior gargalo é: ',
-    seeSolutionCta: 'ESTANCAR MEU PREJUÍZO AGORA',
+    seeSolutionCta: 'QUERO RECUPERAR O CONTROLE',
   },
   landing: {
     viewPlansCta: 'Ver planos',
@@ -1132,7 +1132,7 @@ const en: typeof pt = {
     alertCardReactivation: { title: 'REVENUE LOSS: Abandonment Leak', desc: "You're leaving money on the table by never reactivating clients." },
     fallbackCard: { title: 'Schedule Full of Holes', desc: 'Empty slots and no-shows are quietly draining your calendar.' },
     conclusionPrefix: 'We detected your biggest bottleneck is: ',
-    seeSolutionCta: 'See My Solution',
+    seeSolutionCta: 'I WANT TO TAKE BACK CONTROL',
   },
   landing: {
     viewPlansCta: 'View Plans',
@@ -1646,7 +1646,7 @@ const es: typeof pt = {
     alertCardReactivation: { title: 'FUGA DE INGRESOS: Pérdida por Abandono', desc: 'Estás dejando dinero sobre la mesa al no reactivar clientas.' },
     fallbackCard: { title: 'Agenda Llena de Huecos', desc: 'Los espacios vacíos y las ausencias están drenando tu agenda en silencio.' },
     conclusionPrefix: 'Detectamos que tu mayor obstáculo es: ',
-    seeSolutionCta: 'Ver Mi Solución',
+    seeSolutionCta: 'QUIERO RECUPERAR EL CONTROL',
   },
   landing: {
     viewPlansCta: 'Ver Planes',
