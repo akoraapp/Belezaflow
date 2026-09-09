@@ -387,8 +387,8 @@ function ClienteDetail({
       <Card style={{ marginBottom: 20 }}>
         <Row label={t.clientes.originRowLabel} value={ORIGEM_LABEL[lang][client.origem] || client.origem} />
         {client.service && <Row label={t.clientes.serviceRowLabel} value={client.service} />}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
-          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '9px 0' }}>
+          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, flexShrink: 0 }}>{t.clientes.birthdayLabel}</span>
           <input
             type="date"
             value={bdayInput}
@@ -398,16 +398,17 @@ function ClienteDetail({
             }}
             data-testid="cliente-detail-birthday"
             style={{
-              border: 'none',
-              borderBottom: `1px solid ${T.line}`,
-              textAlign: 'right',
+              border: `1px solid ${T.line}`,
+              borderRadius: RADIUS.control,
+              boxSizing: 'border-box',
+              maxWidth: '100%',
+              padding: '6px 10px',
               fontFamily: 'Inter',
               fontSize: 12.5,
               fontWeight: 700,
               color: T.ink,
               outline: 'none',
-              width: 130,
-              background: 'transparent',
+              background: T.surface,
             }}
           />
         </div>
