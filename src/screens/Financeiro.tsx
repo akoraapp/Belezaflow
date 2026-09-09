@@ -10,6 +10,17 @@ import { useAppointments } from '../hooks/useAppointments';
 import { useFinance } from '../hooks/useFinance';
 import type { CurrencyCode } from '../types';
 
+// Sentinel for "every month of the selected year" in the month <select>, as
+// opposed to a specific month index (0-11).
+const ALL_MONTHS = -1;
+
+// The vencimento field is a native date input (yyyy-mm-dd) — shown as
+// dd/mm/yyyy in the entries list instead of the raw ISO string.
+function formatDueDate(dateStr: string) {
+  const m = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : dateStr;
+}
+
 function GoalGauge({ pct }: { pct: number }) {
   const clamped = Math.max(0, Math.min(100, pct));
   const textOnFill = clamped >= 50;
@@ -90,29 +101,38 @@ export function FinanceiroScreen() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
   const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   if (!profile) return null;
   const currency = profile.currency;
+  const isWholeYear = selectedMonth === ALL_MONTHS;
   const isCurrentPeriod = selectedYear === currentYear && selectedMonth === currentMonth;
   const yearOptions = Array.from({ length: 2030 - currentYear + 1 }, (_, i) => currentYear + i);
 
   const appointmentsInPeriod = (year: number, month: number) =>
-    appointments.filter((a) => a.status === 'Compareceu' && new Date(a.createdAt).getFullYear() === year && new Date(a.createdAt).getMonth() === month);
+    appointments.filter((a) => a.status === 'Compareceu' && new Date(a.createdAt).getFullYear() === year && (month === ALL_MONTHS || new Date(a.createdAt).getMonth() === month));
   const entriesInPeriod = (year: number, month: number) =>
-    entries.filter((e) => new Date(e.createdAt).getFullYear() === year && new Date(e.createdAt).getMonth() === month);
+    entries.filter((e) => new Date(e.createdAt).getFullYear() === year && (month === ALL_MONTHS || new Date(e.createdAt).getMonth() === month));
 
   const periodAppointments = appointmentsInPeriod(selectedYear, selectedMonth);
   const periodEntries = entriesInPeriod(selectedYear, selectedMonth);
 
   const totalRev = periodAppointments.reduce((s, a) => s + a.price, 0);
-  const goalPct = profile.goal > 0 ? Math.min(100, Math.round((totalRev / profile.goal) * 100)) : 0;
-  const remaining = Math.max(0, profile.goal - totalRev);
+  // profile.goal is a monthly target — scale it to the whole year being
+  // viewed so the goal gauge/remaining-to-goal stay meaningful instead of
+  // comparing a year of revenue against a single month's target.
+  const periodGoal = isWholeYear ? profile.goal * 12 : profile.goal;
+  const goalPct = periodGoal > 0 ? Math.min(100, Math.round((totalRev / periodGoal) * 100)) : 0;
+  const remaining = Math.max(0, periodGoal - totalRev);
   const ticketMedio = periodAppointments.length ? Math.round(periodAppointments.reduce((s, a) => s + a.price, 0) / periodAppointments.length) : 0;
 
-  const aReceber = periodEntries.filter((e) => e.tipo === 'receber').reduce((s, e) => s + Number(e.value), 0);
+  // "Total a receber" is every real (client revenue already earned) plus
+  // pending (manually logged) amount still owed to her — not just the
+  // manual entries on their own, which was undercounting it before.
+  const aReceber = totalRev + periodEntries.filter((e) => e.tipo === 'receber').reduce((s, e) => s + Number(e.value), 0);
   const aPagar = periodEntries.filter((e) => e.tipo === 'pagar').reduce((s, e) => s + Number(e.value), 0);
 
-  const monthName = MONTH_NAMES[lang][selectedMonth];
+  const monthName = isWholeYear ? t.financeiro.allMonthsOption : MONTH_NAMES[lang][selectedMonth];
+  const periodLabel = isWholeYear ? String(selectedYear) : `${monthName} ${selectedYear}`;
   const history = Array.from({ length: 6 }).map((_, i) => {
     const idx = currentMonth - (5 - i);
     const monthIdx = ((idx % 12) + 12) % 12;
@@ -144,11 +164,11 @@ export function FinanceiroScreen() {
         <GoalGauge pct={goalPct} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: 'Inter', fontSize: 10.5, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: T.goldLight }}>
-            {t.financeiro.metaOfMonthPrefix} {monthName}
+            {t.financeiro.metaOfMonthPrefix} {periodLabel}
           </div>
           <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.bg, marginTop: 7, lineHeight: 1.5 }}>
             {remaining > 0
-              ? `${t.financeiro.remainingToGoalPrefix} ${fmtCurrency(remaining, currency)} ${t.financeiro.remainingToGoalMiddle} ${fmtCurrency(profile.goal, currency)}`
+              ? `${t.financeiro.remainingToGoalPrefix} ${fmtCurrency(remaining, currency)} ${t.financeiro.remainingToGoalMiddle} ${fmtCurrency(periodGoal, currency)}`
               : t.financeiro.goalReached}
           </div>
         </div>
@@ -167,6 +187,7 @@ export function FinanceiroScreen() {
               {m}
             </option>
           ))}
+          <option value={ALL_MONTHS}>{t.financeiro.allMonthsOption}</option>
         </select>
         <select
           value={selectedYear}
@@ -185,7 +206,7 @@ export function FinanceiroScreen() {
       {!isCurrentPeriod && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 26, padding: '10px 12px', background: T.surface, border: `1px solid ${T.gold}`, borderRadius: RADIUS.control }}>
           <span style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.goldDeep, fontWeight: 600 }}>
-            {t.financeiro.viewingPeriodPrefix} {monthName} {selectedYear}
+            {t.financeiro.viewingPeriodPrefix} {periodLabel}
           </span>
           <button
             onClick={resetToCurrentPeriod}
@@ -233,8 +254,13 @@ export function FinanceiroScreen() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={label} onChange={setLabel} placeholder={t.financeiro.descricaoPlaceholder} testId="finance-label" />
-            <TextInput value={value} onChange={setValue} placeholder={`${t.financeiro.valorPlaceholderPrefix} (${CURRENCIES[currency].symbol})`} numeric testId="finance-value" />
-            <TextInput value={data} onChange={setData} placeholder={t.financeiro.vencimentoPlaceholder} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: 'Playfair Display', fontSize: 16, color: T.ink, flexShrink: 0 }}>{CURRENCIES[currency].symbol}</span>
+              <div style={{ flex: 1 }}>
+                <TextInput value={value} onChange={setValue} placeholder={t.financeiro.valorPlaceholderPrefix} numeric testId="finance-value" />
+              </div>
+            </div>
+            <TextInput value={data} onChange={setData} type="date" testId="finance-vencimento" />
           </div>
           <div style={{ marginTop: 12 }}>
             <PrimaryButton full onClick={submit} disabled={!label || !value} variant="accent" testId="finance-add-submit">
@@ -252,7 +278,7 @@ export function FinanceiroScreen() {
               <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: T.ink }}>{e.label}</div>
               {e.data && (
                 <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
-                  {t.financeiro.venceLabel} {e.data}
+                  {t.financeiro.venceLabel} {formatDueDate(e.data)}
                 </div>
               )}
             </div>

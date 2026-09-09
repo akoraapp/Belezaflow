@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR, CURRENCIES } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
@@ -26,6 +26,28 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
   const [filter, setFilter] = useState(initialFilter ?? 'Todos');
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [showAdd, setShowAdd] = useState(false);
+
+  // Opening a client's detail view is local state, same as the dashboard's
+  // own tab navigation — without its own history entry, the phone/browser
+  // back button skips straight past it. Push one on open so back restores
+  // the list instead of leaving Clientes (or worse, the funnel) entirely.
+  interface ClienteNavState {
+    belezaflowClientId: string | null;
+  }
+  const isClienteNavState = (s: unknown): s is ClienteNavState => !!s && typeof s === 'object' && 'belezaflowClientId' in s;
+
+  const openClient = (id: string) => {
+    setSelectedId(id);
+    window.history.pushState({ belezaflowClientId: id } satisfies ClienteNavState, '');
+  };
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (isClienteNavState(e.state)) setSelectedId(e.state.belezaflowClientId);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [service, setService] = useState('');
@@ -56,7 +78,7 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
         client={selected}
         currency={currency}
         clientAppointments={clientAppointments}
-        onBack={() => setSelectedId(null)}
+        onBack={() => window.history.back()}
         contactMethod={contactMethod}
         onChangeStatus={(status) => updateClient(selected.id, { status })}
         onChangeName={(name) => updateClient(selected.id, { name })}
@@ -132,7 +154,7 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.length === 0 && <EmptyHint text={t.clientes.noClientsInFilter} />}
         {filtered.map((c) => (
-          <Card key={c.id} onClick={() => setSelectedId(c.id)} testId={`cliente-row-${c.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
+          <Card key={c.id} onClick={() => openClient(c.id)} testId={`cliente-row-${c.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div
                 style={{
