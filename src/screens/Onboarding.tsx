@@ -51,7 +51,13 @@ export function Onboarding({ initialName, onComplete }: { initialName: string; o
   useEffect(() => {
     if (profession) {
       const base = SUGGESTED_SERVICES[profession] || SUGGESTED_SERVICES.other;
-      setServices(base.map((s, i) => ({ id: `s${i}`, name: SUGGESTED_SERVICE_LABEL[lang][s.key] || s.key, price: s.price, duration: s.duration })));
+      // services.id is a table-wide primary key (not scoped per user), so a
+      // fixed `s${i}` would collide with another professional's own seeded
+      // services the moment more than one account has onboarded — every
+      // other id generator in the app (products, clients, appointments)
+      // already uses Date.now() for exactly this reason.
+      const seedId = Date.now();
+      setServices(base.map((s, i) => ({ id: `s${seedId}_${i}`, name: SUGGESTED_SERVICE_LABEL[lang][s.key] || s.key, price: s.price, duration: s.duration })));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profession]);
