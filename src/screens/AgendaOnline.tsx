@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AtSign, Check, Copy, MapPin, MessageCircle, MessageSquare, QrCode, Share2 } from 'lucide-react';
 import { T, ALL_SLOTS, RADIUS, SHADOW } from '../theme';
 import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
@@ -6,10 +6,12 @@ import { getAvailability, getAvailableSlotsForDate, getBookableDays, fmtMoney, f
 import { buildWhatsAppLink, digitsOnly } from '../lib/followup';
 import { Card, Chip, TextInput, PhoneInput, FieldLabel, EmptyHint, IconButton, StepLabel, ServiceOption, PrimaryButton, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
+import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { useAppointments } from '../hooks/useAppointments';
 import { useServices } from '../hooks/useServices';
 import { useClients } from '../hooks/useClients';
+import { supabase } from '../services/supabaseClient';
 import type { ServiceItem } from '../types';
 
 const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
@@ -21,6 +23,7 @@ interface AgendaOnlineScreenProps {
 
 export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScreenProps) {
   const { t, lang } = useLang();
+  const { userId } = useAuth();
   const { profile, updateProfile: onUpdateProfile } = useProfile();
   const { appointments, addAppointment } = useAppointments();
   const { services } = useServices();
@@ -28,6 +31,9 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [copyFallback, setCopyFallback] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookDate, setBookDate] = useState<string | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
@@ -44,6 +50,34 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
 
   if (!profile) return null;
   const currency = profile.currency;
+
+  const handleAvatarFile = async (file: File | undefined) => {
+    if (!file || !userId) return;
+    setAvatarError('');
+    if (!file.type.startsWith('image/')) {
+      setAvatarError(t.agendaOnline.avatarInvalidType);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError(t.agendaOnline.avatarTooLarge);
+      return;
+    }
+    setUploadingAvatar(true);
+    // Same path every time (upsert) so re-uploading replaces the old photo
+    // instead of leaving orphaned files behind in her folder.
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${userId}/avatar.${ext}`;
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' });
+    setUploadingAvatar(false);
+    if (uploadError) {
+      setAvatarError(t.agendaOnline.avatarUploadError);
+      return;
+    }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    // Cache-bust: the URL/path never changes on re-upload, so without this
+    // the browser (or a CDN) can keep serving the previous image.
+    onUpdateProfile({ avatarUrl: `${data.publicUrl}?t=${Date.now()}` });
+  };
 
   // Must match the slug the public-booking Edge Function derives from
   // profiles.public_name (see supabase/functions/public-booking) — there's
@@ -172,6 +206,39 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
       <SectionTitle>{t.agendaOnline.publicInfoTitle}</SectionTitle>
       <Card style={{ marginBottom: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
+          <FieldLabel>{t.agendaOnline.avatarLabel}</FieldLabel>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div
+              onClick={() => avatarInputRef.current?.click()}
+              style={{
+                width: 56,
+                height: 56,
+                minWidth: 56,
+                borderRadius: 16,
+                overflow: 'hidden',
+                cursor: 'pointer',
+                background: profile.avatarUrl ? T.surfaceAlt : `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {profile.avatarUrl ? (
+                <img src={profile.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <span style={{ fontFamily: 'Playfair Display', fontSize: 22, color: '#fff', fontWeight: 600 }}>{(profile.publicName || 'S').charAt(0)}</span>
+              )}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <PrimaryButton variant="secondary" onClick={() => avatarInputRef.current?.click()} disabled={uploadingAvatar} testId="agendaonline-avatar-upload">
+                {uploadingAvatar ? '…' : t.agendaOnline.avatarUploadCta}
+              </PrimaryButton>
+              {avatarError && <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.danger, marginTop: 6 }}>{avatarError}</div>}
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => handleAvatarFile(e.target.files?.[0])} />
+          </div>
+        </div>
+        <div>
           <FieldLabel>{t.agendaOnline.instagramLabel}</FieldLabel>
           <TextInput value={profile.instagram || ''} onChange={(v) => onUpdateProfile({ instagram: v })} placeholder={t.agendaOnline.instagramPlaceholder} />
         </div>
@@ -256,7 +323,8 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               height: 74,
               borderRadius: '50%',
               margin: '0 auto 14px',
-              background: `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
+              overflow: 'hidden',
+              background: profile.avatarUrl ? T.surface : `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -267,13 +335,12 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
               boxShadow: '0 0 0 3px rgba(255,255,255,0.6), 0 8px 22px -6px rgba(26,26,26,0.25)',
             }}
           >
-            {(profile.publicName || 'S').charAt(0)}
+            {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /> : (profile.publicName || 'S').charAt(0)}
           </div>
           <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: T.ink, fontWeight: 400 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
-          <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldDeep, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
+          <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldDeep, marginTop: 4, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1.4 }}>
             {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
           </div>
-          <div style={{ position: 'relative', width: 28, height: 1.5, background: T.gold, margin: '12px auto 14px', opacity: 0.7 }} />
           <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
             {profile.instagram && (
               <a

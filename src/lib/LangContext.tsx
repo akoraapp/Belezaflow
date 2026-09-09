@@ -23,7 +23,13 @@ function readSavedLang(): Lang | null {
   return null;
 }
 
-function detectDeviceLang(): Lang {
+// Exported for the public booking page (src/pages/PublicBooking.tsx): that
+// page is opened by an anonymous client, not the professional, and must
+// always reflect their own device's language — never whatever got cached in
+// this browser's localStorage by unrelated earlier app usage (e.g. the
+// professional's own account language, if she's ever tested the link on the
+// same device/browser she's logged into).
+export function detectDeviceLang(): Lang {
   try {
     const candidates = navigator.languages?.length ? navigator.languages : navigator.language ? [navigator.language] : [];
     for (const candidate of candidates) {

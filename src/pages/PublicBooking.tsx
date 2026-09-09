@@ -6,7 +6,8 @@ import { PROFESSION_LABEL, WEEKDAY_LABEL } from '../i18n';
 import { getAvailableSlotsForDate, getBookableDays, fmtMoney, formatTimeLabel } from '../lib/helpers';
 import { buildWhatsAppLink, digitsOnly } from '../lib/followup';
 import { Card, TextInput, PhoneInput, EmptyHint, StepLabel, ServiceOption, PrimaryButton } from '../components/primitives';
-import { useLang } from '../lib/LangContext';
+import { detectDeviceLang } from '../lib/LangContext';
+import { DICT } from '../i18n';
 import { supabase } from '../services/supabaseClient';
 import type { Appointment, ContactMethod, CurrencyCode, ServiceItem } from '../types';
 
@@ -21,6 +22,7 @@ interface PublicProfile {
   workingDays: string[];
   availableSlots: string[];
   currency: CurrencyCode;
+  avatarUrl: string;
 }
 
 // Only day/time/status travel over the wire (see supabase/functions/public-
@@ -31,7 +33,11 @@ type PublicAppointment = Pick<Appointment, 'day' | 'time' | 'status'>;
 
 export function PublicBookingPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { t, lang } = useLang();
+  // Always the visitor's own device language, never the shared app's cached
+  // localStorage preference — this page is opened by a client, not whoever
+  // last used this browser for the professional's own dashboard.
+  const [lang] = useState(detectDeviceLang);
+  const t = DICT[lang];
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [appointments, setAppointments] = useState<PublicAppointment[]>([]);
@@ -160,7 +166,8 @@ export function PublicBookingPage() {
                 height: 74,
                 borderRadius: '50%',
                 margin: '0 auto 14px',
-                background: `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
+                overflow: 'hidden',
+                background: profile.avatarUrl ? T.surface : `linear-gradient(135deg, ${T.goldLight}, ${T.goldDeep})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -171,13 +178,12 @@ export function PublicBookingPage() {
                 boxShadow: '0 0 0 3px rgba(255,255,255,0.6), 0 8px 22px -6px rgba(26,26,26,0.25)',
               }}
             >
-              {(profile.publicName || 'S').charAt(0)}
+              {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /> : (profile.publicName || 'S').charAt(0)}
             </div>
             <div style={{ position: 'relative', fontFamily: 'Playfair Display', fontSize: 21, color: T.ink, fontWeight: 400 }}>{profile.publicName || t.agendaOnline.defaultPublicName}</div>
-            <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldDeep, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1.4 }}>
+            <div style={{ position: 'relative', fontFamily: 'Inter', fontSize: 10.5, color: T.goldDeep, marginTop: 4, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1.4 }}>
               {profile.profession ? PROFESSION_LABEL[lang][profile.profession] : ''}
             </div>
-            <div style={{ position: 'relative', width: 28, height: 1.5, background: T.gold, margin: '12px auto 14px', opacity: 0.7 }} />
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
               {profile.instagram && (
                 <a

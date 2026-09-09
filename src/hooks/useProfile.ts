@@ -66,6 +66,7 @@ export function useProfile() {
       rescheduleNoticeHours: 24,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
       confirmationMessageTemplate: '',
+      avatarUrl: '',
     };
     profileStore.setState({ profile: newProfile, loading: false, userId });
     if (userId) {

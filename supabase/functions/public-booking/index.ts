@@ -40,7 +40,7 @@ function slugify(publicName: string | null | undefined) {
 async function findProfileBySlug(slug: string) {
   const { data: profiles, error } = await supabaseAdmin
     .from('profiles')
-    .select('id, public_name, profession, instagram, whatsapp, endereco, maps_link, contact_method, working_days, available_slots, currency');
+    .select('id, public_name, profession, instagram, whatsapp, endereco, maps_link, contact_method, working_days, available_slots, currency, avatar_url');
   if (error) throw error;
   return (profiles ?? []).find((p) => slugify(p.public_name as string) === slug) ?? null;
 }
@@ -74,6 +74,7 @@ async function handleGet(slug: string) {
         workingDays: profile.working_days ?? [],
         availableSlots: profile.available_slots ?? [],
         currency: profile.currency,
+        avatarUrl: profile.avatar_url ?? '',
       },
       services: services ?? [],
       appointments: appointments ?? [],

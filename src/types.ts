@@ -45,6 +45,9 @@ export interface Profile {
   // Custom appointment-confirmation message template (see src/lib/followup.ts) —
   // empty means "use the built-in default for the current language".
   confirmationMessageTemplate: string;
+  // Public URL of the professional's uploaded photo/logo (Supabase storage
+  // 'avatars' bucket) — empty means "show the plain letter avatar instead".
+  avatarUrl: string;
 }
 
 export interface OnboardingResult {
