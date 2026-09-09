@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronLeft, MessageCircle, MessageSquare, Plus } from 'lucide-react';
 import { T, RADIUS, ORIGENS, STATUS_LIST, STATUS_COLOR, CURRENCIES } from '../theme';
 import { STATUS_LABEL, ORIGEM_LABEL } from '../i18n';
-import { Card, Chip, TextInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle, StatBox, SelectInput } from '../components/primitives';
+import { Card, Chip, TextInput, TextareaInput, PhoneInput, EmptyHint, PrimaryButton, Row, SectionTitle, StatBox, SelectInput } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { format, fmtMoney } from '../lib/helpers';
 import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
@@ -279,6 +279,7 @@ function ClienteDetail({
       quebraObjecao: `Entendo, ${client.name}! Se for sobre o valor, posso te mostrar as formas de pagamento que temos disponíveis 💛`,
       fechamento: `${client.name}, consigo te encaixar para o ${client.service}. Vamos confirmar seu horário?`,
       reativacao: `Saudades por aqui, ${client.name}! Que tal renovar seu ${client.service}? Tenho uma condição especial essa semana.`,
+      aniversario: `Feliz aniversário, ${client.name}! 🎂💛 Passando pra desejar um dia incrível. Que tal comemorar com um horário especial? Tenho uma condição de aniversário só pra você essa semana!`,
     },
     en: {
       primeiroContato: `Hi ${client.name}! 😊 I saw you're interested in ${client.service}. Can I help you find the best time?`,
@@ -286,6 +287,7 @@ function ClienteDetail({
       quebraObjecao: `I understand, ${client.name}! If it's about the price, I can show you the payment options we have 💛`,
       fechamento: `${client.name}, I can fit you in for your ${client.service}. Shall we confirm your time?`,
       reativacao: `Missed you here, ${client.name}! How about renewing your ${client.service}? I have a special offer this week.`,
+      aniversario: `Happy birthday, ${client.name}! 🎂💛 Just stopping by to wish you an amazing day. How about celebrating with a special appointment? I have a birthday offer just for you this week!`,
     },
     es: {
       primeiroContato: `¡Hola ${client.name}! 😊 Vi tu interés en ${client.service}. ¿Te ayudo a encontrar el mejor horario?`,
@@ -293,16 +295,26 @@ function ClienteDetail({
       quebraObjecao: `Entiendo, ${client.name}! Si es por el precio, puedo mostrarte las formas de pago que tenemos disponibles 💛`,
       fechamento: `${client.name}, puedo agendarte para tu ${client.service}. ¿Confirmamos tu horario?`,
       reativacao: `¡Te extrañamos por aquí, ${client.name}! ¿Qué tal renovar tu ${client.service}? Tengo una condición especial esta semana.`,
+      aniversario: `¡Feliz cumpleaños, ${client.name}! 🎂💛 Pasando para desearte un día increíble. ¿Qué tal celebrar con una cita especial? ¡Tengo una condición de cumpleaños solo para ti esta semana!`,
     },
   };
 
-  const templateKeys = ['primeiroContato', 'followUp', 'quebraObjecao', 'fechamento', 'reativacao'] as const;
+  const templateKeys = ['primeiroContato', 'followUp', 'quebraObjecao', 'fechamento', 'reativacao', 'aniversario'] as const;
   const methodLabel = contactMethod === 'sms' ? 'SMS' : 'WhatsApp';
   const MethodIcon = contactMethod === 'sms' ? MessageSquare : MessageCircle;
 
+  // The template just seeds the box — she can send it as-is or rewrite it
+  // entirely before sending, same idea as every other editable field in
+  // this screen (name, birthday).
+  const [messageDraft, setMessageDraft] = useState('');
+  const selectTemplate = (key: (typeof templateKeys)[number]) => {
+    setMsgType(key);
+    setMessageDraft(templateBodies[lang][key]);
+  };
+
   const sendTemplateMessage = async () => {
-    if (!msgType) return;
-    const message = templateBodies[lang][msgType];
+    if (!msgType || !messageDraft.trim()) return;
+    const message = messageDraft;
     const waLink = client.phone ? buildWhatsAppLink(client.phone, message) : null;
     if (contactMethod === 'whatsapp' && waLink) {
       window.open(waLink, '_blank', 'noopener,noreferrer');
@@ -488,19 +500,19 @@ function ClienteDetail({
       <SectionTitle>{t.clientes.centralRespostasTitle}</SectionTitle>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
         {templateKeys.map((k) => (
-          <Chip key={k} active={msgType === k} onClick={() => setMsgType(k)}>
+          <Chip key={k} active={msgType === k} onClick={() => selectTemplate(k)}>
             {t.clientes.msgTemplateLabels[k]}
           </Chip>
         ))}
       </div>
       {msgType && (
         <Card style={{ marginBottom: 14 }}>
-          <div style={{ fontFamily: 'Inter', fontSize: 13, color: T.ink, lineHeight: 1.5 }}>{templateBodies[lang][msgType]}</div>
+          <TextareaInput value={messageDraft} onChange={setMessageDraft} rows={4} testId="clientes-message-draft" />
           {!client.phone && contactMethod === 'whatsapp' && (
             <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginTop: 8 }}>{t.clientes.noPhoneHint}</div>
           )}
           <div style={{ marginTop: 12 }}>
-            <PrimaryButton full icon={MethodIcon} onClick={sendTemplateMessage} testId="clientes-send-template">
+            <PrimaryButton full icon={MethodIcon} onClick={sendTemplateMessage} disabled={!messageDraft.trim()} testId="clientes-send-template">
               {copied ? t.clientes.copiedMessageLabel : `${t.clientes.sendViaPrefix} ${methodLabel}`}
             </PrimaryButton>
           </div>
