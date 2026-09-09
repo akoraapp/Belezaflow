@@ -35,9 +35,14 @@ export const FUNNEL_KEYFRAMES = `
 @keyframes bfFloatC { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-22px) rotate(-2deg); } }
 /* On narrow phones the floating decorative cards overlap the hero title
    (they're positioned relative to the full-width hero panel, not the text
-   column) — hide them below the app's own mobile breakpoint. */
+   column, which leaves no side margin to float them in once the panel is
+   barely wider than the centered text itself) — so below the app's own
+   mobile breakpoint they're swapped for .bf-hero-float-mobile, the same
+   cards laid out in-flow as a horizontal scroller instead of floating. */
+.bf-hero-float-mobile { display: none; }
 @media (max-width: 640px) {
   .bf-hero-float { display: none; }
+  .bf-hero-float-mobile { display: flex; }
 }
 `;
 

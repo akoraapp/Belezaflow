@@ -93,6 +93,32 @@ export function LandingPage() {
               {l.viewPlansCta}
             </button>
           </div>
+          {/* Same preview cards as the desktop .bf-hero-float ones (see
+              funnelTheme.ts), swapped in below 640px — laid out in-flow as a
+              horizontal scroller instead of floating beside the title, since
+              a narrow phone has no side margin to float them in without
+              covering the text. */}
+          <div className="bf-hero-float-mobile" style={{ gap: 10, overflowX: 'auto', margin: '0 -20px 20px', padding: '0 20px 4px' }}>
+            {l.heroPreviewCards.map((card, i) => (
+              <div
+                key={i}
+                style={{
+                  flex: '0 0 auto',
+                  width: 136,
+                  padding: '10px 12px',
+                  background: F.surface,
+                  border: `1px solid ${F.lineSoft}`,
+                  borderRadius: 12,
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                  textAlign: 'left',
+                }}
+              >
+                <div style={{ fontSize: 9, fontWeight: 800, color: F.goldDeep, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{card.tag}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: F.ink, marginBottom: 3 }}>{card.title}</div>
+                <div style={{ fontSize: 10, color: F.mutedLight }}>{card.desc}</div>
+              </div>
+            ))}
+          </div>
           <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 42, fontWeight: 800, color: F.ink, lineHeight: 1.15, margin: '0 auto 24px', maxWidth: 700, letterSpacing: -1 }}>{l.heroTitle}</h1>
           <p style={{ fontSize: 18, color: F.body, lineHeight: 1.6, margin: '0 auto 32px', maxWidth: 600 }}>
             {l.heroSubtitlePrefix} <strong style={{ color: F.goldDeep, fontWeight: 800 }}>{l.heroSubtitleHighlight}</strong> {l.heroSubtitleSuffix}
