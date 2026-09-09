@@ -135,17 +135,54 @@ function AppShell() {
   const [clientesNonce, setClientesNonce] = useState(0);
   const [clientesInitialSelectedId, setClientesInitialSelectedId] = useState<string | null>(null);
 
+  // Tab/"more screen" navigation inside the dashboard is local React state,
+  // not a route change — the URL stays on /app the whole time. Left alone,
+  // the phone/browser back button has no in-app history to pop through, so
+  // it falls straight past the dashboard to whatever real navigation entry
+  // put the app there (the quiz/landing funnel), which is jarring and loses
+  // whatever screen the professional was on. Each in-app navigation now
+  // pushes its own history entry (same URL, only the state object differs)
+  // so back pops through screens the person actually visited instead.
+  interface DashboardNavState {
+    belezaflowTab: string;
+    belezaflowMore: string | null;
+  }
+  const isDashboardNavState = (s: unknown): s is DashboardNavState => !!s && typeof s === 'object' && 'belezaflowTab' in s;
+
   const openMore = (id: string) => {
     setMoreScreen(id);
     setShowMore(false);
+    window.history.pushState({ belezaflowTab: activeTab, belezaflowMore: id } satisfies DashboardNavState, '');
   };
   const selectTab = (id: string) => {
     setActiveTab(id);
     setMoreScreen(null);
+    window.history.pushState({ belezaflowTab: id, belezaflowMore: null } satisfies DashboardNavState, '');
   };
   const tabs = getTabs(t);
   const moreItems = getMoreItems(t);
   const goTo = (id: string) => (tabs.some((tb) => tb.id === id) ? selectTab(id) : openMore(id));
+
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (isDashboardNavState(e.state)) {
+        setActiveTab(e.state.belezaflowTab);
+        setMoreScreen(e.state.belezaflowMore);
+      }
+      // Otherwise this popped past our own in-app history, down to the real
+      // navigation entry that led here (the quiz/landing route). Don't fight
+      // the browser's History API directly here — react-router owns that,
+      // and a raw history.pushState call here would desync its internal
+      // location from the real URL. QuizPage/LandingPage already treat any
+      // signed-in or previously-signed-up visitor as returning and bounce
+      // straight back to /app on their own (see isStandalonePWA/
+      // belezaflow_returning_user), so this just falls through to that
+      // existing safety net instead of duplicating it.
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, moreScreen]);
 
   const openClientesWithFilter = (filterValue: string, selectClientId: string | null = null) => {
     setClientesFilter(filterValue);
@@ -294,7 +331,7 @@ function AppShell() {
       {moreScreen === 'config' && (
         <ConfigScreen onOpenServicos={() => setMoreScreen('servicos')} notifPermission={notifPermission} onRequestNotifPermission={requestNotifPermission} />
       )}
-      {moreScreen === 'servicos' && <ServicosScreen onBack={() => setMoreScreen(null)} />}
+      {moreScreen === 'servicos' && <ServicosScreen onBack={() => window.history.back()} />}
 
       {!moreScreen && activeTab === 'hoje' && (
         <HojeScreen
@@ -406,7 +443,7 @@ function AppShell() {
 
       {moreScreen && moreScreen !== 'servicos' && (
         <button
-          onClick={() => setMoreScreen(null)}
+          onClick={() => window.history.back()}
           style={{
             position: 'absolute',
             top: 'max(18px, calc(env(safe-area-inset-top) + 8px))',

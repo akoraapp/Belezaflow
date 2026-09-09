@@ -24,7 +24,15 @@ export function Login({ isMobile = true }: { isMobile?: boolean }) {
     setLoading('signin');
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setLoading(null);
-    if (signInError) setError(t.login.authErrorGeneric);
+    if (signInError) {
+      setError(t.login.authErrorGeneric);
+      return;
+    }
+    // Marks this browser as belonging to a real customer, same as signUp —
+    // otherwise someone logging into an existing account on a browser that
+    // never saw signup (a new device, a cleared cache) would still get
+    // routed through the marketing quiz/landing funnel on their next visit.
+    localStorage.setItem('belezaflow_returning_user', '1');
   };
 
   const signUp = async () => {
