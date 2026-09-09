@@ -43,7 +43,11 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
 
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
-      if (isClienteNavState(e.state)) setSelectedId(e.state.belezaflowClientId);
+      // Popping past our own client-detail entry (back to the plain tab-level
+      // list, or anything else) must close the detail view — otherwise it
+      // stays stuck open, the back button looks like it did nothing, and a
+      // second press (trying again) skips an extra step back in history.
+      setSelectedId(isClienteNavState(e.state) ? e.state.belezaflowClientId : null);
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
