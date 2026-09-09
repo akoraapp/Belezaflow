@@ -438,7 +438,21 @@ function AppShell() {
     <div className="app-fullbleed" style={{ background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
       <style>{FONT_IMPORT}</style>
       <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
-        <div style={{ paddingTop: moreScreen && moreScreen !== 'servicos' ? 'max(34px, calc(env(safe-area-inset-top) + 12px))' : 0 }}>{screenContent}</div>
+        <div
+          style={{
+            // Installed standalone PWAs have no browser chrome pushing content
+            // down, so the OS status bar/notch sits directly over the top of
+            // the page unless every screen — not just the ones reached
+            // through "Mais", which is the only case this used to cover —
+            // reserves room for env(safe-area-inset-top). Screens with the
+            // floating back-chevron below need extra clearance so it doesn't
+            // overlap their own title.
+            paddingTop:
+              moreScreen && moreScreen !== 'servicos' ? 'max(34px, calc(env(safe-area-inset-top) + 12px))' : 'max(14px, calc(env(safe-area-inset-top) + 4px))',
+          }}
+        >
+          {screenContent}
+        </div>
       </div>
 
       {moreScreen && moreScreen !== 'servicos' && (

@@ -254,13 +254,32 @@ export function FinanceiroScreen() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={label} onChange={setLabel} placeholder={t.financeiro.descricaoPlaceholder} testId="finance-label" />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontFamily: 'Playfair Display', fontSize: 16, color: T.ink, flexShrink: 0 }}>{CURRENCIES[currency].symbol}</span>
-              <div style={{ flex: 1 }}>
-                <TextInput value={value} onChange={setValue} placeholder={t.financeiro.valorPlaceholderPrefix} numeric testId="finance-value" />
-              </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                width: '100%',
+                padding: '0 16px',
+                borderRadius: RADIUS.control,
+                border: `1.5px solid ${T.line}`,
+                background: T.surface,
+                boxSizing: 'border-box',
+              }}
+            >
+              <span style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: T.muted, flexShrink: 0 }}>{CURRENCIES[currency].symbol}</span>
+              <input
+                value={value}
+                onChange={(e) => setValue(e.target.value.replace(/[^0-9]/g, ''))}
+                placeholder={t.financeiro.valorPlaceholderPrefix}
+                data-testid="finance-value"
+                style={{ flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', padding: '13px 0', fontFamily: 'Inter', fontSize: 14, fontWeight: 600, color: T.ink }}
+              />
             </div>
-            <TextInput value={data} onChange={setData} type="date" testId="finance-vencimento" />
+            <div>
+              <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted, marginBottom: 4 }}>{t.financeiro.vencimentoLabel}</div>
+              <TextInput value={data} onChange={setData} type="date" testId="finance-vencimento" />
+            </div>
           </div>
           <div style={{ marginTop: 12 }}>
             <PrimaryButton full onClick={submit} disabled={!label || !value} variant="accent" testId="finance-add-submit">
