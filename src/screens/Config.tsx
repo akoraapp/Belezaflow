@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronRight, Scissors } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Mail, Scissors } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { Card, Chip, PrimaryButton, TextInput, TextareaInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -16,7 +16,9 @@ interface ConfigScreenProps {
   onRequestNotifPermission: () => void;
 }
 
-type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | null;
+type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | 'ajuda' | null;
+
+const SUPPORT_EMAIL = 'belezaflowapp@gmail.com';
 
 export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
   const { profile, updateProfile: onUpdateProfile } = useProfile();
@@ -205,7 +207,7 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
         <div
           onClick={() => toggle('notificacoes')}
           data-testid="config-notif-row"
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${T.line}`, cursor: 'pointer' }}
         >
           <span style={{ fontFamily: 'Inter', fontSize: 13.5, color: T.ink }}>{t.config.itemPrefNotificacoes}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -214,13 +216,35 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
           </div>
         </div>
         {openRow === 'notificacoes' && (
-          <div style={{ padding: '10px 16px 16px' }}>
+          <div style={{ padding: '10px 16px 16px', borderBottom: `1px solid ${T.line}` }}>
             {notifPermission === 'denied' && <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger, marginBottom: 10, lineHeight: 1.5 }}>{t.config.notifDeniedHint}</div>}
             {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
               <PrimaryButton full onClick={onRequestNotifPermission} testId="config-notif-enable">
                 {t.config.notifEnableCta}
               </PrimaryButton>
             )}
+          </div>
+        )}
+
+        <div
+          onClick={() => toggle('ajuda')}
+          data-testid="config-ajuda-row"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', cursor: 'pointer' }}
+        >
+          <span style={{ fontFamily: 'Inter', fontSize: 13.5, color: T.ink }}>{t.config.itemAjuda}</span>
+          <ChevronDown size={15} color={T.muted} style={{ transform: openRow === 'ajuda' ? 'rotate(180deg)' : 'none' }} />
+        </div>
+        {openRow === 'ajuda' && (
+          <div style={{ padding: '10px 16px 16px' }}>
+            <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t.config.ajudaHint}</div>
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ textDecoration: 'none', display: 'block' }} data-testid="config-ajuda-email">
+              <PrimaryButton full>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                  <Mail size={14} />
+                  {t.config.ajudaEmailCta}
+                </span>
+              </PrimaryButton>
+            </a>
           </div>
         )}
       </Card>

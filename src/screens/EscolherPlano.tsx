@@ -4,7 +4,7 @@ import { T, RADIUS } from '../theme';
 import { Card, PrimaryButton } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
-import { FUNNEL_PRICING } from '../lib/funnelTheme';
+import { useRegionPricing } from '../lib/useRegionPricing';
 
 type PlanId = 'monthly' | 'annual';
 type PaymentMethod = 'card' | 'pix';
@@ -24,7 +24,7 @@ export function EscolherPlanoScreen({
 }) {
   const { t, lang } = useLang();
   const l = t.landing;
-  const pricing = FUNNEL_PRICING[lang];
+  const { pricing, isBrazil } = useRegionPricing(lang);
   const [selected, setSelected] = useState<PlanId>(initialPlan);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [submitting, setSubmitting] = useState(false);
@@ -32,8 +32,10 @@ export function EscolherPlanoScreen({
 
   // Pix only exists for Brazil's annual plan — Mercado Pago's recurring
   // /preapproval API is card-only, so a one-time Pix charge only makes sense
-  // for the plan that's already sold as a single upfront payment.
-  const showPixOption = lang === 'pt' && selected === 'annual';
+  // for the plan that's already sold as a single upfront payment. Gated by
+  // real location (isBrazil), not UI language — a Portuguese-speaking buyer
+  // outside Brazil pays USD via Stripe and never sees Pix.
+  const showPixOption = isBrazil && selected === 'annual';
 
   const handleContinue = async () => {
     setSubmitting(true);

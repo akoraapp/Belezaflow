@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
 import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
-import { LangSwitcher } from '../components/LangSwitcher';
 import { LandingPage } from './Landing';
 import wordmark from '../assets/belezaflow-wordmark.png';
 
@@ -96,9 +95,8 @@ export function QuizPage() {
 
       {screen === 'quiz' && (
         <div style={{ maxWidth: 480, margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '24px 24px 40px', animation: 'bfFadeIn 0.5s ease' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 36 }}>
+          <div style={{ marginBottom: 36 }}>
             <img src={wordmark} alt="BelezaFlow" style={{ height: 22, width: 'auto', display: 'block' }} />
-            <LangSwitcher />
           </div>
           <div style={{ height: 6, background: F.line, borderRadius: 999, overflow: 'hidden', marginBottom: 40 }}>
             <div style={{ height: '100%', background: F.gold, borderRadius: 999, transition: 'width 0.4s ease', width: `${(quizStep / q.questions.length) * 100}%` }} />

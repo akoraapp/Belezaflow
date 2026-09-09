@@ -1,12 +1,19 @@
 // Creates a subscription for the calling user's chosen plan and returns the
 // checkout URL to redirect to. Which payment provider handles it depends on
-// the user's own profile.language (never anything the client sends, so a
-// tampered request can't switch providers or plans):
-//   - pt (Brazil)      -> Mercado Pago, BRL
-//   - en / es (intl)   -> Stripe Checkout, USD, cards (always recurring)
+// the caller's real-world location — geolocated from the request's IP
+// address server-side, never anything the client sends, so a tampered
+// request can't switch providers/currency — NOT their UI language. A
+// Portuguese-speaking visitor outside Brazil still pays in USD via Stripe;
+// someone in Brazil pays in BRL via Mercado Pago regardless of which
+// language they browse in:
+//   - IP geolocates to BR  -> Mercado Pago, BRL
+//   - anywhere else        -> Stripe Checkout, USD, cards (always recurring)
+// If geolocation fails (lookup error, no IP on the request, etc.) this falls
+// back to the old language-based heuristic (profile/metadata language === pt)
+// so checkout never breaks outright — it just loses the location precision.
 //
-// For pt, the plan and the client-requested paymentMethod together decide
-// which Mercado Pago API is used:
+// For Brazil, the plan and the client-requested paymentMethod together
+// decide which Mercado Pago API is used:
 //   - monthly, or annual with paymentMethod !== 'pix' -> /preapproval
 //     (recurring, card-only — Mercado Pago's recurring-billing API doesn't
 //     support Pix at all).
@@ -50,15 +57,33 @@ type PricingLang = 'pt' | 'en' | 'es';
 
 // Mirrors src/lib/funnelTheme.ts's FUNNEL_PRICING — kept in sync manually
 // since the frontend constant isn't reachable from a Deno Edge Function.
-const PRICING: Record<PricingLang, { currency: string; monthly: number; annual: number }> = {
-  pt: { currency: 'BRL', monthly: 77, annual: 684 },
-  en: { currency: 'USD', monthly: 47, annual: 397 },
-  es: { currency: 'USD', monthly: 47, annual: 397 },
-};
+const BR_PRICING = { currency: 'BRL', monthly: 77, annual: 684 };
+const INTL_PRICING = { currency: 'USD', monthly: 47, annual: 397 };
 
 interface CreateSubscriptionBody {
   plan: Plan;
   paymentMethod?: 'card' | 'pix';
+}
+
+// Geolocates the caller's IP via a free lookup service to decide Brazil vs.
+// international pricing/provider. Returns null (never throws) on any
+// failure — no IP on the request, the lookup service being down, a private/
+// local IP in dev, etc. — so the caller can fall back to a language-based
+// guess instead of the request failing outright.
+async function detectCountryCode(req: Request): Promise<string | null> {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  const ip = forwardedFor?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || '';
+  if (!ip) return null;
+  try {
+    const res = await fetch(`https://ipwho.is/${ip}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.success) return null;
+    return typeof data.country_code === 'string' ? data.country_code.toUpperCase() : null;
+  } catch (err) {
+    console.error('Country geolocation failed', err);
+    return null;
+  }
 }
 
 async function createMercadoPagoCheckout(userId: string, email: string | undefined, plan: Plan, amount: number, currency: string, origin: string) {
@@ -232,22 +257,25 @@ Deno.serve(async (req) => {
   // profiles.language (set once onboarding completes) is the source of truth
   // once it exists. If checkout happens before that — or onboarding is ever
   // skipped for a direct-purchase flow — fall back to the language recorded
-  // in auth metadata at signup time (see Login.tsx's signUp), so a visitor who
-  // picked English/Spanish on the landing page never silently gets routed to
-  // Mercado Pago/BRL just because their profile row doesn't exist yet.
+  // in auth metadata at signup time (see Login.tsx's signUp). This `lang` is
+  // ONLY used below as a last-resort fallback if IP geolocation fails — it no
+  // longer drives currency/provider on its own (see detectCountryCode above).
   const metadataLang = (user.user_metadata as Record<string, unknown> | undefined)?.language;
   const fallbackLang: PricingLang = metadataLang === 'en' || metadataLang === 'es' ? metadataLang : 'pt';
   const lang: PricingLang = profile?.language === 'en' || profile?.language === 'es' || profile?.language === 'pt' ? profile.language : fallbackLang;
-  const pricing = PRICING[lang];
+
+  const countryCode = await detectCountryCode(req);
+  const isBrazil = countryCode !== null ? countryCode === 'BR' : lang === 'pt';
+  const pricing = isBrazil ? BR_PRICING : INTL_PRICING;
   const amount = body.plan === 'monthly' ? pricing.monthly : pricing.annual;
   const origin = req.headers.get('origin') || Deno.env.get('APP_BASE_URL') || 'https://app.belezaflow.com';
 
-  const wantsPix = lang === 'pt' && body.plan === 'annual' && body.paymentMethod === 'pix';
+  const wantsPix = isBrazil && body.plan === 'annual' && body.paymentMethod === 'pix';
 
   try {
     const initPoint = wantsPix
       ? await createMercadoPagoOneTimeCheckout(user.id, user.email, amount, pricing.currency, origin)
-      : lang === 'pt'
+      : isBrazil
         ? await createMercadoPagoCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin)
         : await createStripeCheckout(user.id, user.email, body.plan, amount, pricing.currency, origin);
     return new Response(JSON.stringify({ init_point: initPoint }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

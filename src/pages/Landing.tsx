@@ -17,10 +17,12 @@ import {
 } from 'lucide-react';
 import { useLang } from '../lib/LangContext';
 import { format } from '../lib/helpers';
-import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES, FUNNEL_PRICING } from '../lib/funnelTheme';
-import { LangSwitcher } from '../components/LangSwitcher';
+import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
+import { useRegionPricing } from '../lib/useRegionPricing';
 import wordmark from '../assets/belezaflow-wordmark.png';
 import appIcon from '../assets/belezaflow-app-icon.png';
+
+const SUPPORT_EMAIL = 'belezaflowapp@gmail.com';
 
 const TOOL_ICONS = [Search, MessageSquare, Settings, Clock];
 const FEATURE_ICONS = [Calendar, Sparkles, MessageCircle, DollarSign, Users];
@@ -40,7 +42,7 @@ export function LandingPage() {
   const navigate = useNavigate();
   const isReturningUser = localStorage.getItem('belezaflow_returning_user') === '1';
   const l = t.landing;
-  const pricing = FUNNEL_PRICING[lang];
+  const { pricing } = useRegionPricing(lang);
   const [openFaq, setOpenFaq] = useState(-1);
 
   useEffect(() => {
@@ -87,12 +89,9 @@ export function LandingPage() {
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 480, margin: '0 auto 40px' }}>
             <img src={wordmark} alt="BelezaFlow" style={{ height: 22, width: 'auto', display: 'block' }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <LangSwitcher />
-              <button onClick={scrollToPricing} style={btnDark}>
-                {l.viewPlansCta}
-              </button>
-            </div>
+            <button onClick={scrollToPricing} style={btnDark}>
+              {l.viewPlansCta}
+            </button>
           </div>
           <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 42, fontWeight: 800, color: F.ink, lineHeight: 1.15, margin: '0 auto 24px', maxWidth: 700, letterSpacing: -1 }}>{l.heroTitle}</h1>
           <p style={{ fontSize: 18, color: F.body, lineHeight: 1.6, margin: '0 auto 32px', maxWidth: 600 }}>
@@ -326,7 +325,15 @@ export function LandingPage() {
         </div>
       </div>
 
-      <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: F.mutedLight, background: '#EFEBE3' }}>{l.footerText}</div>
+      <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: F.mutedLight, background: '#EFEBE3' }}>
+        <div style={{ marginBottom: 6 }}>
+          {l.footerHelpText}
+          <a href={`mailto:${SUPPORT_EMAIL}`} style={{ color: F.goldDeep, fontWeight: 700 }}>
+            {SUPPORT_EMAIL}
+          </a>
+        </div>
+        {l.footerText}
+      </div>
     </div>
   );
 }
