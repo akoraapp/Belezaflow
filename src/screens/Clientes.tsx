@@ -59,6 +59,7 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
         onBack={() => setSelectedId(null)}
         contactMethod={contactMethod}
         onChangeStatus={(status) => updateClient(selected.id, { status })}
+        onChangeName={(name) => updateClient(selected.id, { name })}
         onChangeBirthday={(bday) => updateClient(selected.id, { birthday: bday })}
         pendingNoShow={pendingNoShow}
         onFollowUpSent={onFollowUpSent}
@@ -201,6 +202,7 @@ function ClienteDetail({
   onBack,
   contactMethod,
   onChangeStatus,
+  onChangeName,
   onChangeBirthday,
   pendingNoShow,
   onFollowUpSent,
@@ -211,6 +213,7 @@ function ClienteDetail({
   onBack: () => void;
   contactMethod: ContactMethod;
   onChangeStatus: (status: string) => void;
+  onChangeName: (name: string) => void;
   onChangeBirthday: (bday: string) => void;
   pendingNoShow?: Appointment;
   onFollowUpSent: (appointmentId: string) => void;
@@ -220,7 +223,18 @@ function ClienteDetail({
   const totalGasto = attendedAppointments.reduce((s, a) => s + a.price, 0);
   const visitas = attendedAppointments.length;
   const [msgType, setMsgType] = useState<string | null>(null);
+  const [nameInput, setNameInput] = useState(client.name);
   const [bdayInput, setBdayInput] = useState(client.birthday || '');
+
+  const commitName = () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) {
+      setNameInput(client.name);
+      return;
+    }
+    if (trimmed !== client.name) onChangeName(trimmed);
+    setNameInput(trimmed);
+  };
   const [copied, setCopied] = useState(false);
   const [noShowCopied, setNoShowCopied] = useState(false);
 
@@ -316,8 +330,26 @@ function ClienteDetail({
         >
           {client.name.charAt(0)}
         </div>
-        <div>
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, fontWeight: 400, color: T.ink }}>{client.name}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <input
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            onBlur={commitName}
+            data-testid="cliente-detail-name"
+            style={{
+              display: 'block',
+              width: '100%',
+              border: 'none',
+              borderBottom: `1px solid ${T.line}`,
+              background: 'transparent',
+              padding: '0 0 2px',
+              fontFamily: 'Playfair Display',
+              fontSize: 19,
+              fontWeight: 400,
+              color: T.ink,
+              outline: 'none',
+            }}
+          />
           <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{client.phone}</div>
         </div>
       </div>
