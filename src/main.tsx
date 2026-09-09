@@ -5,6 +5,7 @@ import './index.css'
 import { LangProvider } from './lib/LangContext'
 import App from './App.tsx'
 import { QuizPage } from './pages/Quiz'
+import { PublicBookingPage } from './pages/PublicBooking'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -17,6 +18,11 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<QuizPage />} />
           <Route path="/quiz" element={<Navigate to="/" replace />} />
           <Route path="/app/*" element={<App />} />
+          {/* Each professional's public booking link (see AgendaOnline.tsx) —
+              a bare slug, matched after every static route above since
+              react-router ranks static paths above a dynamic :slug regardless
+              of declaration order. */}
+          <Route path="/:slug" element={<PublicBookingPage />} />
         </Routes>
       </LangProvider>
     </BrowserRouter>

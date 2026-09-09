@@ -26,6 +26,8 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   const { services } = useServices();
   const { addClient, updateClient, findClientForAppointment } = useClients();
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const [copyFallback, setCopyFallback] = useState(false);
   const [bookService, setBookService] = useState<ServiceItem | null>(null);
   const [bookDate, setBookDate] = useState<string | null>(null);
   const [bookTime, setBookTime] = useState<string | null>(null);
@@ -43,8 +45,36 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
   if (!profile) return null;
   const currency = profile.currency;
 
+  // Must match the slug the public-booking Edge Function derives from
+  // profiles.public_name (see supabase/functions/public-booking) — there's
+  // no stored slug column, it's recomputed identically on both sides.
   const slug = (profile.publicName || 'seunegocio').toLowerCase().replace(/[^a-z0-9]+/g, '');
-  const link = `beautyflow.app/${slug}`;
+  const link = `${window.location.origin}/${slug}`;
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setCopyFallback(false);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // No clipboard permission (some in-app browsers) — show the raw link
+      // so the professional can select and copy it herself.
+      setCopyFallback(true);
+    }
+  };
+
+  const shareLink = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: profile.publicName || t.agendaOnline.defaultPublicName, url: link });
+        return;
+      } catch {
+        // Share sheet dismissed/unsupported for this content — fall back to copy.
+      }
+    }
+    copyLink();
+  };
 
   const { workingDays, chosenSlots } = getAvailability(profile, appointments);
   const availableSlotsForBookDate = bookDate ? getAvailableSlotsForDate(profile, appointments, bookDate) : [];
@@ -114,19 +144,29 @@ export function AgendaOnlineScreen({ onOpenServicos, embedded }: AgendaOnlineScr
 
       <Card style={{ marginBottom: 22 }}>
         <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 6 }}>{t.agendaOnline.publicLinkLabel}</div>
-        <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12 }}>{link}</div>
+        <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 12, wordBreak: 'break-all' }}>{link}</div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <IconButton
-            icon={Copy}
-            label={copied ? t.agendaOnline.copiedLabel : t.agendaOnline.copyLabel}
-            onClick={() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            }}
-          />
-          <IconButton icon={Share2} label={t.agendaOnline.shareLabel} />
-          <IconButton icon={QrCode} label={t.agendaOnline.qrLabel} />
+          <IconButton icon={Copy} label={copied ? t.agendaOnline.copiedLabel : t.agendaOnline.copyLabel} onClick={copyLink} />
+          <IconButton icon={Share2} label={t.agendaOnline.shareLabel} onClick={shareLink} />
+          <IconButton icon={QrCode} label={t.agendaOnline.qrLabel} onClick={() => setShowQr((v) => !v)} />
         </div>
+        {copyFallback && (
+          <div style={{ marginTop: 10, fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
+            {t.agendaOnline.copyFailed}
+            <div style={{ fontWeight: 700, color: T.ink, marginTop: 2, wordBreak: 'break-all' }}>{link}</div>
+          </div>
+        )}
+        {showQr && (
+          <div style={{ marginTop: 14, display: 'flex', justifyContent: 'center' }}>
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(link)}`}
+              alt={t.agendaOnline.qrLabel}
+              width={180}
+              height={180}
+              style={{ borderRadius: RADIUS.control, border: `1px solid ${T.line}` }}
+            />
+          </div>
+        )}
       </Card>
 
       <SectionTitle>{t.agendaOnline.publicInfoTitle}</SectionTitle>

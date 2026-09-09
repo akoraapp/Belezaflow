@@ -46,10 +46,12 @@ export function getAvailability(profile: Profile | null, appointments: Appointme
   return { today, isWorkingToday, workingDays, chosenSlots, availableSlots };
 }
 
-// Used by the public booking preview: unlike getAvailability (always "today"), this computes
+// Used by the public booking page: unlike getAvailability (always "today"), this computes
 // open slots for an arbitrary calendar date, so a client can book any upcoming working day,
-// not just today.
-export function getAvailableSlotsForDate(profile: Profile | null, appointments: Appointment[], dateStr: string) {
+// not just today. Only needs these two fields — narrowed from the full Profile so the public
+// booking page (which only ever gets this subset over the wire, never a full profile) can
+// call it without an unsafe cast.
+export function getAvailableSlotsForDate(profile: Pick<Profile, 'workingDays' | 'availableSlots'> | null, appointments: Appointment[], dateStr: string) {
   const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   if (!workingDays.includes(weekdayLabelForDate(dateStr))) return [];
   const chosenSlots = profile?.availableSlots?.length ? profile.availableSlots : ALL_SLOTS;
@@ -65,8 +67,9 @@ export interface BookableDay {
 }
 
 // Enumerates the next `daysAhead` calendar days that fall on one of the professional's
-// working days, for the public booking day picker.
-export function getBookableDays(profile: Profile | null, daysAhead = 14): BookableDay[] {
+// working days, for the public booking day picker. Narrowed to just workingDays for the
+// same reason as getAvailableSlotsForDate above.
+export function getBookableDays(profile: Pick<Profile, 'workingDays'> | null, daysAhead = 14): BookableDay[] {
   const workingDays = profile?.workingDays || ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'];
   const base = new Date();
   base.setHours(0, 0, 0, 0);
