@@ -7,10 +7,11 @@ import { useServices } from './useServices';
 import { useInventory } from './useInventory';
 import { buildAlerts, type AlertItem } from '../lib/alerts';
 import { useLang } from '../lib/LangContext';
-import { buildNoShowMessage, buildWhatsAppLink } from '../lib/followup';
+import { buildNoShowMessage, buildWhatsAppLink, buildConfirmationMessage, buildSmsLink } from '../lib/followup';
 import { getNotificationPermission, requestNotificationPermission, fireNotification, type NotifPermission } from '../lib/notifications';
 import { subscribeToPush } from '../lib/push';
 import { PushService } from '../services/pushService';
+import { todayDateStr, formatTimeLabel } from '../lib/helpers';
 import type { Appointment, CurrencyCode } from '../types';
 
 interface AlertsNav {
@@ -26,7 +27,7 @@ export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
   const { t, lang } = useLang();
   const { userId } = useAuth();
   const { profile } = useProfile();
-  const { appointments, sendReminders, markFollowUpSent } = useAppointments();
+  const { appointments, confirmAppointment, markFollowUpSent } = useAppointments();
   const { clients } = useClients();
   const { services } = useServices();
   const { products } = useInventory();
@@ -48,6 +49,39 @@ export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
     nav.onOpenClientesFiltered('Perdido', client?.id ?? null);
   };
 
+  // There's no real send-automation behind this — it used to just silently
+  // flip every pending appointment to "Confirmado" locally, which lied about
+  // a confirmation that never happened. With exactly one pending client we
+  // can do what the button promises and open WhatsApp/SMS for her right
+  // away (same message + logging as Agenda's own per-row confirm button);
+  // with more than one there's no single link to open, so send her to
+  // Agenda where each appointment already has that same real button.
+  const handleSendReminders = () => {
+    if (!profile) return;
+    const todayStr = todayDateStr();
+    const pending = appointments.filter((a) => a.day === todayStr && a.status === 'Agendado');
+    const appt = pending.length === 1 ? pending[0] : null;
+    if (appt && appt.clientPhone) {
+      const clientPhone = appt.clientPhone;
+      const [, m, d] = appt.day.split('-');
+      const message = buildConfirmationMessage(profile.confirmationMessageTemplate, lang, {
+        nome_cliente: appt.clientName,
+        data: `${d}/${m}`,
+        hora: formatTimeLabel(appt.time, lang),
+        servico: appt.service,
+        nome_profissional: profile.publicName || profile.name,
+      });
+      const channel = profile.contactMethod === 'sms' ? 'sms' : 'whatsapp';
+      const link = channel === 'sms' ? buildSmsLink(clientPhone, message) : buildWhatsAppLink(clientPhone, message);
+      if (link) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+        confirmAppointment(appt.id, channel);
+        return;
+      }
+    }
+    nav.onOpenAgenda();
+  };
+
   const alerts: AlertItem[] = profile
     ? buildAlerts({
         profile,
@@ -62,7 +96,7 @@ export function useAlerts(nav: AlertsNav, currency: CurrencyCode) {
           onOpenClientesLost: () => nav.onOpenClientesFiltered('Perdido'),
           onOpenEstoque: nav.onOpenEstoque,
           onOpenClientesLeads: () => nav.onOpenClientesFiltered('Novo Lead'),
-          onSendReminders: sendReminders,
+          onSendReminders: handleSendReminders,
           onFollowUpNoShow: handleFollowUpNoShow,
         },
       })

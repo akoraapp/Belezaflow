@@ -1,6 +1,5 @@
 import { createListResource } from './createListResource';
 import { AppointmentService, isSlotConflictError } from '../services/appointmentService';
-import { todayDateStr } from '../lib/helpers';
 import { notifyPush } from '../lib/pushNotify';
 import type { Appointment } from '../types';
 
@@ -31,7 +30,7 @@ export function useAppointments() {
 
   // Used by useAttendance to flip status (Compareceu/NaoCompareceu) as part of
   // the wider attendance orchestration, and directly for simpler status-only
-  // transitions like markFollowUpSent/sendReminders below.
+  // transitions like markFollowUpSent below.
   const updateStatus = (id: string, patch: Partial<Appointment>) => {
     store.setState((s) => ({ ...s, items: s.items.map((a) => (a.id === id ? { ...a, ...patch } : a)) }));
     AppointmentService.update(id, patch).catch(console.error);
@@ -62,16 +61,5 @@ export function useAppointments() {
     }
   };
 
-  const sendReminders = () => {
-    const todayStr = todayDateStr();
-    store.setState((s) => ({
-      ...s,
-      items: s.items.map((a) => (a.day === todayStr && a.status === 'Agendado' ? { ...a, status: 'Confirmado' } : a)),
-    }));
-    // Bulk local-only confirmation nudge (mirrors legacy behavior) — each
-    // affected row's status is not persisted individually here because it's a
-    // soft reminder state, not a real confirmation from the client.
-  };
-
-  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, confirmAppointment, cancelAppointment, rescheduleAppointment, sendReminders };
+  return { appointments: items, loading, error, addAppointment, updateStatus, markFollowUpSent, confirmAppointment, cancelAppointment, rescheduleAppointment };
 }
