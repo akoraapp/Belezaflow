@@ -248,6 +248,11 @@ function ClienteDetail({
   const attendedAppointments = clientAppointments.filter((a) => a.status === 'Compareceu');
   const totalGasto = attendedAppointments.reduce((s, a) => s + a.price, 0);
   const visitas = attendedAppointments.length;
+  // Most recent visit first — client.service only ever holds the single
+  // procedure from whenever this CRM record was first created, so it can't
+  // answer "what has she actually had done here", only "what she originally
+  // came in for". This is the real per-visit history.
+  const historico = [...attendedAppointments].sort((a, b) => b.day.localeCompare(a.day) || b.time.localeCompare(a.time));
   const [msgType, setMsgType] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState(client.name);
   // <input type="date"> only understands yyyy-mm-dd — older free-typed values
@@ -429,6 +434,43 @@ function ClienteDetail({
           />
         </div>
       </Card>
+
+      <SectionTitle>{t.clientes.historicoLabel}</SectionTitle>
+      {historico.length === 0 ? (
+        <div style={{ marginBottom: 20 }}>
+          <EmptyHint text={t.clientes.noHistoricoLabel} />
+        </div>
+      ) : (
+        <Card style={{ marginBottom: 20 }}>
+          {historico.map((a, i) => {
+            const [, m, d] = a.day.split('-');
+            return (
+              <div
+                key={a.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '9px 0',
+                  borderTop: i > 0 ? `1px solid ${T.line}` : undefined,
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.ink }}>{a.service}</div>
+                  <div style={{ fontFamily: 'Inter', fontSize: 11, color: T.muted }}>
+                    {d}/{m}
+                  </div>
+                </div>
+                <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12.5, color: T.goldDeep, flexShrink: 0 }}>
+                  {CURRENCIES[currency].symbol}
+                  {fmtMoney(a.price, currency)}
+                </div>
+              </div>
+            );
+          })}
+        </Card>
+      )}
 
       {pendingNoShow && (
         <Card style={{ marginBottom: 20, border: `1.5px solid ${T.danger}` }}>

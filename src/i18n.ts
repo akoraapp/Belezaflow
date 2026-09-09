@@ -433,6 +433,8 @@ const pt = {
     noAttendanceDataLabel: 'Nenhum registro ainda',
     totalGastoLabel: 'Total gasto',
     visitasLabel: 'Visitas',
+    historicoLabel: 'Histórico de procedimentos',
+    noHistoricoLabel: 'Nenhum procedimento realizado ainda.',
   },
   financeiro: {
     title: 'Central de Lucro',
@@ -961,6 +963,8 @@ const en: typeof pt = {
     noAttendanceDataLabel: 'No records yet',
     totalGastoLabel: 'Total spent',
     visitasLabel: 'Visits',
+    historicoLabel: 'Procedure history',
+    noHistoricoLabel: 'No procedures completed yet.',
   },
   financeiro: {
     title: 'Profit Hub',
@@ -1487,6 +1491,8 @@ const es: typeof pt = {
     noAttendanceDataLabel: 'Aún no hay registros',
     totalGastoLabel: 'Total gastado',
     visitasLabel: 'Visitas',
+    historicoLabel: 'Historial de procedimientos',
+    noHistoricoLabel: 'Aún no hay procedimientos realizados.',
   },
   financeiro: {
     title: 'Centro de Ganancias',
