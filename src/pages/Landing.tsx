@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useLang } from '../lib/LangContext';
-import { format } from '../lib/helpers';
+import { format, isStandalonePWA } from '../lib/helpers';
 import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
 import { useRegionPricing } from '../lib/useRegionPricing';
 import wordmark from '../assets/belezaflow-wordmark.png';
@@ -40,7 +40,7 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
 export function LandingPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
-  const isReturningUser = localStorage.getItem('belezaflow_returning_user') === '1';
+  const isReturningUser = isStandalonePWA() || localStorage.getItem('belezaflow_returning_user') === '1';
   const l = t.landing;
   const { pricing } = useRegionPricing(lang);
   const [openFaq, setOpenFaq] = useState(-1);

@@ -5,6 +5,20 @@ function pad2(n: number) {
   return String(n).padStart(2, '0');
 }
 
+// An installed home-screen PWA (iOS "Add to Home Screen", Android/desktop
+// "Install app") runs in its own isolated storage context, separate from
+// whatever browser tab the person originally signed up in — so it never
+// sees the 'belezaflow_returning_user' flag set at signup, and would
+// otherwise wrongly show the marketing quiz/landing funnel every time it's
+// opened. Nobody reaches an installed icon without already having been
+// inside the app at least once, so standalone mode is always treated as a
+// returning visitor: straight to /app (dashboard if there's a session,
+// login screen if not) — never the funnel.
+export function isStandalonePWA() {
+  if (typeof window === 'undefined') return false;
+  return (window.navigator as unknown as { standalone?: boolean }).standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+}
+
 export function todayDateStr() {
   const d = new Date();
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;

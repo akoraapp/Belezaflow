@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '../lib/LangContext';
-import { format } from '../lib/helpers';
+import { format, isStandalonePWA } from '../lib/helpers';
 import { F, FUNNEL_FONT_IMPORT, FUNNEL_KEYFRAMES } from '../lib/funnelTheme';
 import { LandingPage } from './Landing';
 import wordmark from '../assets/belezaflow-wordmark.png';
@@ -22,10 +22,12 @@ const WANTS_TO_REACTIVATE_IDX = 2; // Q3 "Quero mas não sei como" — the leak 
 export function QuizPage() {
   const { t } = useLang();
   const q = t.quiz;
-  // A returning customer (already completed signup once on this browser)
-  // must never be forced through the quiz again — skip straight to
-  // LandingPage, whose own effect redirects them to /app.
-  const isReturningUser = localStorage.getItem('belezaflow_returning_user') === '1';
+  // A returning customer (already completed signup once on this browser) —
+  // or anyone opening the installed home-screen app, which has its own
+  // isolated storage and would otherwise never see the flag below — must
+  // never be forced through the quiz again. Skip straight to LandingPage,
+  // whose own effect redirects them to /app.
+  const isReturningUser = isStandalonePWA() || localStorage.getItem('belezaflow_returning_user') === '1';
 
   const [screen, setScreen] = useState<Screen>('quiz');
   const [quizStep, setQuizStep] = useState(0);

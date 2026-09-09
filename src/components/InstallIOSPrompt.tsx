@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { T, SHADOW } from '../theme';
 import { useLang } from '../lib/LangContext';
+import { isStandalonePWA } from '../lib/helpers';
 
 const DISMISS_KEY = 'belezaflow-install-prompt-dismissed';
 
@@ -11,11 +12,6 @@ function isIOSSafari() {
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
   return isIOS && isSafari;
-}
-
-function isStandalone() {
-  if (typeof window === 'undefined') return false;
-  return (window.navigator as unknown as { standalone?: boolean }).standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 }
 
 function Step({ n, text }: { n: number; text: string }) {
@@ -49,7 +45,7 @@ export function InstallIOSPrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (isStandalone() || !isIOSSafari()) return;
+    if (isStandalonePWA() || !isIOSSafari()) return;
     try {
       if (localStorage.getItem(DISMISS_KEY) === '1') return;
     } catch {
