@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { T, RADIUS } from '../theme';
-import { getAvailability, fmtMoney, formatTimeLabel, todayDateStr, weekdayLabelForDate } from '../lib/helpers';
+import { getAvailability, getAvailableSlotsForDate, fmtMoney, formatTimeLabel, todayDateStr, weekdayLabelForDate } from '../lib/helpers';
 import { buildWhatsAppLink, buildSmsLink, buildConfirmationMessage } from '../lib/followup';
 import { WEEKDAY_LABEL, STATUS_LABEL } from '../i18n';
 import { Card, Chip, TextInput, PhoneInput, SelectInput, EmptyHint, AppointmentRow, PrimaryButton, SectionTitle } from '../components/primitives';
@@ -258,14 +258,41 @@ export function AgendaScreen({ embedded }: AgendaScreenProps) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {appts.map((a) => (
-                      <AppointmentRow
-                        key={a.id}
-                        a={a}
-                        currency={currency}
-                        testId={`appt-${a.id}`}
-                        onConfirmWhatsApp={() => sendConfirmation(a, 'whatsapp')}
-                        onConfirmSms={() => sendConfirmation(a, 'sms')}
-                      />
+                      <div key={a.id}>
+                        <AppointmentRow
+                          a={a}
+                          currency={currency}
+                          testId={`appt-${a.id}`}
+                          onMarkAttended={onMarkAttended ? () => onMarkAttended(a.id) : undefined}
+                          onMarkNoShow={onMarkNoShow ? () => onMarkNoShow(a.id) : undefined}
+                          onCancel={() => cancelAppointment(a.id)}
+                          onReschedule={() => setReschedulingId((cur) => (cur === a.id ? null : a.id))}
+                          onConfirmWhatsApp={() => sendConfirmation(a, 'whatsapp')}
+                          onConfirmSms={() => sendConfirmation(a, 'sms')}
+                        />
+                        {reschedulingId === a.id && (
+                          <Card style={{ marginTop: 8 }}>
+                            <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, marginBottom: 8 }}>{t.attendance.rescheduleSlotsLabel}</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                              {getAvailableSlotsForDate(profile, appointments, a.day).length === 0 && (
+                                <span style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted }}>{t.attendance.rescheduleNoSlots}</span>
+                              )}
+                              {getAvailableSlotsForDate(profile, appointments, a.day).map((tm) => (
+                                <Chip
+                                  key={tm}
+                                  active={false}
+                                  onClick={() => {
+                                    rescheduleAppointment(a.id, a.day, tm);
+                                    setReschedulingId(null);
+                                  }}
+                                >
+                                  {formatTimeLabel(tm, lang)}
+                                </Chip>
+                              ))}
+                            </div>
+                          </Card>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>

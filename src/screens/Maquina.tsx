@@ -57,11 +57,11 @@ function SelectGroup({
   );
 }
 
-function MiniSection({ label, text }: { label: string; text: string }) {
+function MiniSection({ label, text, pre }: { label: string; text: string; pre?: boolean }) {
   return (
     <div>
       <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 10.5, color: T.goldDeep, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
-      <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>{text}</div>
+      <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.ink, lineHeight: 1.5, whiteSpace: pre ? 'pre-line' : 'normal' }}>{text}</div>
     </div>
   );
 }
@@ -117,7 +117,7 @@ function GeneratedCard({ item, testId }: { item: GeneratedItem; testId?: string 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14, paddingTop: 12, borderTop: `1px solid ${T.line}` }}>
           <MiniSection label={t.maquina.diagnosticoLabel} text={item.content.diagnostico} />
           <MiniSection label={t.maquina.estrategiaLabel} text={item.content.estrategia} />
-          <MiniSection label={t.maquina.roteiroLabel} text={item.content.roteiro} />
+          <MiniSection label={t.maquina.roteiroLabel} text={item.content.roteiro} pre />
           <MiniSection label={t.maquina.ctaLabel} text={item.content.cta} />
         </div>
       )}
