@@ -94,7 +94,7 @@ export function ClientesScreen({ initialFilter, initialSelectedId }: ClientesScr
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <TextInput value={name} onChange={setName} placeholder={t.clientes.namePlaceholder} testId="clientes-name" />
             <PhoneInput value={phone} onChange={setPhone} placeholder={t.clientes.phonePlaceholder} testId="clientes-phone" />
-            <TextInput value={birthday} onChange={setBirthday} placeholder={t.clientes.birthdayPlaceholder} />
+            <TextInput value={birthday} onChange={setBirthday} type="date" testId="clientes-birthday" />
           </div>
 
           <div style={{ fontFamily: 'Inter', fontSize: 11.5, color: T.muted, margin: '10px 0 8px' }}>{t.clientes.serviceLabel}</div>
@@ -224,7 +224,10 @@ function ClienteDetail({
   const visitas = attendedAppointments.length;
   const [msgType, setMsgType] = useState<string | null>(null);
   const [nameInput, setNameInput] = useState(client.name);
-  const [bdayInput, setBdayInput] = useState(client.birthday || '');
+  // <input type="date"> only understands yyyy-mm-dd — older free-typed values
+  // (dd/mm) still work for the "is today their birthday" check, but can't be
+  // shown back in the picker, so start it blank until re-picked.
+  const [bdayInput, setBdayInput] = useState(/^\d{4}-\d{2}-\d{2}$/.test(client.birthday || '') ? client.birthday : '');
 
   const commitName = () => {
     const trimmed = nameInput.trim();
@@ -365,10 +368,13 @@ function ClienteDetail({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0' }}>
           <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted }}>{t.clientes.birthdayLabel}</span>
           <input
+            type="date"
             value={bdayInput}
-            onChange={(e) => setBdayInput(e.target.value)}
-            onBlur={() => onChangeBirthday(bdayInput)}
-            placeholder={t.clientes.birthdayInputPlaceholder}
+            onChange={(e) => {
+              setBdayInput(e.target.value);
+              onChangeBirthday(e.target.value);
+            }}
+            data-testid="cliente-detail-birthday"
             style={{
               border: 'none',
               borderBottom: `1px solid ${T.line}`,
@@ -378,7 +384,7 @@ function ClienteDetail({
               fontWeight: 700,
               color: T.ink,
               outline: 'none',
-              width: 80,
+              width: 130,
               background: 'transparent',
             }}
           />

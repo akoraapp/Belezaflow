@@ -70,10 +70,14 @@ export function getBookableDays(profile: Profile | null, daysAhead = 14): Bookab
 
 export function todayIsBirthday(dateStr?: string) {
   if (!dateStr) return false;
-  const m = dateStr.match(/^(\d{1,2})\/(\d{1,2})/);
-  if (!m) return false;
   const now = new Date();
-  return Number(m[1]) === now.getDate() && Number(m[2]) === now.getMonth() + 1;
+  // Calendar picker (<input type="date">) stores yyyy-mm-dd.
+  const iso = dateStr.match(/^\d{4}-(\d{1,2})-(\d{1,2})/);
+  if (iso) return Number(iso[2]) === now.getDate() && Number(iso[1]) === now.getMonth() + 1;
+  // Older free-typed entries used dd/mm — still honored so nothing already saved breaks.
+  const legacy = dateStr.match(/^(\d{1,2})\/(\d{1,2})/);
+  if (legacy) return Number(legacy[1]) === now.getDate() && Number(legacy[2]) === now.getMonth() + 1;
+  return false;
 }
 
 export function format(template: string, vars: Record<string, string | number>) {

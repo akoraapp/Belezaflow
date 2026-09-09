@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import { T, FONT_IMPORT } from './theme';
 import type { Dict } from './i18n';
 import belezaflowLogo from './assets/belezaflow-logo.webp';
+import belezaflowWordmark from './assets/belezaflow-wordmark.png';
 import { getTabs, BottomNav } from './components/BottomNav';
 import { getMoreItems, MoreSheet } from './components/MoreSheet';
 import { InstallIOSPrompt } from './components/InstallIOSPrompt';
@@ -335,8 +336,8 @@ function AppShell() {
             flexDirection: 'column',
           }}
         >
-          <div style={{ fontFamily: 'Playfair Display', fontSize: 19, color: T.ink, padding: '0 10px 22px', fontWeight: 600 }}>
-            Beleza<span style={{ color: T.goldDeep }}>Flow</span>
+          <div style={{ padding: '0 10px 22px' }}>
+            <img src={belezaflowWordmark} alt="BelezaFlow" style={{ height: 18, width: 'auto', display: 'block' }} />
           </div>
           <div style={{ padding: '0 10px 14px', fontFamily: 'Inter', fontSize: 12, color: T.muted }}>
             {t.nav.greetingLoggedAs}, {profile.name} 👋
