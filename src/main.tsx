@@ -32,10 +32,16 @@ createRoot(document.getElementById('root')!).render(
 if ('serviceWorker' in navigator) {
   // A new service worker takes control (see sw.js's skipWaiting/clients.claim)
   // right after a fresh deploy — reload once so the tab picks up the new
-  // build instead of the user needing to clear the cache manually.
+  // build instead of the user needing to clear the cache manually. But that
+  // same 'controllerchange' event also fires the very first time a tab is
+  // ever controlled (no previous service worker existed to be "stale"),
+  // which reloaded every first-ever visit mid-load for no reason — hence
+  // hadControllerAlready, checked before registering: only a page that was
+  // already controlled by an older worker counts as an update to refresh for.
+  const hadControllerAlready = !!navigator.serviceWorker.controller
   let refreshingAfterUpdate = false
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshingAfterUpdate) return
+    if (!hadControllerAlready || refreshingAfterUpdate) return
     refreshingAfterUpdate = true
     window.location.reload()
   })
