@@ -428,7 +428,7 @@ const pt = {
     visitasLabel: 'Visitas',
   },
   financeiro: {
-    title: 'Profit Hub',
+    title: 'Central de Lucro',
     metaOfMonthPrefix: 'Meta de',
     remainingToGoalPrefix: 'Faltam',
     remainingToGoalMiddle: 'para bater a meta de',
@@ -1466,7 +1466,7 @@ const es: typeof pt = {
     visitasLabel: 'Visitas',
   },
   financeiro: {
-    title: 'Profit Hub',
+    title: 'Centro de Ganancias',
     metaOfMonthPrefix: 'Meta de',
     remainingToGoalPrefix: 'Faltan',
     remainingToGoalMiddle: 'para alcanzar la meta de',
