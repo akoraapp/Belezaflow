@@ -14,6 +14,7 @@ import { useProfile } from './hooks/useProfile';
 import { useAlerts } from './hooks/useAlerts';
 import { useInventory, productStatus } from './hooks/useInventory';
 import { useIsMobile } from './hooks/useIsMobile';
+import { useViewportHeight } from './hooks/useViewportHeight';
 import { useSubscriptionGate } from './hooks/useSubscriptionGate';
 import { supabase } from './services/supabaseClient';
 import { Login } from './screens/Login';
@@ -76,9 +77,10 @@ function AuthBrandPanel({ t }: { t: Dict }) {
 // instead of a small card floating alone. Which one shows is decided purely
 // by the real viewport width (useIsMobile), never by a user-facing toggle.
 function AuthShell({ children, isMobile, t }: { children: React.ReactNode; isMobile: boolean; t: Dict }) {
+  const viewportHeight = useViewportHeight();
   if (isMobile) {
     return (
-      <div className="app-fullbleed" style={{ background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
+      <div className="app-fullbleed" style={{ height: viewportHeight, background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
         <style>{FONT_IMPORT}</style>
         {children}
       </div>
@@ -125,6 +127,7 @@ function AppShell() {
   }, [profile?.language]);
 
   const isMobile = useIsMobile();
+  const viewportHeight = useViewportHeight();
   const [searchParams] = useSearchParams();
   const { subscription, loading: subscriptionLoading, resetPendingPayment } = useSubscriptionGate(session?.user.id ?? null);
   const [organicPlanScreenDismissed, setOrganicPlanScreenDismissed] = useState(false);
@@ -433,9 +436,13 @@ function AppShell() {
   }
 
   // Real phone viewport: no decorative frame, fills the actual screen edge to
-  // edge (see .app-fullbleed in index.css for the dvh/vh fallback).
+  // edge. Height comes from useViewportHeight (tracks visualViewport), not a
+  // CSS vh/dvh unit — those could momentarily report a viewport taller than
+  // what's actually visible while the browser's own address bar was showing,
+  // which pushed the absolutely-positioned BottomNav below the fold and, with
+  // overflow: hidden here, made it unreachable.
   return (
-    <div className="app-fullbleed" style={{ background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
+    <div className="app-fullbleed" style={{ height: viewportHeight, background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
       <style>{FONT_IMPORT}</style>
       <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
         <div
