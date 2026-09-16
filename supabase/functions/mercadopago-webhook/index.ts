@@ -4,22 +4,25 @@
 // Register this function's URL with Mercado Pago as the notification URL:
 //   https://<your-project-ref>.functions.supabase.co/mercadopago-webhook
 //
-// Security note: this never trusts the webhook body's own status field —
-// every event re-fetches the resource straight from Mercado Pago's API using
-// our own access token before writing anything, which is what actually
-// prevents a forged POST from flipping someone's subscription to active.
-// Full request-signature verification (Mercado Pago's x-signature /
-// x-request-id HMAC scheme) is NOT implemented here; add it if tighter
-// verification is needed later.
+// Security: every event re-fetches the resource straight from Mercado
+// Pago's API using our own access token before writing anything, so a
+// forged POST alone can't flip a subscription to active. On top of that,
+// when MP_WEBHOOK_SECRET is configured, this also verifies the
+// x-signature/x-request-id HMAC Mercado Pago sends (the "Secret key" shown
+// next to the notification URL in the Mercado Pago dashboard) — without it,
+// anyone who learns/guesses a real payment id belonging to this merchant
+// account could still replay a notification for it.
 //
-// Required secrets: MP_ACCESS_TOKEN. SUPABASE_URL and
-// SUPABASE_SERVICE_ROLE_KEY are provided automatically by the Supabase runtime.
+// Required secrets: MP_ACCESS_TOKEN. Optional but recommended:
+// MP_WEBHOOK_SECRET. SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided
+// automatically by the Supabase runtime.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN') ?? '';
+const MP_WEBHOOK_SECRET = Deno.env.get('MP_WEBHOOK_SECRET') ?? '';
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
@@ -27,6 +30,41 @@ const PLAN_PERIOD_MS: Record<string, number> = {
   monthly: 30 * 24 * 60 * 60 * 1000,
   annual: 365 * 24 * 60 * 60 * 1000,
 };
+
+// Mercado Pago's documented scheme: x-signature is "ts=<unix seconds>,v1=<hex
+// hmac>" and the signed manifest is "id:<data.id lowercased>;request-id:<x-request-id>;ts:<ts>;".
+// Returns true when MP_WEBHOOK_SECRET isn't configured yet (soft-allow, but
+// logged) so this doesn't silently break existing checkouts before the
+// secret is set up — the resource-refetch-before-write behavior above is
+// still the primary guard either way.
+async function verifyMpSignature(req: Request, dataId: string): Promise<boolean> {
+  if (!MP_WEBHOOK_SECRET) {
+    console.error('MP_WEBHOOK_SECRET is not configured — skipping Mercado Pago signature verification');
+    return true;
+  }
+
+  const signatureHeader = req.headers.get('x-signature');
+  const requestId = req.headers.get('x-request-id');
+  if (!signatureHeader || !requestId) return false;
+
+  const parts: Record<string, string> = {};
+  for (const part of signatureHeader.split(',')) {
+    const [key, value] = part.split('=').map((s) => s.trim());
+    if (key && value) parts[key] = value;
+  }
+  const ts = parts.ts;
+  const v1 = parts.v1;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(MP_WEBHOOK_SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const signatureBytes = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(manifest));
+  const computedHex = Array.from(new Uint8Array(signatureBytes))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  return computedHex === v1;
+}
 
 async function mpGet(path: string) {
   const res = await fetch(`https://api.mercadopago.com${path}`, { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } });
@@ -62,6 +100,11 @@ async function triggerWelcomeEmail(userId: string) {
   }
 }
 
+async function logActivity(userId: string, action: string, metadata: Record<string, unknown> = {}) {
+  const { error } = await supabaseAdmin.from('activity_log').insert({ user_id: userId, action, metadata });
+  if (error) console.error('activity_log insert failed', action, error);
+}
+
 async function handlePreapproval(preapprovalId: string) {
   const preapproval = await mpGet(`/preapproval/${preapprovalId}`);
   if (!preapproval) return;
@@ -72,11 +115,14 @@ async function handlePreapproval(preapprovalId: string) {
   }
   if (preapproval.status === 'authorized') {
     await updateSubscriptionByUserId(userId, { status: 'active', mp_preapproval_id: preapprovalId });
+    await logActivity(userId, 'subscription_active', { provider: 'mercadopago', preapprovalId });
     await triggerWelcomeEmail(userId);
   } else if (preapproval.status === 'paused') {
     await updateSubscriptionByUserId(userId, { status: 'past_due' });
+    await logActivity(userId, 'subscription_past_due', { provider: 'mercadopago', preapprovalId });
   } else if (preapproval.status === 'cancelled') {
     await updateSubscriptionByUserId(userId, { status: 'canceled' });
+    await logActivity(userId, 'subscription_canceled', { provider: 'mercadopago', preapprovalId });
   }
   // 'pending' -> no-op, already pending_payment from create-subscription.
 }
@@ -100,9 +146,11 @@ async function handlePayment(paymentId: string) {
     const plan = existing?.plan as string | undefined;
     const periodMs = (plan && PLAN_PERIOD_MS[plan]) || PLAN_PERIOD_MS.monthly;
     await updateSubscriptionByUserId(userId, { status: 'active', current_period_end: new Date(Date.now() + periodMs).toISOString() });
+    await logActivity(userId, 'subscription_active', { provider: 'mercadopago', paymentId });
     await triggerWelcomeEmail(userId);
   } else if (payment.status === 'rejected' || payment.status === 'cancelled') {
     await updateSubscriptionByUserId(userId, { status: 'past_due' });
+    await logActivity(userId, 'subscription_past_due', { provider: 'mercadopago', paymentId });
   }
   // 'pending'/'in_process' -> no-op, keep waiting.
 }
@@ -128,6 +176,13 @@ Deno.serve(async (req) => {
     } catch {
       // No JSON body — fine, we only had query params to go on.
     }
+  }
+
+  // MP's signature scheme applies to the real POST notifications; skip it
+  // for the occasional GET ping, which carries no signature to check.
+  if (req.method === 'POST' && resourceId && !(await verifyMpSignature(req, resourceId))) {
+    console.error('Mercado Pago signature verification failed', { type, resourceId });
+    return new Response('Invalid signature', { status: 401 });
   }
 
   try {

@@ -15,13 +15,27 @@ const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// Access-Control-Allow-Origin defaults to '*' only when ALLOWED_ORIGINS isn't
+// set, so this doesn't break anything before that secret exists — set
+// ALLOWED_ORIGINS (comma-separated, e.g. "https://belezaflow.app") to
+// actually restrict this authenticated, app-only endpoint to real origins.
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function corsHeadersFor(req: Request) {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowOrigin = ALLOWED_ORIGINS.length === 0 ? '*' : ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
@@ -78,6 +92,9 @@ Deno.serve(async (req) => {
     console.error(updateError);
     return new Response(JSON.stringify({ error: updateError.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
+
+  const { error: logError } = await supabaseAdmin.from('activity_log').insert({ user_id: user.id, action: 'subscription_reset', metadata: { previousStatus: existing.status } });
+  if (logError) console.error('activity_log insert failed', logError);
 
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 });

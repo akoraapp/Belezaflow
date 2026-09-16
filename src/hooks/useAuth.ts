@@ -27,6 +27,22 @@ function ensureListener() {
   });
 }
 
+// The service worker (see public/sw.js) caches every GET it sees, including
+// authenticated REST responses — each keyed by a URL that already embeds
+// the querying user's id, so a different signed-in user would never
+// actually be served someone else's cached row. Still, on a shared/public
+// device this is the right moment to purge it: nothing genuinely sensitive
+// should outlive the session that fetched it.
+async function clearCaches() {
+  if (!('caches' in window)) return;
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => caches.delete(key)));
+  } catch (err) {
+    console.error('Failed clearing caches on sign-out', err);
+  }
+}
+
 export function useAuth() {
   useEffect(() => {
     ensureListener();
@@ -39,6 +55,10 @@ export function useAuth() {
     userId: state.session?.user.id ?? null,
     passwordRecovery: state.passwordRecovery,
     clearPasswordRecovery: () => authStore.setState((s) => ({ ...s, passwordRecovery: false })),
-    signOut: () => supabase.auth.signOut().catch(console.error),
+    signOut: () =>
+      supabase.auth
+        .signOut()
+        .catch(console.error)
+        .finally(clearCaches),
   };
 }

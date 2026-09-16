@@ -46,11 +46,24 @@ const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, { httpClient: S
 // The frontend calls this function directly from the browser, so a preflight
 // OPTIONS request precedes the real POST — without these headers the browser
 // blocks the POST before it's ever sent, surfacing as a 405/CORS error.
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// Access-Control-Allow-Origin defaults to '*' only when ALLOWED_ORIGINS isn't
+// set, so this doesn't break checkout before that secret exists — set
+// ALLOWED_ORIGINS (comma-separated, e.g. "https://belezaflow.app") to
+// actually restrict this authenticated, app-only endpoint to real origins.
+const ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+function corsHeadersFor(req: Request) {
+  const origin = req.headers.get('Origin') ?? '';
+  const allowOrigin = ALLOWED_ORIGINS.length === 0 ? '*' : ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  };
+}
 
 type Plan = 'monthly' | 'annual';
 type PricingLang = 'pt' | 'en' | 'es';
@@ -212,6 +225,7 @@ async function createStripeCheckout(userId: string, email: string | undefined, p
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders });
   }

@@ -206,6 +206,11 @@ async function handleBook(body: BookBody) {
     if (error) console.error('client insert failed', error);
   }
 
+  const { error: logError } = await supabaseAdmin
+    .from('activity_log')
+    .insert({ user_id: profile.id, action: 'public_booking_created', metadata: { appointmentId: apptId, serviceId, day, time } });
+  if (logError) console.error('activity_log insert failed', logError);
+
   return { status: 200 as const, body: { ok: true } };
 }
 

@@ -51,6 +51,11 @@ async function triggerWelcomeEmail(userId: string) {
   }
 }
 
+async function logActivity(userId: string, action: string, metadata: Record<string, unknown> = {}) {
+  const { error } = await supabaseAdmin.from('activity_log').insert({ user_id: userId, action, metadata });
+  if (error) console.error('activity_log insert failed', action, error);
+}
+
 function mapSubscriptionStatus(status: Stripe.Subscription.Status): 'active' | 'past_due' | 'canceled' | null {
   if (status === 'active' || status === 'trialing') return 'active';
   if (status === 'past_due' || status === 'unpaid' || status === 'incomplete_expired') return 'past_due';
@@ -76,6 +81,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
     ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
   });
+  await logActivity(userId, 'subscription_active', { provider: 'stripe', checkoutSessionId: session.id });
   await triggerWelcomeEmail(userId);
 }
 
@@ -88,6 +94,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const status = mapSubscriptionStatus(subscription.status);
   if (!status) return;
   await updateSubscriptionByUserId(userId, { status, current_period_end: new Date(subscription.current_period_end * 1000).toISOString() });
+  await logActivity(userId, status === 'active' ? 'subscription_active' : status === 'past_due' ? 'subscription_past_due' : 'subscription_canceled', {
+    provider: 'stripe',
+    stripeSubscriptionId: subscription.id,
+  });
   if (status === 'active') await triggerWelcomeEmail(userId);
 }
 
@@ -98,6 +108,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     return;
   }
   await updateSubscriptionByUserId(userId, { status: 'canceled' });
+  await logActivity(userId, 'subscription_canceled', { provider: 'stripe', stripeSubscriptionId: subscription.id });
 }
 
 Deno.serve(async (req) => {
