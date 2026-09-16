@@ -45,6 +45,23 @@ async function updateSubscriptionByUserId(userId: string, patch: Record<string, 
   if (error) console.error('Failed updating subscription', userId, error);
 }
 
+// Fire-and-log, never throw: send-welcome-email is idempotent on its own
+// (see that function), so it's safe — and simplest — to call this every time
+// a subscription goes active rather than tracking "was this already active"
+// here too. A failure here must never fail the webhook itself.
+async function triggerWelcomeEmail(userId: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+      body: JSON.stringify({ userId }),
+    });
+    if (!res.ok) console.error('send-welcome-email failed', userId, res.status, await res.text());
+  } catch (err) {
+    console.error('send-welcome-email request failed', userId, err);
+  }
+}
+
 async function handlePreapproval(preapprovalId: string) {
   const preapproval = await mpGet(`/preapproval/${preapprovalId}`);
   if (!preapproval) return;
@@ -55,6 +72,7 @@ async function handlePreapproval(preapprovalId: string) {
   }
   if (preapproval.status === 'authorized') {
     await updateSubscriptionByUserId(userId, { status: 'active', mp_preapproval_id: preapprovalId });
+    await triggerWelcomeEmail(userId);
   } else if (preapproval.status === 'paused') {
     await updateSubscriptionByUserId(userId, { status: 'past_due' });
   } else if (preapproval.status === 'cancelled') {
@@ -82,6 +100,7 @@ async function handlePayment(paymentId: string) {
     const plan = existing?.plan as string | undefined;
     const periodMs = (plan && PLAN_PERIOD_MS[plan]) || PLAN_PERIOD_MS.monthly;
     await updateSubscriptionByUserId(userId, { status: 'active', current_period_end: new Date(Date.now() + periodMs).toISOString() });
+    await triggerWelcomeEmail(userId);
   } else if (payment.status === 'rejected' || payment.status === 'cancelled') {
     await updateSubscriptionByUserId(userId, { status: 'past_due' });
   }

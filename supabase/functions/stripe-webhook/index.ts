@@ -34,6 +34,23 @@ async function updateSubscriptionByUserId(userId: string, patch: Record<string, 
   if (error) console.error('Failed updating subscription', userId, error);
 }
 
+// Fire-and-log, never throw: send-welcome-email is idempotent on its own
+// (see that function), so it's safe — and simplest — to call this every time
+// a subscription goes active rather than tracking "was this already active"
+// here too. A failure here must never fail the webhook itself.
+async function triggerWelcomeEmail(userId: string) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+      body: JSON.stringify({ userId }),
+    });
+    if (!res.ok) console.error('send-welcome-email failed', userId, res.status, await res.text());
+  } catch (err) {
+    console.error('send-welcome-email request failed', userId, err);
+  }
+}
+
 function mapSubscriptionStatus(status: Stripe.Subscription.Status): 'active' | 'past_due' | 'canceled' | null {
   if (status === 'active' || status === 'trialing') return 'active';
   if (status === 'past_due' || status === 'unpaid' || status === 'incomplete_expired') return 'past_due';
@@ -59,6 +76,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
     ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
   });
+  await triggerWelcomeEmail(userId);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -70,6 +88,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const status = mapSubscriptionStatus(subscription.status);
   if (!status) return;
   await updateSubscriptionByUserId(userId, { status, current_period_end: new Date(subscription.current_period_end * 1000).toISOString() });
+  if (status === 'active') await triggerWelcomeEmail(userId);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
