@@ -33,6 +33,42 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// Same weekday indexing as src/theme.ts's WEEKDAY_LABELS / src/lib/helpers.ts's
+// weekdayLabelForDate, reimplemented here since this Edge Function can't
+// import frontend code — index 0 is Sunday, matching Date#getDay().
+const WEEKDAY_LABELS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^\d{2}:\d{2}$/;
+const MAX_TEXT_LEN = 200;
+
+function weekdayLabelForDate(dateStr: string) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()];
+}
+
+function getClientIp(req: Request) {
+  const forwardedFor = req.headers.get('x-forwarded-for');
+  return forwardedFor?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
+}
+
+// Anonymous endpoint, no auth to key a limit by — keyed by IP instead.
+// 'get' is read-only and called repeatedly as a visitor browses slots, so it
+// gets a generous allowance; 'book' actually writes a row, so it's tight.
+async function checkRateLimit(req: Request, action: 'get' | 'book') {
+  const ip = getClientIp(req);
+  const [maxCount, windowSeconds] = action === 'book' ? [5, 300] : [40, 60];
+  const { data, error } = await supabaseAdmin.rpc('check_rate_limit', {
+    p_key: `public-booking:${action}:${ip}`,
+    p_max_count: maxCount,
+    p_window_seconds: windowSeconds,
+  });
+  if (error) {
+    console.error('check_rate_limit failed', error);
+    return true; // fail open — a broken rate limiter must never take booking down.
+  }
+  return data as boolean;
+}
+
 function slugify(publicName: string | null | undefined) {
   return (publicName || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
@@ -100,9 +136,25 @@ async function handleBook(body: BookBody) {
   if (!slug || !serviceId || !day || !time || !clientName || !clientPhone) {
     return { status: 400 as const, body: { error: 'missing_fields' } };
   }
+  if (!DAY_RE.test(day) || !TIME_RE.test(time)) {
+    return { status: 400 as const, body: { error: 'invalid_datetime' } };
+  }
+  if (clientName.length > MAX_TEXT_LEN || clientPhone.length > MAX_TEXT_LEN) {
+    return { status: 400 as const, body: { error: 'field_too_long' } };
+  }
 
   const profile = await findProfileBySlug(slug);
   if (!profile) return { status: 404 as const, body: { error: 'not_found' } };
+
+  // The booking widget only ever offers slots that are actually within the
+  // professional's configured schedule — re-check that here too, since
+  // nothing before this point stopped a direct API call from booking any
+  // arbitrary day/time regardless of her working days or configured slots.
+  const workingDays = (profile.working_days as string[] | null) ?? [];
+  const availableSlots = (profile.available_slots as string[] | null) ?? [];
+  if (!workingDays.includes(weekdayLabelForDate(day)) || !availableSlots.includes(time)) {
+    return { status: 400 as const, body: { error: 'slot_not_offered' } };
+  }
 
   const { data: service, error: serviceError } = await supabaseAdmin.from('services').select('name, price, duration').eq('id', serviceId).eq('user_id', profile.id).maybeSingle();
   if (serviceError) throw serviceError;
@@ -129,13 +181,18 @@ async function handleBook(body: BookBody) {
 
   // Mirrors AgendaOnlineScreen.confirmBooking: a returning client booking
   // again must never create a second CRM record for the same person.
-  const { data: existingClient, error: findClientError } = await supabaseAdmin
-    .from('clients')
-    .select('id, status')
-    .eq('user_id', profile.id)
-    .or(`phone.eq.${clientPhone},name.eq.${clientName}`)
-    .maybeSingle();
-  if (findClientError) console.error('client lookup failed', findClientError);
+  // Two separate .eq() lookups instead of one .or() built from a template
+  // string — clientName/clientPhone are attacker-controlled (anonymous
+  // endpoint), and supabase-js's .or() does not escape special characters
+  // (',', '(', ')') in a string you build yourself, which would let a
+  // crafted name/phone inject extra filter clauses into the query.
+  const [{ data: byPhone, error: byPhoneError }, { data: byName, error: byNameError }] = await Promise.all([
+    supabaseAdmin.from('clients').select('id, status').eq('user_id', profile.id).eq('phone', clientPhone).maybeSingle(),
+    supabaseAdmin.from('clients').select('id, status').eq('user_id', profile.id).eq('name', clientName).maybeSingle(),
+  ]);
+  if (byPhoneError) console.error('client lookup by phone failed', byPhoneError);
+  if (byNameError) console.error('client lookup by name failed', byNameError);
+  const existingClient = byPhone ?? byName;
 
   if (existingClient) {
     if (existingClient.status !== 'Cliente') {
@@ -165,10 +222,16 @@ Deno.serve(async (req) => {
 
   try {
     if (payload.action === 'get' && payload.slug) {
+      if (!(await checkRateLimit(req, 'get'))) {
+        return new Response(JSON.stringify({ error: 'rate_limited' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
       const { status, body } = await handleGet(payload.slug);
       return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     if (payload.action === 'book') {
+      if (!(await checkRateLimit(req, 'book'))) {
+        return new Response(JSON.stringify({ error: 'rate_limited' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
       const { status, body } = await handleBook(payload as BookBody);
       return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }

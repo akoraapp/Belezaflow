@@ -44,6 +44,16 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'Invalid session' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
+  const { data: withinLimit, error: rateLimitError } = await supabaseAdmin.rpc('check_rate_limit', {
+    p_key: `reset-subscription:${user.id}`,
+    p_max_count: 10,
+    p_window_seconds: 300,
+  });
+  if (rateLimitError) console.error('check_rate_limit failed', rateLimitError); // fail open
+  if (!rateLimitError && withinLimit === false) {
+    return new Response(JSON.stringify({ error: 'rate_limited' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   const { data: existing, error: fetchError } = await supabaseAdmin.from('subscriptions').select('status').eq('user_id', user.id).maybeSingle();
   if (fetchError) {
     console.error(fetchError);
