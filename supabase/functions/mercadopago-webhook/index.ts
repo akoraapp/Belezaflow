@@ -114,14 +114,19 @@ async function handlePreapproval(preapprovalId: string) {
     return;
   }
   if (preapproval.status === 'authorized') {
-    await updateSubscriptionByUserId(userId, { status: 'active', mp_preapproval_id: preapprovalId });
+    await updateSubscriptionByUserId(userId, { status: 'active', mp_preapproval_id: preapprovalId, cancel_at_period_end: false });
     await logActivity(userId, 'subscription_active', { provider: 'mercadopago', preapprovalId });
     await triggerWelcomeEmail(userId);
   } else if (preapproval.status === 'paused') {
     await updateSubscriptionByUserId(userId, { status: 'past_due' });
     await logActivity(userId, 'subscription_past_due', { provider: 'mercadopago', preapprovalId });
   } else if (preapproval.status === 'cancelled') {
-    await updateSubscriptionByUserId(userId, { status: 'canceled' });
+    // Access isn't revoked here — the caller (cancel-subscription Edge
+    // Function, or Mercado Pago itself if canceled from their dashboard/for
+    // repeated payment failures) already paid through current_period_end;
+    // the cron job in 0015_cancel_subscription.sql finalizes the status once
+    // that date actually passes.
+    await updateSubscriptionByUserId(userId, { cancel_at_period_end: true });
     await logActivity(userId, 'subscription_canceled', { provider: 'mercadopago', preapprovalId });
   }
   // 'pending' -> no-op, already pending_payment from create-subscription.
@@ -145,7 +150,7 @@ async function handlePayment(paymentId: string) {
     const { data: existing } = await supabaseAdmin.from('subscriptions').select('plan').eq('user_id', userId).maybeSingle();
     const plan = existing?.plan as string | undefined;
     const periodMs = (plan && PLAN_PERIOD_MS[plan]) || PLAN_PERIOD_MS.monthly;
-    await updateSubscriptionByUserId(userId, { status: 'active', current_period_end: new Date(Date.now() + periodMs).toISOString() });
+    await updateSubscriptionByUserId(userId, { status: 'active', current_period_end: new Date(Date.now() + periodMs).toISOString(), cancel_at_period_end: false });
     await logActivity(userId, 'subscription_active', { provider: 'mercadopago', paymentId });
     await triggerWelcomeEmail(userId);
   } else if (payment.status === 'rejected' || payment.status === 'cancelled') {

@@ -79,6 +79,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     provider: 'stripe',
     stripe_customer_id: typeof session.customer === 'string' ? session.customer : null,
     stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+    cancel_at_period_end: false,
     ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
   });
   await logActivity(userId, 'subscription_active', { provider: 'stripe', checkoutSessionId: session.id });
@@ -93,7 +94,11 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
   const status = mapSubscriptionStatus(subscription.status);
   if (!status) return;
-  await updateSubscriptionByUserId(userId, { status, current_period_end: new Date(subscription.current_period_end * 1000).toISOString() });
+  await updateSubscriptionByUserId(userId, {
+    status,
+    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    cancel_at_period_end: subscription.cancel_at_period_end,
+  });
   await logActivity(userId, status === 'active' ? 'subscription_active' : status === 'past_due' ? 'subscription_past_due' : 'subscription_canceled', {
     provider: 'stripe',
     stripeSubscriptionId: subscription.id,
@@ -107,7 +112,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     console.error('Stripe subscription has no metadata.user_id', subscription.id);
     return;
   }
-  await updateSubscriptionByUserId(userId, { status: 'canceled' });
+  await updateSubscriptionByUserId(userId, { status: 'canceled', cancel_at_period_end: false });
   await logActivity(userId, 'subscription_canceled', { provider: 'stripe', stripeSubscriptionId: subscription.id });
 }
 

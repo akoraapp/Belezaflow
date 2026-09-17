@@ -129,7 +129,7 @@ function AppShell() {
   const isMobile = useIsMobile();
   const viewportHeight = useViewportHeight();
   const [searchParams] = useSearchParams();
-  const { subscription, loading: subscriptionLoading, resetPendingPayment } = useSubscriptionGate(session?.user.id ?? null);
+  const { subscription, loading: subscriptionLoading, resetPendingPayment, cancelSubscription } = useSubscriptionGate(session?.user.id ?? null);
   const [organicPlanScreenDismissed, setOrganicPlanScreenDismissed] = useState(false);
   const [activeTab, setActiveTab] = useState('hoje');
   const [showMore, setShowMore] = useState(false);
@@ -332,7 +332,13 @@ function AppShell() {
         <NotificacoesScreen alerts={alerts} timestamps={alertTimestamps} permission={notifPermission} onRequestPermission={requestNotifPermission} />
       )}
       {moreScreen === 'config' && (
-        <ConfigScreen onOpenServicos={() => setMoreScreen('servicos')} notifPermission={notifPermission} onRequestNotifPermission={requestNotifPermission} />
+        <ConfigScreen
+          onOpenServicos={() => setMoreScreen('servicos')}
+          notifPermission={notifPermission}
+          onRequestNotifPermission={requestNotifPermission}
+          subscription={subscription}
+          onCancelSubscription={cancelSubscription}
+        />
       )}
       {moreScreen === 'servicos' && <ServicosScreen onBack={() => window.history.back()} />}
 

@@ -12,6 +12,7 @@ export interface SubscriptionRow {
   trialEndsAt: string | null;
   billingType: 'recurring' | 'one_time';
   currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 function rowFrom(data: Record<string, unknown>): SubscriptionRow {
@@ -21,6 +22,7 @@ function rowFrom(data: Record<string, unknown>): SubscriptionRow {
     trialEndsAt: (data.trial_ends_at as string) ?? null,
     billingType: (data.billing_type as SubscriptionRow['billingType']) ?? 'recurring',
     currentPeriodEnd: (data.current_period_end as string) ?? null,
+    cancelAtPeriodEnd: (data.cancel_at_period_end as boolean) ?? false,
   };
   // A one-time charge (e.g. Pix on the annual plan) never renews itself, so
   // once its paid-through date passes it must be treated as lapsed — same as
@@ -47,7 +49,11 @@ export function useSubscriptionGate(userId: string | null) {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase.from('subscriptions').select('plan, status, trial_ends_at, billing_type, current_period_end').eq('user_id', userId).maybeSingle();
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('plan, status, trial_ends_at, billing_type, current_period_end, cancel_at_period_end')
+      .eq('user_id', userId)
+      .maybeSingle();
     if (error) {
       console.error(error);
       setLoading(false);
@@ -58,7 +64,7 @@ export function useSubscriptionGate(userId: string | null) {
       const { data: created, error: insertError } = await supabase
         .from('subscriptions')
         .insert({ user_id: userId, status: 'trialing', trial_ends_at: trialEndsAt })
-        .select('plan, status, trial_ends_at, billing_type, current_period_end')
+        .select('plan, status, trial_ends_at, billing_type, current_period_end, cancel_at_period_end')
         .single();
       if (insertError) {
         console.error(insertError);
@@ -91,5 +97,13 @@ export function useSubscriptionGate(userId: string | null) {
     await fetchSubscription();
   }, [fetchSubscription]);
 
-  return { subscription, loading, refetch: fetchSubscription, resetPendingPayment };
+  // Cancels future billing at the provider but keeps access until
+  // currentPeriodEnd — see cancel-subscription Edge Function.
+  const cancelSubscription = useCallback(async () => {
+    const { error } = await supabase.functions.invoke('cancel-subscription', { body: {} });
+    if (error) throw error;
+    await fetchSubscription();
+  }, [fetchSubscription]);
+
+  return { subscription, loading, refetch: fetchSubscription, resetPendingPayment, cancelSubscription };
 }

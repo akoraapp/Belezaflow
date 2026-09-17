@@ -116,6 +116,16 @@ export function fmtCurrency(value: number, currency: CurrencyCode) {
   return `${CURRENCIES[currency].symbol} ${fmtMoney(value, currency)}`;
 }
 
+const DATE_LOCALES: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' };
+
+export function fmtDate(iso: string, lang: Lang) {
+  try {
+    return new Date(iso).toLocaleDateString(DATE_LOCALES[lang], { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch {
+    return iso;
+  }
+}
+
 // Slot times are stored internally as 24h "HH:MM" strings (sorting/comparison relies on
 // this). English speakers conventionally read schedules in 12h AM/PM, so only the display
 // label is reformatted for 'en' — pt and es keep the 24h format common in their locales.

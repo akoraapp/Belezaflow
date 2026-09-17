@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronRight, Mail, Scissors } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, ExternalLink, Mail, Scissors } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { Card, Chip, PrimaryButton, TextInput, TextareaInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
 import { LANG_OPTIONS } from '../i18n';
+import { format, fmtDate } from '../lib/helpers';
 import { useProfile } from '../hooks/useProfile';
 import { useServices } from '../hooks/useServices';
 import { useAuth } from '../hooks/useAuth';
+import type { SubscriptionRow } from '../hooks/useSubscriptionGate';
 import type { NotifPermission } from '../lib/notifications';
 import type { CurrencyCode, Lang } from '../types';
 
@@ -14,19 +16,40 @@ interface ConfigScreenProps {
   onOpenServicos: () => void;
   notifPermission: NotifPermission;
   onRequestNotifPermission: () => void;
+  subscription: SubscriptionRow;
+  onCancelSubscription: () => Promise<void>;
 }
 
 type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | 'ajuda' | null;
 
 const SUPPORT_EMAIL = 'belezaflowapp@gmail.com';
 
-export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPermission }: ConfigScreenProps) {
+export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPermission, subscription, onCancelSubscription }: ConfigScreenProps) {
   const { profile, updateProfile: onUpdateProfile } = useProfile();
   const { services } = useServices();
   const { signOut: onSignOut } = useAuth();
   const { t, lang, setLang } = useLang();
   const [openRow, setOpenRow] = useState<OpenRow>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [canceling, setCanceling] = useState(false);
+  const [cancelError, setCancelError] = useState(false);
   if (!profile) return null;
+
+  const planLabel = subscription.plan === 'annual' ? t.config.planAnnualLabel : t.config.planMonthlyLabel;
+
+  const handleConfirmCancel = async () => {
+    setCanceling(true);
+    setCancelError(false);
+    try {
+      await onCancelSubscription();
+      setConfirmingCancel(false);
+    } catch (err) {
+      console.error(err);
+      setCancelError(true);
+    } finally {
+      setCanceling(false);
+    }
+  };
 
   const notifStatusLabel =
     notifPermission === 'granted'
@@ -237,7 +260,7 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
         {openRow === 'ajuda' && (
           <div style={{ padding: '10px 16px 16px' }}>
             <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t.config.ajudaHint}</div>
-            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ textDecoration: 'none', display: 'block' }} data-testid="config-ajuda-email">
+            <a href={`mailto:${SUPPORT_EMAIL}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 10 }} data-testid="config-ajuda-email">
               <PrimaryButton full>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                   <Mail size={14} />
@@ -245,7 +268,62 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
                 </span>
               </PrimaryButton>
             </a>
+            <a
+              href="/privacidade"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter', fontSize: 12.5, fontWeight: 600, color: T.muted, textDecoration: 'underline' }}
+              data-testid="config-privacy-policy"
+            >
+              {t.config.privacyPolicyCta}
+              <ExternalLink size={12} />
+            </a>
           </div>
+        )}
+      </Card>
+
+      <SectionTitle>{t.config.subscriptionTitle}</SectionTitle>
+      <Card style={{ marginBottom: 22 }}>
+        {subscription.status === 'trialing' && (
+          <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>{t.config.subscriptionTrialText}</div>
+        )}
+        {subscription.status === 'active' && (
+          <>
+            <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13.5, color: T.ink, marginBottom: 14 }}>
+              {subscription.currentPeriodEnd
+                ? format(t.config.subscriptionActiveTemplate, { plan: planLabel, date: fmtDate(subscription.currentPeriodEnd, lang) })
+                : format(t.config.subscriptionActiveNoDateTemplate, { plan: planLabel })}
+            </div>
+
+            {subscription.cancelAtPeriodEnd ? (
+              <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.muted, lineHeight: 1.5 }}>
+                {subscription.currentPeriodEnd
+                  ? format(t.config.cancelPlanPendingTemplate, { date: fmtDate(subscription.currentPeriodEnd, lang) })
+                  : t.config.cancelPlanPendingNoDateText}
+              </div>
+            ) : !confirmingCancel ? (
+              <PrimaryButton full variant="secondary" onClick={() => setConfirmingCancel(true)} testId="config-cancel-plan">
+                {t.config.cancelPlanCta}
+              </PrimaryButton>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ fontFamily: 'Inter', fontSize: 12.5, color: T.ink, lineHeight: 1.5 }}>
+                  {subscription.currentPeriodEnd
+                    ? format(t.config.cancelPlanConfirmTemplate, { date: fmtDate(subscription.currentPeriodEnd, lang) })
+                    : t.config.cancelPlanConfirmTextNoDate}
+                </div>
+                {cancelError && <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.danger }}>{t.config.cancelPlanErrorText}</div>}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <PrimaryButton full variant="secondary" onClick={() => setConfirmingCancel(false)} disabled={canceling} testId="config-cancel-plan-keep">
+                    {t.config.cancelPlanKeepCta}
+                  </PrimaryButton>
+                  <PrimaryButton full onClick={handleConfirmCancel} disabled={canceling} testId="config-cancel-plan-confirm">
+                    {t.config.cancelPlanConfirmCta}
+                  </PrimaryButton>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </Card>
 

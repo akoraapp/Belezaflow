@@ -359,6 +359,11 @@ export function LandingPage() {
           </a>
         </div>
         {l.footerText}
+        <div style={{ marginTop: 6 }}>
+          <Link to="/privacidade" style={{ color: F.mutedLight, textDecoration: 'underline' }}>
+            {l.footerPrivacyCta}
+          </Link>
+        </div>
       </div>
     </div>
   );
