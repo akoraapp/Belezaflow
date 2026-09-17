@@ -6,8 +6,9 @@
 //
 // Called server-to-server from mercadopago-webhook and stripe-webhook right
 // after they flip a subscription's status to 'active' — never from the
-// frontend. Idempotent via subscriptions.welcome_email_sent_at: safe to call
-// on every webhook delivery, including retries, without ever double-sending.
+// frontend, and there's no legitimate reason for anyone else to trigger it.
+// Idempotent via subscriptions.welcome_email_sent_at: safe to call on every
+// webhook delivery, including retries, without ever double-sending.
 //
 // Required secrets (Project Settings > Edge Functions > Secrets):
 //   RESEND_API_KEY   — from resend.com, after verifying the sending domain.
@@ -27,6 +28,16 @@ const WELCOME_EMAIL_FROM = Deno.env.get('WELCOME_EMAIL_FROM') ?? 'BelezaFlow <co
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://belezaflow.app';
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+// Platform verify_jwt only checks that SOME valid JWT is present — that
+// includes the public anon key shipped in the frontend bundle. Without this
+// check, anyone holding that anon key could call this function directly
+// with an arbitrary userId and trigger a real email (and the Kiwify link)
+// to any user whose welcome email hadn't fired yet.
+function isServiceRoleCaller(authHeader: string | null): boolean {
+  if (!authHeader?.startsWith('Bearer ')) return false;
+  return authHeader.slice('Bearer '.length) === SERVICE_ROLE_KEY;
+}
 
 function buildEmailHtml(name: string) {
   return `
@@ -51,6 +62,9 @@ function buildEmailHtml(name: string) {
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+  if (!isServiceRoleCaller(req.headers.get('Authorization'))) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
+  }
 
   let userId: string | undefined;
   try {
