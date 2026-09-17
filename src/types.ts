@@ -93,6 +93,7 @@ export interface Client {
   origem: string;
   status: string;
   birthday: string;
+  createdAt: number;
 }
 
 export interface FinanceEntry {

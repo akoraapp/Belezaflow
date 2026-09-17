@@ -10,6 +10,7 @@ function rowToClient(row: Record<string, unknown>): Client {
     origem: row.origem as string,
     status: row.status as string,
     birthday: row.birthday as string,
+    createdAt: new Date(row.created_at as string).getTime(),
   };
 }
 

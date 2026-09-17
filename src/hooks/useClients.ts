@@ -7,8 +7,8 @@ const { useResource, store } = createListResource<Client>(ClientService.fetchAll
 export function useClients() {
   const { items, loading, error, userId } = useResource();
 
-  const addClient = (c: Omit<Client, 'id'>): Client => {
-    const client: Client = { id: `c${Date.now()}`, ...c };
+  const addClient = (c: Omit<Client, 'id' | 'createdAt'>): Client => {
+    const client: Client = { id: `c${Date.now()}`, createdAt: Date.now(), ...c };
     store.setState((s) => ({ ...s, items: [client, ...s.items] }));
     if (userId) ClientService.insert(userId, client).catch(console.error);
     return client;
