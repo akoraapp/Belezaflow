@@ -4,21 +4,32 @@
 // its reminder sent yet, then stamps reminder_sent_at so it never fires twice.
 //
 // Security: this iterates and pushes notifications for EVERY user on the
-// platform, so it must only ever run from the trusted pg_cron job (which
-// calls it with the service role key, per 0005_pg_cron_reminders.sql) —
-// never from the platform's verify_jwt gate alone, which would also accept
-// the public anon key embedded in the frontend bundle.
+// platform, so it must only ever run from the trusted pg_cron job — never
+// from the platform's verify_jwt gate alone, which would also accept the
+// public anon key embedded in the frontend bundle. The cron job (see
+// 0017_fix_appointment_reminders_cron.sql) authenticates with a narrow,
+// dedicated CRON_SECRET rather than the project's master service role
+// key, so that the one credential pg_cron/pg_net has to carry (readable by
+// anyone with SQL access to this project) can't be used to impersonate the
+// service role anywhere else. The real service role key still works too,
+// for any other internal caller.
+//
+// Required secret: CRON_SECRET (Project Settings > Edge Functions >
+// Secrets) — must match the value stored in vault as 'cron_internal_secret'
+// (see that migration).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const CRON_SECRET = Deno.env.get('CRON_SECRET') ?? '';
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-function isServiceRoleCaller(authHeader: string | null): boolean {
+function isTrustedCaller(authHeader: string | null): boolean {
   if (!authHeader?.startsWith('Bearer ')) return false;
-  return authHeader.slice('Bearer '.length) === SERVICE_ROLE_KEY;
+  const token = authHeader.slice('Bearer '.length);
+  return token === SERVICE_ROLE_KEY || (!!CRON_SECRET && token === CRON_SECRET);
 }
 
 // Computes the UTC instant for a "day" (YYYY-MM-DD) + "time" (HH:MM) pair as
@@ -58,7 +69,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
-  if (!isServiceRoleCaller(req.headers.get('Authorization'))) {
+  if (!isTrustedCaller(req.headers.get('Authorization'))) {
     return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
   }
 
