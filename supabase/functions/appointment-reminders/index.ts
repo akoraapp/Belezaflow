@@ -4,9 +4,12 @@
 // its reminder sent yet, then stamps reminder_sent_at so it never fires twice.
 //
 // Security: this iterates and pushes notifications for EVERY user on the
-// platform, so it must only ever run from the trusted pg_cron job — never
-// from the platform's verify_jwt gate alone, which would also accept the
-// public anon key embedded in the frontend bundle. The cron job (see
+// platform, so it must only ever run from the trusted pg_cron job.
+// verify_jwt is OFF here (like mercadopago-webhook/stripe-webhook) because
+// the cron job authenticates with a plain bearer secret (CRON_SECRET), not
+// a real JWT — Supabase's platform verify_jwt gate would reject that at
+// the edge before this code ever runs. isTrustedCaller() below is what
+// actually enforces access. The cron job (see
 // 0017_fix_appointment_reminders_cron.sql) authenticates with a narrow,
 // dedicated CRON_SECRET rather than the project's master service role
 // key, so that the one credential pg_cron/pg_net has to carry (readable by
