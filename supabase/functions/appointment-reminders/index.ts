@@ -2,6 +2,12 @@
 // supabase/migrations/0005_pg_cron_reminders.sql) and sends a push notification
 // for every appointment that starts within the next 30 minutes and hasn't had
 // its reminder sent yet, then stamps reminder_sent_at so it never fires twice.
+//
+// Security: this iterates and pushes notifications for EVERY user on the
+// platform, so it must only ever run from the trusted pg_cron job (which
+// calls it with the service role key, per 0005_pg_cron_reminders.sql) —
+// never from the platform's verify_jwt gate alone, which would also accept
+// the public anon key embedded in the frontend bundle.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
@@ -9,6 +15,11 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+
+function isServiceRoleCaller(authHeader: string | null): boolean {
+  if (!authHeader?.startsWith('Bearer ')) return false;
+  return authHeader.slice('Bearer '.length) === SERVICE_ROLE_KEY;
+}
 
 // Computes the UTC instant for a "day" (YYYY-MM-DD) + "time" (HH:MM) pair as
 // understood in a given IANA timezone, handling DST correctly.
@@ -46,6 +57,9 @@ function zonedDateTimeToUtc(day: string, time: string, timeZone: string): Date {
 Deno.serve(async (req) => {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+  }
+  if (!isServiceRoleCaller(req.headers.get('Authorization'))) {
+    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 });
   }
 
   const now = new Date();
