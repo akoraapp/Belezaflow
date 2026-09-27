@@ -96,7 +96,12 @@ export function DiagnosticoScreen({ onOpenConteudo, onOpenClientes, onOpenFinanc
   const revenue = appointments
     .filter((a) => a.status === 'Compareceu' && a.day >= periodStartStr && a.day <= todayStr)
     .reduce((s, a) => s + a.price, 0);
-  const periodGoal = Math.round(((profile.goal || 0) * periodDays) / GOAL_PRORATION_BASE_DAYS);
+  // profile.goal is a real, user-set monthly figure — there's no stored
+  // history of what the goal was in past months to pull for a >30-day
+  // window, so proration only ever scales it DOWN for a partial month
+  // (7/15 days). Past 30 days (60 dias) it stays the plain monthly goal
+  // instead of multiplying it into a number nothing in the account backs up.
+  const periodGoal = Math.round(((profile.goal || 0) * Math.min(periodDays, GOAL_PRORATION_BASE_DAYS)) / GOAL_PRORATION_BASE_DAYS);
   const gap = Math.max(0, periodGoal - revenue);
   const apptsInPeriod = appointments.filter((a) => a.day >= todayStr && a.day <= periodEndStr).length;
   const bookableDaysInPeriod = getBookableDays(profile, periodDays);
