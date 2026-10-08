@@ -69,9 +69,6 @@ export function PrivacyPolicyPage() {
             <li>
               <strong>Mercado Pago</strong> e <strong>Stripe</strong> — processamento de pagamentos da sua assinatura.
             </li>
-            <li>
-              <strong>Resend</strong> — envio de e-mails transacionais (ex: confirmação de acesso).
-            </li>
           </ul>
         </Section>
 
