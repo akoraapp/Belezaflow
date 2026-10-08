@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -37,6 +37,36 @@ function Eyebrow({ children, color }: { children: React.ReactNode; color: string
   return <div style={{ fontSize: 13, fontWeight: 800, color, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16 }}>{children}</div>;
 }
 
+// Each major section starts invisible and fades/slides up (bfFadeIn, see
+// funnelTheme.ts) the first time it scrolls into view — the page previously
+// defined that keyframe but never actually applied it anywhere, which is
+// why it read as fully static instead of feeling alive while scrolling.
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const style: React.CSSProperties = visible ? { animation: 'bfFadeIn 700ms ease-out forwards' } : { opacity: 0 };
+  return { ref, style };
+}
+
 export function LandingPage() {
   const { t, lang } = useLang();
   const navigate = useNavigate();
@@ -44,6 +74,14 @@ export function LandingPage() {
   const l = t.landing;
   const { pricing } = useRegionPricing(lang);
   const [openFaq, setOpenFaq] = useState(-1);
+
+  const heroReveal = useReveal<HTMLDivElement>();
+  const howItWorksReveal = useReveal<HTMLDivElement>();
+  const toolsReveal = useReveal<HTMLDivElement>();
+  const diferencialReveal = useReveal<HTMLDivElement>();
+  const featuresReveal = useReveal<HTMLDivElement>();
+  const faqReveal = useReveal<HTMLDivElement>();
+  const pricingReveal = useReveal<HTMLDivElement>();
 
   useEffect(() => {
     if (isReturningUser) navigate('/app', { replace: true });
@@ -61,7 +99,7 @@ export function LandingPage() {
       <style>{FUNNEL_FONT_IMPORT + FUNNEL_KEYFRAMES}</style>
 
       {/* Hero */}
-      <div style={{ background: F.surface, padding: '32px 20px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div ref={heroReveal.ref} style={{ background: F.surface, padding: '32px 20px 48px', textAlign: 'center', position: 'relative', overflow: 'hidden', ...heroReveal.style }}>
         {l.heroPreviewCards.map((card, i) => (
           <div
             key={i}
@@ -94,30 +132,34 @@ export function LandingPage() {
             </button>
           </div>
           {/* Same preview cards as the desktop .bf-hero-float ones (see
-              funnelTheme.ts), swapped in below 640px — laid out in-flow as a
-              horizontal scroller instead of floating beside the title, since
-              a narrow phone has no side margin to float them in without
-              covering the text. */}
-          <div className="bf-hero-float-mobile" style={{ gap: 10, overflowX: 'auto', margin: '0 -20px 20px', padding: '0 20px 4px' }}>
-            {l.heroPreviewCards.map((card, i) => (
-              <div
-                key={i}
-                style={{
-                  flex: '0 0 auto',
-                  width: 136,
-                  padding: '10px 12px',
-                  background: F.surface,
-                  border: `1px solid ${F.lineSoft}`,
-                  borderRadius: 12,
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{ fontSize: 9, fontWeight: 800, color: F.goldDeep, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{card.tag}</div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: F.ink, marginBottom: 3 }}>{card.title}</div>
-                <div style={{ fontSize: 10, color: F.mutedLight }}>{card.desc}</div>
-              </div>
-            ))}
+              funnelTheme.ts), swapped in below 640px — animated through on
+              their own as a marquee instead of floating beside the title
+              (a narrow phone has no side margin for that), and never a
+              manual drag-to-scroll strip, which read as broken/inert
+              rather than part of the page's motion. The card list is
+              duplicated so the loop has no visible seam. */}
+          <div className="bf-hero-float-mobile" style={{ margin: '0 -20px 20px' }}>
+            <div className="bf-hero-float-mobile-track" style={{ gap: 10, padding: '0 20px 4px' }}>
+              {[...l.heroPreviewCards, ...l.heroPreviewCards].map((card, i) => (
+                <div
+                  key={i}
+                  style={{
+                    flex: '0 0 auto',
+                    width: 136,
+                    padding: '10px 12px',
+                    background: F.surface,
+                    border: `1px solid ${F.lineSoft}`,
+                    borderRadius: 12,
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ fontSize: 9, fontWeight: 800, color: F.goldDeep, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{card.tag}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: F.ink, marginBottom: 3 }}>{card.title}</div>
+                  <div style={{ fontSize: 10, color: F.mutedLight }}>{card.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 42, fontWeight: 800, color: F.ink, lineHeight: 1.15, margin: '0 auto 24px', maxWidth: 700, letterSpacing: -1 }}>{l.heroTitle}</h1>
           <p style={{ fontSize: 18, color: F.body, lineHeight: 1.6, margin: '0 auto 32px', maxWidth: 600 }}>
@@ -134,7 +176,7 @@ export function LandingPage() {
       </div>
 
       {/* How it works */}
-      <div style={{ padding: '56px 24px', background: F.ink, textAlign: 'center' }}>
+      <div ref={howItWorksReveal.ref} style={{ padding: '56px 24px', background: F.ink, textAlign: 'center', ...howItWorksReveal.style }}>
         <Eyebrow color={F.gold}>{l.howItWorksEyebrow}</Eyebrow>
         <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: 32, fontWeight: 800, color: '#FFFFFF', margin: '0 auto 16px', lineHeight: 1.2, maxWidth: 700 }}>{l.howItWorksTitle}</h2>
         <p style={{ fontSize: 16, color: F.mutedOnDark, margin: '0 auto 32px', lineHeight: 1.5, maxWidth: 600 }}>{l.howItWorksSubtitle}</p>
@@ -153,7 +195,7 @@ export function LandingPage() {
       </div>
 
       {/* Tools */}
-      <div style={{ padding: '56px 24px', background: F.toolsBg, textAlign: 'center' }}>
+      <div ref={toolsReveal.ref} style={{ padding: '56px 24px', background: F.toolsBg, textAlign: 'center', ...toolsReveal.style }}>
         <Eyebrow color={F.goldDeep}>{l.toolsEyebrow}</Eyebrow>
         <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: 30, fontWeight: 800, color: F.ink, margin: '0 auto 32px', lineHeight: 1.2, maxWidth: 700 }}>{l.toolsTitle}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, maxWidth: 1000, margin: '0 auto', textAlign: 'left' }}>
@@ -173,7 +215,7 @@ export function LandingPage() {
       </div>
 
       {/* Diferencial */}
-      <div style={{ padding: '56px 20px', background: F.inkSoft, textAlign: 'center' }}>
+      <div ref={diferencialReveal.ref} style={{ padding: '56px 20px', background: F.inkSoft, textAlign: 'center', ...diferencialReveal.style }}>
         <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: 26, fontWeight: 800, color: '#FFFFFF', textAlign: 'center', margin: '0 auto 32px', maxWidth: 600, lineHeight: 1.25 }}>{l.diferencialTitle}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20, maxWidth: 1000, margin: '0 auto', textAlign: 'left' }}>
           <div style={{ background: '#1C1C1A', borderRadius: 20, padding: '26px 22px', textAlign: 'left' }}>
@@ -227,7 +269,7 @@ export function LandingPage() {
       </div>
 
       {/* Features */}
-      <div style={{ padding: '56px 24px', background: F.surface, textAlign: 'center' }}>
+      <div ref={featuresReveal.ref} style={{ padding: '56px 24px', background: F.surface, textAlign: 'center', ...featuresReveal.style }}>
         <Eyebrow color={F.goldDeep}>{l.featuresEyebrow}</Eyebrow>
         <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: 30, fontWeight: 800, color: F.ink, margin: '0 auto 32px', lineHeight: 1.2, maxWidth: 700 }}>{l.featuresTitle}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, maxWidth: 1000, margin: '0 auto', textAlign: 'left' }}>
@@ -250,7 +292,7 @@ export function LandingPage() {
       </div>
 
       {/* FAQ */}
-      <div style={{ padding: '52px 24px', background: F.ink }}>
+      <div ref={faqReveal.ref} style={{ padding: '52px 24px', background: F.ink, ...faqReveal.style }}>
         <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: 30, fontWeight: 800, color: '#FFFFFF', textAlign: 'center', margin: '0 0 32px 0' }}>{l.faqEyebrow}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 700, margin: '0 auto' }}>
           {l.faqItems.map((faq, i) => {
@@ -289,7 +331,7 @@ export function LandingPage() {
       </div>
 
       {/* Pricing */}
-      <div id="pricing" style={{ padding: '64px 24px 72px', background: F.inkDeep }}>
+      <div id="pricing" ref={pricingReveal.ref} style={{ padding: '64px 24px 72px', background: F.inkDeep, ...pricingReveal.style }}>
         <Eyebrow color={F.gold}>
           <span style={{ display: 'block', textAlign: 'center' }}>{l.pricingEyebrow}</span>
         </Eyebrow>

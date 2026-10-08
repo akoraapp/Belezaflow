@@ -33,16 +33,32 @@ export const FUNNEL_KEYFRAMES = `
 @keyframes bfFloatA { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-18px) rotate(-4deg); } }
 @keyframes bfFloatB { 0%, 100% { transform: translateY(0) rotate(3deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
 @keyframes bfFloatC { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-22px) rotate(-2deg); } }
+@keyframes bfMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 /* On narrow phones the floating decorative cards overlap the hero title
    (they're positioned relative to the full-width hero panel, not the text
    column, which leaves no side margin to float them in once the panel is
    barely wider than the centered text itself) — so below the app's own
    mobile breakpoint they're swapped for .bf-hero-float-mobile, the same
-   cards laid out in-flow as a horizontal scroller instead of floating. */
+   cards animating through on their own as a marquee instead of floating —
+   never a manual drag-to-scroll strip, which read as broken/inert rather
+   than part of the page's motion. */
 .bf-hero-float-mobile { display: none; }
 @media (max-width: 640px) {
   .bf-hero-float { display: none; }
-  .bf-hero-float-mobile { display: flex; }
+  .bf-hero-float-mobile {
+    display: block;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .bf-hero-float-mobile-track {
+    display: flex;
+    width: max-content;
+    animation: bfMarquee 18s linear infinite;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bf-hero-float-mobile-track { animation: none; }
 }
 `;
 

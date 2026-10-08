@@ -1,8 +1,8 @@
 // Sends the one-time "you're in!" email once a subscription actually goes
-// active (a real payment landed) — not at signup/trial start. Delivers two
-// things: a reminder that her app access is ready, and the link to the
-// Kiwify members area where the training videos live (a separate product
-// from the app itself, so this is the only place that connects the two).
+// active (a real payment landed) — not at signup/trial start. A reminder
+// that her app access is ready. Any mention of the Kiwify training-video
+// members area is sent manually by the team instead (Portuguese-speaking
+// customers only, for now) — never automatically from this function.
 //
 // Called server-to-server from mercadopago-webhook and stripe-webhook right
 // after they flip a subscription's status to 'active' — never from the
@@ -11,10 +11,7 @@
 // webhook delivery, including retries, without ever double-sending.
 //
 // Required secrets (Project Settings > Edge Functions > Secrets):
-//   RESEND_API_KEY   — from resend.com, after verifying the sending domain.
-//   KIWIFY_MEMBERS_URL — the Kiwify members-area login link (same for every
-//                        buyer; they sign in there with the email they
-//                        bought with).
+//   RESEND_API_KEY — from resend.com, after verifying the sending domain.
 // Optional: WELCOME_EMAIL_FROM (defaults below), APP_URL (defaults below).
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
@@ -23,7 +20,6 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const KIWIFY_MEMBERS_URL = Deno.env.get('KIWIFY_MEMBERS_URL') ?? '';
 const WELCOME_EMAIL_FROM = Deno.env.get('WELCOME_EMAIL_FROM') ?? 'BelezaFlow <contato@belezaflow.app>';
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://belezaflow.app';
 
@@ -32,8 +28,8 @@ const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 // Platform verify_jwt only checks that SOME valid JWT is present — that
 // includes the public anon key shipped in the frontend bundle. Without this
 // check, anyone holding that anon key could call this function directly
-// with an arbitrary userId and trigger a real email (and the Kiwify link)
-// to any user whose welcome email hadn't fired yet.
+// with an arbitrary userId and trigger a real email to any user whose
+// welcome email hadn't fired yet.
 function isServiceRoleCaller(authHeader: string | null): boolean {
   if (!authHeader?.startsWith('Bearer ')) return false;
   return authHeader.slice('Bearer '.length) === SERVICE_ROLE_KEY;
@@ -47,15 +43,6 @@ function buildEmailHtml(name: string) {
     <p style="margin: 24px 0;">
       <a href="${APP_URL}/app" style="background: #C8A96A; color: #1a1a1a; text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: bold; display: inline-block;">Acessar o BelezaFlow</a>
     </p>
-    ${
-      KIWIFY_MEMBERS_URL
-        ? `<p style="font-size: 15px; line-height: 1.6;">E antes de começar, dá uma passada no treinamento completo — está tudo esperando por você na área de membros:</p>
-    <p style="margin: 24px 0;">
-      <a href="${KIWIFY_MEMBERS_URL}" style="background: #1a1a1a; color: #ffffff; text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: bold; display: inline-block;">Assistir ao treinamento</a>
-    </p>
-    <p style="font-size: 13px; color: #666;">Use o mesmo e-mail da compra para entrar na área de membros.</p>`
-        : ''
-    }
     <p style="font-size: 14px; color: #666; margin-top: 32px;">Qualquer dúvida, é só responder este e-mail.</p>
   </div>`;
 }
@@ -98,7 +85,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: WELCOME_EMAIL_FROM,
         to: email,
-        subject: 'Seu acesso ao BelezaFlow + treinamento 🎉',
+        subject: 'Seu acesso ao BelezaFlow 🎉',
         html: buildEmailHtml(name),
       }),
     });
