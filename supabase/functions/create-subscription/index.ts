@@ -190,6 +190,12 @@ async function createStripeCheckout(userId: string, email: string | undefined, p
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
+    // Explicit instead of relying on the Stripe Dashboard's automatic
+    // payment-method detection per currency — a fresh/newly-connected
+    // account can have no payment method enabled yet for a given
+    // currency, which fails checkout.session.create with "No valid
+    // payment method types for this Checkout Session" until this is set.
+    payment_method_types: ['card'],
     customer_email: email,
     client_reference_id: userId,
     success_url: `${origin}/app?checkout=success`,
