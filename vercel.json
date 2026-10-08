@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/bio/(.*)", "destination": "https://bio-beauty.vercel.app/bio/$1" },
+    { "source": "/sitemap.xml", "destination": "https://zqimhhjyeljafhqtpfci.supabase.co/functions/v1/sitemap" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
