@@ -586,6 +586,7 @@ const pt = {
     itemPrefNotificacoes: 'Preferências de notificações',
     itemAjuda: 'Ajuda e suporte',
     ajudaHint: 'Precisa de ajuda? Envie um e-mail para a nossa equipe.',
+    manualCta: 'Manual de uso',
     ajudaEmailCta: 'Enviar e-mail',
     privacyPolicyCta: 'Política de Privacidade',
     dadosProfissionalNomeLabel: 'Nome',
@@ -735,6 +736,75 @@ const pt = {
     footerText: '© 2026 BelezaFlow. Todos os direitos reservados.',
     footerPrivacyCta: 'Política de Privacidade',
     footerHelpText: 'Precisa de ajuda? Fale com a gente: ',
+  },
+  manual: {
+    title: 'Manual de uso',
+    intro: 'Um guia rápido com o essencial para você usar o BelezaFlow no dia a dia.',
+    sections: [
+      {
+        title: 'Primeiros passos',
+        items: [
+          'Na configuração inicial, escolha idioma, moeda, nome público, profissão e meta mensal — tudo pode ser alterado depois em Configurações.',
+          'Confirme os serviços e valores sugeridos, ou ajuste-os. Eles aparecem na Agenda, no Profit Hub e na sua página pública de agendamento.',
+        ],
+      },
+      {
+        title: 'Tela Hoje',
+        items: [
+          'É a tela inicial: mostra o faturamento do dia, os agendamentos de hoje e os alertas da Secretária IA (horários vazios, clientes sumidas, estoque baixo, aniversários, novos leads).',
+          'Toque em um alerta para agir direto: preencher horário, ver clientes, repor estoque etc.',
+        ],
+      },
+      {
+        title: 'Agenda',
+        items: [
+          'Em "Agenda" você registra atendimentos manualmente e vê os horários livres do dia.',
+          'Em "Agenda Online" você define os dias e horários em que atende — só o que estiver marcado ali fica disponível para a cliente agendar sozinha.',
+          'Copie e compartilhe seu link público de agendamento (em Agenda Online) nas redes sociais ou no WhatsApp.',
+        ],
+      },
+      {
+        title: 'Clientes (CRM)',
+        items: [
+          'Cadastre clientes com nome, telefone, serviço de interesse e origem (Instagram, WhatsApp, indicação etc.).',
+          'Use a Central de Respostas para enviar mensagens prontas de primeiro contato, follow-up, quebra de objeção, fechamento, reativação e aniversário direto pelo WhatsApp.',
+          'Acompanhe o histórico de procedimentos e o total gasto por cliente.',
+        ],
+      },
+      {
+        title: 'Financeiro (Profit Hub)',
+        items: [
+          'Veja a receita do mês, o ticket médio e sua meta mensal.',
+          'Registre contas a pagar e a receber, com data de vencimento.',
+          'Consulte o histórico dos últimos 6 meses e dados de meses/anos anteriores.',
+        ],
+      },
+      {
+        title: 'Máquina de Conteúdo IA',
+        items: [
+          'Gere ideias de post, reel, story ou campanha de recuperação automaticamente, com base na sua agenda, clientes e metas — ou escolha o formato manualmente.',
+          'Cada conteúdo vem com roteiro, legenda e CTA prontos para copiar e postar.',
+        ],
+      },
+      {
+        title: 'Diagnóstico Rápido',
+        items: ['Um resumo do seu negócio no período que você escolher: faturamento, meta, agendamentos, clientes ativas/sumidas e pontos de atenção.'],
+      },
+      {
+        title: 'Estoque',
+        items: [
+          'Cadastre produtos com quantidade e estoque mínimo.',
+          'Vincule produtos aos serviços em "Serviços e valores" — ao marcar um atendimento como "Compareceu", a quantidade usada é descontada automaticamente.',
+        ],
+      },
+      {
+        title: 'Configurações',
+        items: [
+          'Altere idioma, moeda, dados profissionais, políticas de agendamento (buffer, cancelamento, reagendamento) e preferências de notificação.',
+          'Gerencie sua assinatura (plano, renovação, cancelamento) e acesse a Política de Privacidade.',
+        ],
+      },
+    ],
   },
   choosePlan: {
     title: 'Escolha seu plano',
@@ -1133,6 +1203,7 @@ const en: typeof pt = {
     itemPrefNotificacoes: 'Notification preferences',
     itemAjuda: 'Help and support',
     ajudaHint: 'Need help? Send our team an email.',
+    manualCta: 'User manual',
     ajudaEmailCta: 'Send email',
     privacyPolicyCta: 'Privacy Policy',
     dadosProfissionalNomeLabel: 'Name',
@@ -1282,6 +1353,75 @@ const en: typeof pt = {
     footerText: '© 2026 BelezaFlow. All rights reserved.',
     footerPrivacyCta: 'Privacy Policy',
     footerHelpText: 'Need help? Contact us: ',
+  },
+  manual: {
+    title: 'User manual',
+    intro: 'A quick guide to the essentials of using BelezaFlow day to day.',
+    sections: [
+      {
+        title: 'Getting started',
+        items: [
+          'During setup, choose your language, currency, public name, profession, and monthly goal — all of this can be changed later in Settings.',
+          'Confirm the suggested services and prices, or adjust them. They appear in your Schedule, Profit Hub, and your public booking page.',
+        ],
+      },
+      {
+        title: 'Today screen',
+        items: [
+          "This is the home screen: it shows today's revenue, today's appointments, and your AI Secretary's alerts (open slots, lost clients, low stock, birthdays, new leads).",
+          'Tap an alert to act right away: fill a slot, view clients, restock inventory, and so on.',
+        ],
+      },
+      {
+        title: 'Schedule',
+        items: [
+          'In "Schedule" you log appointments manually and see the day\'s free slots.',
+          'In "Online Booking" you set the days and times you work — only what you mark there becomes available for clients to book on their own.',
+          'Copy and share your public booking link (under Online Booking) on social media or WhatsApp.',
+        ],
+      },
+      {
+        title: 'Clients (CRM)',
+        items: [
+          'Add clients with name, phone, service of interest, and source (Instagram, WhatsApp, referral, etc.).',
+          'Use the Message Center to send ready-made first-contact, follow-up, objection-handling, closing, reactivation, and birthday messages straight through WhatsApp.',
+          "Track each client's service history and total spend.",
+        ],
+      },
+      {
+        title: 'Finance (Profit Hub)',
+        items: [
+          "See this month's revenue, average ticket, and your monthly goal.",
+          'Log bills to pay and payments to receive, with due dates.',
+          'Review the last 6 months of history, plus earlier months and years.',
+        ],
+      },
+      {
+        title: 'AI Content Machine',
+        items: [
+          'Generate post, reel, story, or recovery-campaign ideas automatically based on your schedule, clients, and goals — or pick a format manually.',
+          'Each piece of content comes with a ready-to-copy script, caption, and call to action.',
+        ],
+      },
+      {
+        title: 'Quick Insights',
+        items: ['A snapshot of your business for any period you choose: revenue, goal, appointments, active/lost clients, and points needing attention.'],
+      },
+      {
+        title: 'Inventory',
+        items: [
+          'Register products with quantity and minimum stock level.',
+          'Link products to services under "Services and prices" — marking an appointment as "Attended" automatically deducts the quantity used.',
+        ],
+      },
+      {
+        title: 'Settings',
+        items: [
+          'Change language, currency, your professional details, booking policies (buffer time, cancellation, rescheduling), and notification preferences.',
+          'Manage your subscription (plan, renewal, cancellation) and access the Privacy Policy.',
+        ],
+      },
+    ],
   },
   choosePlan: {
     title: 'Choose your plan',
@@ -1680,6 +1820,7 @@ const es: typeof pt = {
     itemPrefNotificacoes: 'Preferencias de notificaciones',
     itemAjuda: 'Ayuda y soporte',
     ajudaHint: '¿Necesitas ayuda? Envía un correo a nuestro equipo.',
+    manualCta: 'Manual de uso',
     ajudaEmailCta: 'Enviar correo',
     privacyPolicyCta: 'Política de Privacidad',
     dadosProfissionalNomeLabel: 'Nombre',
@@ -1829,6 +1970,75 @@ const es: typeof pt = {
     footerText: '© 2026 BelezaFlow. Todos los derechos reservados.',
     footerPrivacyCta: 'Política de Privacidad',
     footerHelpText: '¿Necesitas ayuda? Contáctanos: ',
+  },
+  manual: {
+    title: 'Manual de uso',
+    intro: 'Una guía rápida con lo esencial para usar BelezaFlow en tu día a día.',
+    sections: [
+      {
+        title: 'Primeros pasos',
+        items: [
+          'En la configuración inicial, elige idioma, moneda, nombre público, profesión y meta mensual — todo se puede cambiar después en Configuración.',
+          'Confirma los servicios y precios sugeridos, o ajústalos. Aparecen en tu Agenda, en el Centro de Lucro y en tu página pública de reservas.',
+        ],
+      },
+      {
+        title: 'Pantalla Hoy',
+        items: [
+          'Es la pantalla inicial: muestra los ingresos del día, las citas de hoy y las alertas de la Secretaria IA (huecos en la agenda, clientas perdidas, poco inventario, cumpleaños, nuevos leads).',
+          'Toca una alerta para actuar de inmediato: llenar un horario, ver clientas, reponer inventario, etc.',
+        ],
+      },
+      {
+        title: 'Agenda',
+        items: [
+          'En "Agenda" registras citas manualmente y ves los horarios libres del día.',
+          'En "Agenda Online" defines los días y horarios en que atiendes — solo lo marcado ahí queda disponible para que la clienta reserve por su cuenta.',
+          'Copia y comparte tu enlace público de reservas (en Agenda Online) en redes sociales o WhatsApp.',
+        ],
+      },
+      {
+        title: 'Clientas (CRM)',
+        items: [
+          'Registra clientas con nombre, teléfono, servicio de interés y origen (Instagram, WhatsApp, referido, etc.).',
+          'Usa la Central de Respuestas para enviar mensajes listos de primer contacto, seguimiento, manejo de objeciones, cierre, reactivación y cumpleaños directo por WhatsApp.',
+          'Consulta el historial de procedimientos y el total gastado por cada clienta.',
+        ],
+      },
+      {
+        title: 'Finanzas (Centro de Lucro)',
+        items: [
+          'Consulta los ingresos del mes, el ticket promedio y tu meta mensual.',
+          'Registra cuentas por pagar y por cobrar, con fecha de vencimiento.',
+          'Revisa el historial de los últimos 6 meses, además de meses y años anteriores.',
+        ],
+      },
+      {
+        title: 'Máquina de Contenido IA',
+        items: [
+          'Genera ideas de post, reel, story o campaña de reactivación automáticamente, según tu agenda, clientas y metas — o elige el formato manualmente.',
+          'Cada contenido viene con guion, leyenda y CTA listos para copiar y publicar.',
+        ],
+      },
+      {
+        title: 'Diagnóstico Rápido',
+        items: ['Un resumen de tu negocio en el período que elijas: ingresos, meta, citas, clientas activas/perdidas y puntos de atención.'],
+      },
+      {
+        title: 'Inventario',
+        items: [
+          'Registra productos con cantidad y stock mínimo.',
+          'Vincula productos a los servicios en "Servicios y precios" — al marcar una cita como "Asistió", la cantidad usada se descuenta automáticamente.',
+        ],
+      },
+      {
+        title: 'Configuración',
+        items: [
+          'Cambia idioma, moneda, tus datos profesionales, políticas de reservas (tiempo entre citas, cancelación, reprogramación) y preferencias de notificaciones.',
+          'Gestiona tu suscripción (plan, renovación, cancelación) y accede a la Política de Privacidad.',
+        ],
+      },
+    ],
   },
   choosePlan: {
     title: 'Elige tu plan',

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronDown, ChevronRight, ExternalLink, Mail, Scissors } from 'lucide-react';
+import { BookOpen, Check, ChevronDown, ChevronRight, ExternalLink, Mail, Scissors } from 'lucide-react';
 import { T, CURRENCIES, RADIUS } from '../theme';
 import { Card, Chip, PrimaryButton, TextInput, TextareaInput, PhoneInput, SectionTitle } from '../components/primitives';
 import { useLang } from '../lib/LangContext';
@@ -14,6 +14,7 @@ import type { CurrencyCode, Lang } from '../types';
 
 interface ConfigScreenProps {
   onOpenServicos: () => void;
+  onOpenManual: () => void;
   notifPermission: NotifPermission;
   onRequestNotifPermission: () => void;
   subscription: SubscriptionRow;
@@ -24,7 +25,7 @@ type OpenRow = 'idioma' | 'moeda' | 'dados' | 'politicas' | 'notificacoes' | 'aj
 
 const SUPPORT_EMAIL = 'belezaflowapp@gmail.com';
 
-export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPermission, subscription, onCancelSubscription }: ConfigScreenProps) {
+export function ConfigScreen({ onOpenServicos, onOpenManual, notifPermission, onRequestNotifPermission, subscription, onCancelSubscription }: ConfigScreenProps) {
   const { profile, updateProfile: onUpdateProfile } = useProfile();
   const { services } = useServices();
   const { signOut: onSignOut } = useAuth();
@@ -260,6 +261,14 @@ export function ConfigScreen({ onOpenServicos, notifPermission, onRequestNotifPe
         {openRow === 'ajuda' && (
           <div style={{ padding: '10px 16px 16px' }}>
             <div style={{ fontFamily: 'Inter', fontSize: 12, color: T.muted, marginBottom: 12, lineHeight: 1.5 }}>{t.config.ajudaHint}</div>
+            <div style={{ marginBottom: 10 }} data-testid="config-manual">
+              <PrimaryButton full variant="secondary" onClick={onOpenManual}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                  <BookOpen size={14} />
+                  {t.config.manualCta}
+                </span>
+              </PrimaryButton>
+            </div>
             <a href={`mailto:${SUPPORT_EMAIL}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 10 }} data-testid="config-ajuda-email">
               <PrimaryButton full>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>

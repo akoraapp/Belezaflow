@@ -32,6 +32,7 @@ import { ServicosScreen } from './screens/Servicos';
 import { EstoqueScreen } from './screens/Estoque';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
+import { ManualScreen } from './screens/Manual';
 
 function deriveNameFromEmail(email: string) {
   const local = email.split('@')[0] || '';
@@ -334,6 +335,7 @@ function AppShell() {
       {moreScreen === 'config' && (
         <ConfigScreen
           onOpenServicos={() => setMoreScreen('servicos')}
+          onOpenManual={() => setMoreScreen('manual')}
           notifPermission={notifPermission}
           onRequestNotifPermission={requestNotifPermission}
           subscription={subscription}
@@ -341,6 +343,7 @@ function AppShell() {
         />
       )}
       {moreScreen === 'servicos' && <ServicosScreen onBack={() => window.history.back()} />}
+      {moreScreen === 'manual' && <ManualScreen />}
 
       {!moreScreen && activeTab === 'hoje' && (
         <HojeScreen
