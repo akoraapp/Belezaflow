@@ -60,14 +60,17 @@ export function PrivacyPolicyPage() {
         </Section>
 
         <Section title="4. Com quem compartilhamos dados">
-          Não vendemos seus dados a terceiros para fins de publicidade. Compartilhamos dados apenas com prestadores de serviço estritamente necessários para o
-          funcionamento do app, atuando como operadores em nosso nome:
+          Não vendemos seus dados a terceiros. Compartilhamos dados apenas com prestadores de serviço estritamente necessários para o funcionamento do app e
+          para medir o desempenho das nossas páginas e campanhas, atuando como operadores em nosso nome:
           <ul style={{ paddingLeft: 18, margin: '8px 0 0' }}>
             <li>
               <strong>Supabase</strong> — hospedagem, banco de dados e autenticação.
             </li>
             <li>
               <strong>Mercado Pago</strong> e <strong>Stripe</strong> — processamento de pagamentos da sua assinatura.
+            </li>
+            <li>
+              <strong>Meta (Facebook/Instagram)</strong> e <strong>Google Analytics</strong> — medição de tráfego e desempenho de campanhas em nossas páginas públicas.
             </li>
           </ul>
         </Section>
@@ -100,8 +103,10 @@ export function PrivacyPolicyPage() {
         </Section>
 
         <Section title="9. Cookies e armazenamento local">
-          O BelezaFlow não usa cookies de publicidade ou rastreamento de terceiros. Usamos apenas armazenamento técnico necessário ao funcionamento do app: sua
-          sessão de autenticação e o cache do aplicativo instalável (PWA), para que ele continue funcionando mesmo com conexão instável.
+          Usamos armazenamento técnico necessário ao funcionamento do app: sua sessão de autenticação e o cache do aplicativo instalável (PWA), para que ele
+          continue funcionando mesmo com conexão instável. Também usamos os cookies do Meta Pixel e do Google Analytics para medir o tráfego das nossas
+          páginas e a origem dos acessos (ex: qual campanha ou busca trouxe o visitante) — eles coletam dados de uso de forma agregada e não os utilizamos
+          para tomar decisões automatizadas sobre você.
         </Section>
 
         <Section title="10. Menores de idade">O BelezaFlow não é destinado a menores de 18 anos.</Section>
