@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/bio/(.*)", "destination": "https://bio-beauty.vercel.app/bio/$1" },
+    { "source": "/bio", "destination": "https://beleza-flow-bio.vercel.app" },
+    { "source": "/founding20", "destination": "https://beleza-flow-bio.vercel.app/founding20" },
+    { "source": "/uploads/(.*)", "destination": "https://beleza-flow-bio.vercel.app/uploads/$1" },
     { "source": "/sitemap.xml", "destination": "https://zqimhhjyeljafhqtpfci.supabase.co/functions/v1/sitemap" },
     { "source": "/biobeauty", "destination": "https://bio-beauty.vercel.app/biobeauty" },
     { "source": "/biobeauty/(.*)", "destination": "https://bio-beauty.vercel.app/biobeauty/$1" },
