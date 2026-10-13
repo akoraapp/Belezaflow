@@ -806,6 +806,39 @@ const pt = {
       },
     ],
   },
+  tour: {
+    skipCta: 'Pular',
+    backCta: 'Voltar',
+    nextCta: 'Continuar',
+    steps: [
+      {
+        title: 'Bem-vinda ao BelezaFlow!',
+        desc: 'Vamos te mostrar o essencial em poucos passos, pra você começar a organizar seu negócio agora mesmo.',
+      },
+      {
+        title: 'Cadastre suas clientes',
+        desc: 'Em Clientes, registre quem você já atende: nome, telefone e serviço de interesse. É o primeiro passo pra tudo no app funcionar.',
+      },
+      {
+        title: 'Monte sua Agenda',
+        desc: 'Marque os dias e horários que você atende em Agenda Online. Compartilhe seu link e suas clientes agendam sozinhas, sem precisar te chamar.',
+      },
+      {
+        title: 'Acompanhe o Financeiro',
+        desc: 'Cada atendimento marcado como "Compareceu" já entra automaticamente no seu faturamento — sem planilha, sem esforço extra.',
+      },
+      {
+        title: 'Deixe a Secretária IA ajudar',
+        desc: 'Todo dia ela avisa o que precisa da sua atenção: horário vago, cliente sumida, estoque baixo. E a Máquina de Conteúdo cria posts prontos pra você.',
+      },
+      {
+        title: 'Pronto! Você já sabe o essencial.',
+        desc: 'Quer cadastrar sua primeira cliente agora?',
+      },
+    ],
+    finishPrimaryCta: 'Cadastrar cliente',
+    finishSecondaryCta: 'Explorar sozinha',
+  },
   choosePlan: {
     title: 'Escolha seu plano',
     subtitle: 'Você está a um passo de organizar seu negócio de beleza.',
@@ -1423,6 +1456,39 @@ const en: typeof pt = {
       },
     ],
   },
+  tour: {
+    skipCta: 'Skip',
+    backCta: 'Back',
+    nextCta: 'Continue',
+    steps: [
+      {
+        title: 'Welcome to BelezaFlow!',
+        desc: "We'll walk you through the essentials in a few quick steps, so you can start organizing your business right away.",
+      },
+      {
+        title: 'Add your clients',
+        desc: 'Under Clients, register everyone you already serve: name, phone, and service of interest. It\'s the first step for everything else in the app to work.',
+      },
+      {
+        title: 'Set up your Schedule',
+        desc: 'Mark the days and times you work under Online Booking. Share your link and clients can book themselves — no need to message you.',
+      },
+      {
+        title: 'Track your Finances',
+        desc: 'Every appointment marked "Attended" is automatically added to your revenue — no spreadsheet, no extra work.',
+      },
+      {
+        title: 'Let the AI Secretary help',
+        desc: "Every day it flags what needs your attention: an open slot, a client who's gone quiet, low stock. And the Content Machine creates ready-to-post captions for you.",
+      },
+      {
+        title: "That's it! You know the essentials.",
+        desc: 'Want to add your first client now?',
+      },
+    ],
+    finishPrimaryCta: 'Add a client',
+    finishSecondaryCta: 'Explore on my own',
+  },
   choosePlan: {
     title: 'Choose your plan',
     subtitle: "You're one step away from organizing your beauty business.",
@@ -2039,6 +2105,39 @@ const es: typeof pt = {
         ],
       },
     ],
+  },
+  tour: {
+    skipCta: 'Saltar',
+    backCta: 'Atrás',
+    nextCta: 'Continuar',
+    steps: [
+      {
+        title: '¡Bienvenida a BelezaFlow!',
+        desc: 'Te mostramos lo esencial en unos pocos pasos, para que empieces a organizar tu negocio ahora mismo.',
+      },
+      {
+        title: 'Registra tus clientas',
+        desc: 'En Clientas, registra a quienes ya atiendes: nombre, teléfono y servicio de interés. Es el primer paso para que todo lo demás funcione.',
+      },
+      {
+        title: 'Arma tu Agenda',
+        desc: 'Marca los días y horarios en que atiendes en Agenda Online. Comparte tu enlace y tus clientas reservan solas, sin necesidad de escribirte.',
+      },
+      {
+        title: 'Sigue tus Finanzas',
+        desc: 'Cada cita marcada como "Asistió" se agrega automáticamente a tus ingresos — sin hojas de cálculo, sin esfuerzo extra.',
+      },
+      {
+        title: 'Deja que la Secretaria IA te ayude',
+        desc: 'Cada día te avisa qué necesita tu atención: un horario libre, una clienta perdida, poco inventario. Y la Máquina de Contenido crea publicaciones listas para ti.',
+      },
+      {
+        title: '¡Listo! Ya sabes lo esencial.',
+        desc: '¿Quieres registrar a tu primera clienta ahora?',
+      },
+    ],
+    finishPrimaryCta: 'Registrar clienta',
+    finishSecondaryCta: 'Explorar sola',
   },
   choosePlan: {
     title: 'Elige tu plan',

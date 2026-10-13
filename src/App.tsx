@@ -33,6 +33,27 @@ import { EstoqueScreen } from './screens/Estoque';
 import { ConfigScreen } from './screens/Config';
 import { NotificacoesScreen } from './screens/Notificacoes';
 import { ManualScreen } from './screens/Manual';
+import { FirstRunTour } from './components/FirstRunTour';
+
+const TOUR_SEEN_KEY_PREFIX = 'belezaflow_tour_seen_';
+
+function hasSeenTour(userId: string): boolean {
+  try {
+    return localStorage.getItem(TOUR_SEEN_KEY_PREFIX + userId) === '1';
+  } catch {
+    // localStorage unavailable (privacy mode, sandboxed preview, etc.) —
+    // default to "seen" so a broken storage API can't wedge the tour open.
+    return true;
+  }
+}
+
+function markTourSeen(userId: string) {
+  try {
+    localStorage.setItem(TOUR_SEEN_KEY_PREFIX + userId, '1');
+  } catch {
+    // Nothing to persist to — the tour just reappears next session, harmless.
+  }
+}
 
 function deriveNameFromEmail(email: string) {
   const local = email.split('@')[0] || '';
@@ -138,6 +159,7 @@ function AppShell() {
   const [clientesFilter, setClientesFilter] = useState('Todos');
   const [clientesNonce, setClientesNonce] = useState(0);
   const [clientesInitialSelectedId, setClientesInitialSelectedId] = useState<string | null>(null);
+  const [showTour, setShowTour] = useState(false);
 
   // Tab/"more screen" navigation inside the dashboard is local React state,
   // not a route change — the URL stays on /app the whole time. Left alone,
@@ -192,6 +214,27 @@ function AppShell() {
     setClientesFilter(filterValue);
     setClientesInitialSelectedId(selectClientId);
     setClientesNonce((n) => n + 1);
+    selectTab('clientes');
+  };
+
+  // Once she's actually looking at the real dashboard (profile done, a valid
+  // subscription), show the first-run tour exactly once per account — never
+  // during onboarding/payment screens, and never again once dismissed.
+  useEffect(() => {
+    const userId = session?.user.id;
+    if (!userId || !profile || !subscription) return;
+    if (subscription.status !== 'active' && subscription.status !== 'trialing') return;
+    if (!hasSeenTour(userId)) setShowTour(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user.id, !!profile, subscription?.status]);
+
+  const dismissTour = () => {
+    if (session) markTourSeen(session.user.id);
+    setShowTour(false);
+  };
+  const finishTourToClients = () => {
+    if (session) markTourSeen(session.user.id);
+    setShowTour(false);
     selectTab('clientes');
   };
 
@@ -365,11 +408,13 @@ function AppShell() {
   if (!isMobile) {
     const navItems = [...tabs, ...moreItems];
     return (
-      // Fills the real browser window like an ordinary dashboard/site — no
-      // outer card, no fixed max width. Only the sidebar has a fixed width;
-      // the content pane flexes to whatever room is left and scrolls on its
-      // own real height (100vh, not a fixed pixel guess).
-      <div style={{ width: '100%', height: '100vh', background: T.surfaceAlt, fontFamily: 'Inter', display: 'flex', overflow: 'hidden' }}>
+      <>
+        {showTour && <FirstRunTour onGoToClients={finishTourToClients} onDismiss={dismissTour} />}
+        {/* Fills the real browser window like an ordinary dashboard/site — no
+          outer card, no fixed max width. Only the sidebar has a fixed width;
+          the content pane flexes to whatever room is left and scrolls on its
+          own real height (100vh, not a fixed pixel guess). */}
+        <div style={{ width: '100%', height: '100vh', background: T.surfaceAlt, fontFamily: 'Inter', display: 'flex', overflow: 'hidden' }}>
         <style>{FONT_IMPORT}</style>
         <div
           style={{
@@ -441,6 +486,7 @@ function AppShell() {
           <div style={{ maxWidth: 760, margin: '0 auto' }}>{screenContent}</div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -451,7 +497,9 @@ function AppShell() {
   // which pushed the absolutely-positioned BottomNav below the fold and, with
   // overflow: hidden here, made it unreachable.
   return (
-    <div className="app-fullbleed" style={{ height: viewportHeight, background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
+    <>
+      {showTour && <FirstRunTour onGoToClients={finishTourToClients} onDismiss={dismissTour} />}
+      <div className="app-fullbleed" style={{ height: viewportHeight, background: T.bg, fontFamily: 'Inter', position: 'relative', overflow: 'hidden' }}>
       <style>{FONT_IMPORT}</style>
       <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
         <div
@@ -496,6 +544,7 @@ function AppShell() {
 
       <BottomNav active={activeTab} onSelect={selectTab} onMore={() => setShowMore(true)} moreActive={!!moreScreen} t={t} />
       {showMore && <MoreSheet onSelect={openMore} onClose={() => setShowMore(false)} t={t} />}
-    </div>
+      </div>
+    </>
   );
 }
