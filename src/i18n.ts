@@ -828,6 +828,10 @@ const pt = {
         desc: 'Cada atendimento marcado como "Compareceu" já entra automaticamente no seu faturamento — sem planilha, sem esforço extra.',
       },
       {
+        title: 'Registre seu estoque',
+        desc: 'Cadastre seus produtos em Estoque, com a quantidade que você tem. Assim você sempre sabe o que está acabando — e os produtos usados em cada atendimento são descontados sozinhos.',
+      },
+      {
         title: 'Deixe a Secretária IA ajudar',
         desc: 'Todo dia ela avisa o que precisa da sua atenção: horário vago, cliente sumida, estoque baixo. E a Máquina de Conteúdo cria posts prontos pra você.',
       },
@@ -1478,6 +1482,10 @@ const en: typeof pt = {
         desc: 'Every appointment marked "Attended" is automatically added to your revenue — no spreadsheet, no extra work.',
       },
       {
+        title: 'Track your inventory',
+        desc: 'Add your products under Inventory, with how much you have on hand. That way you always know what\'s running low — and products used in each appointment get deducted automatically.',
+      },
+      {
         title: 'Let the AI Secretary help',
         desc: "Every day it flags what needs your attention: an open slot, a client who's gone quiet, low stock. And the Content Machine creates ready-to-post captions for you.",
       },
@@ -2126,6 +2134,10 @@ const es: typeof pt = {
       {
         title: 'Sigue tus Finanzas',
         desc: 'Cada cita marcada como "Asistió" se agrega automáticamente a tus ingresos — sin hojas de cálculo, sin esfuerzo extra.',
+      },
+      {
+        title: 'Registra tu inventario',
+        desc: 'Agrega tus productos en Inventario, con la cantidad que tienes. Así siempre sabes qué se está acabando — y los productos usados en cada cita se descuentan solos.',
       },
       {
         title: 'Deja que la Secretaria IA te ayude',

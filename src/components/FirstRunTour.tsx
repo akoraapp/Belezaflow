@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ChevronLeft, Heart, UserPlus, CalendarDays, Wallet, Sparkles, PartyPopper, type LucideIcon } from 'lucide-react';
+import { ChevronLeft, Heart, UserPlus, CalendarDays, Wallet, Package, Sparkles, PartyPopper, type LucideIcon } from 'lucide-react';
 import { T, RADIUS } from '../theme';
 import { PrimaryButton } from './primitives';
 import { useLang } from '../lib/LangContext';
 
-const STEP_ICONS: LucideIcon[] = [Heart, UserPlus, CalendarDays, Wallet, Sparkles, PartyPopper];
+const STEP_ICONS: LucideIcon[] = [Heart, UserPlus, CalendarDays, Wallet, Package, Sparkles, PartyPopper];
 
 // Shown once per account, right after she first reaches the real dashboard —
 // a quick lay-of-the-land before the in-depth Manual (Settings > Help) is
